@@ -20,11 +20,14 @@ Route::get('/about',     [AboutController::class,   'index'])->name('about');
 Route::get('/contact',   [ContactController::class, 'index'])->name('contact');
 Route::post('/contact',  [ContactController::class, 'send'])->name('contact.send');
 
+// Cart & Checkout
+Route::get('/checkout',      fn () => view('pages.checkout'))->name('checkout');
+Route::get('/order-success', fn () => view('pages.order-success'))->name('order.success');
+
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
 |--------------------------------------------------------------------------
-| Protected by auth middleware — swap 'auth' for your custom guard later.
 */
 
 Route::prefix('admin')
@@ -34,16 +37,18 @@ Route::prefix('admin')
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Future admin resource routes go here:
-        // Route::resource('products', Admin\ProductController::class);
-        // Route::resource('orders', Admin\OrderController::class);
-        // Route::resource('customers', Admin\CustomerController::class);
+        // Catalogue
+        Route::get('/products',   fn () => view('admin.products'))->name('products');
+        Route::get('/categories', fn () => view('admin.categories'))->name('categories');
+
+        // Business
+        Route::get('/orders',     fn () => view('admin.orders'))->name('orders');
 
     });
 
 /*
 |--------------------------------------------------------------------------
-| Logout (placeholder — wire to real Auth controller later)
+| Logout
 |--------------------------------------------------------------------------
 */
 Route::post('/logout', function () {
@@ -52,3 +57,4 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+

@@ -227,9 +227,133 @@
     </div>
 </section>
 
+
+{{-- ══════════════════════════════════════════════════════════
+     CATEGORIES GRID
+══════════════════════════════════════════════════════════ --}}
+<section class="py-20 bg-cream" aria-labelledby="categories-heading">
+    <div class="container-sk">
+        <div class="text-center mb-12">
+            <span class="badge badge-gold mb-3">Browse By Style</span>
+            <h2 id="categories-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3">
+                Shop by Category
+            </h2>
+            <p class="text-neutral-500 max-w-md mx-auto text-base">
+                Find exactly what you need for every part of your perfect event.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach([
+                ['name'=>'Seating',   'image'=>asset('images/product-chairs.png'),   'count'=>12, 'slug'=>'seating'],
+                ['name'=>'Ceremony',  'image'=>asset('images/product-arch.png'),      'count'=>8,  'slug'=>'ceremony'],
+                ['name'=>'Tableware', 'image'=>asset('images/product-tableware.png'), 'count'=>24, 'slug'=>'tableware'],
+                ['name'=>'Lighting',  'image'=>asset('images/product-lighting.png'),  'count'=>10, 'slug'=>'lighting'],
+                ['name'=>'Furniture', 'image'=>asset('images/product-lounge.png'),    'count'=>15, 'slug'=>'furniture'],
+                ['name'=>'Decor',     'image'=>asset('images/product-backdrop.png'),  'count'=>20, 'slug'=>'decor'],
+            ] as $cat)
+            <x-category-card
+                :name="$cat['name']"
+                :image="$cat['image']"
+                :count="$cat['count']"
+                :href="route('products') . '?category=' . $cat['slug']"
+            />
+            @endforeach
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════════════════════════
+     TESTIMONIALS SLIDER
+══════════════════════════════════════════════════════════ --}}
+<section class="py-20 bg-white" aria-labelledby="testimonials-heading"
+         x-data="{
+             active: 0,
+             testimonials: [
+                 { name: 'Emily & James Watson', event: 'Wedding · May 2025', rating: 5, avatar: '👰', text: 'SK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was wonderful!' },
+                 { name: 'Olivia Chen', event: 'Corporate Gala · March 2025', rating: 5, avatar: '✨', text: 'We hired SK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!' },
+                 { name: 'Sarah & Michael Brown', event: 'Wedding · January 2025', rating: 5, avatar: '💍', text: 'From the first enquiry to the final pickup, the SK Rentals team was professional, responsive, and genuinely caring. Our guests could not stop complimenting the decor.' },
+                 { name: 'Rachel Thompson', event: 'Baby Shower · April 2025', rating: 5, avatar: '🌸', text: 'I rented the tableware set and some beautiful backdrop panels. Everything was pristine, exactly as shown, and the delivery was seamless. Will use again!' },
+             ],
+             next() { this.active = (this.active + 1) % this.testimonials.length },
+             prev() { this.active = (this.active - 1 + this.testimonials.length) % this.testimonials.length },
+         }"
+         x-init="setInterval(() => next(), 5000)">
+    <div class="container-sk">
+
+        <div class="text-center mb-12">
+            <span class="badge badge-gold mb-3">What Our Clients Say</span>
+            <h2 id="testimonials-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3">
+                Real Stories, Real Joy
+            </h2>
+        </div>
+
+        <div class="max-w-3xl mx-auto">
+            <div class="testimonial-card relative overflow-hidden">
+                {{-- Stars --}}
+                <div class="flex items-center gap-0.5">
+                    <template x-for="s in 5" :key="s">
+                        <svg class="w-5 h-5 text-brand-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </template>
+                </div>
+
+                {{-- Quote --}}
+                <blockquote>
+                    <template x-for="(t, i) in testimonials" :key="i">
+                        <p x-show="active === i"
+                           x-transition:enter="transition ease-out duration-400"
+                           x-transition:enter-start="opacity-0 translate-y-3"
+                           x-transition:enter-end="opacity-100 translate-y-0"
+                           x-transition:leave="transition ease-in duration-200"
+                           x-transition:leave-start="opacity-100"
+                           x-transition:leave-end="opacity-0"
+                           class="font-display text-xl sm:text-2xl text-neutral-800 leading-relaxed italic"
+                           x-text="`\u201c` + t.text + `\u201d`">
+                        </p>
+                    </template>
+                </blockquote>
+
+                {{-- Author --}}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-2xl">
+                            <span x-text="testimonials[active].avatar"></span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-neutral-900" x-text="testimonials[active].name"></p>
+                            <p class="text-sm text-neutral-400" x-text="testimonials[active].event"></p>
+                        </div>
+                    </div>
+
+                    {{-- Controls --}}
+                    <div class="flex items-center gap-2">
+                        <button @click="prev" class="w-9 h-9 rounded-full border border-neutral-200 hover:border-brand-400 hover:bg-brand-50 flex items-center justify-center transition-base" aria-label="Previous">
+                            <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button @click="next" class="w-9 h-9 rounded-full border border-neutral-200 hover:border-brand-400 hover:bg-brand-50 flex items-center justify-center transition-base" aria-label="Next">
+                            <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Dots --}}
+                <div class="flex items-center gap-1.5 mt-2">
+                    <template x-for="(t, i) in testimonials" :key="i">
+                        <button @click="active = i"
+                                class="h-1.5 rounded-full transition-all duration-300"
+                                :class="active === i ? 'w-6 bg-brand-500' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'"
+                                :aria-label="'Go to testimonial ' + (i+1)"></button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- ══════════════════════════════════════════════════════════
      CTA BAND — with background image
 ══════════════════════════════════════════════════════════ --}}
+
 <section class="relative py-24 overflow-hidden" aria-labelledby="cta-heading">
     {{-- Background --}}
     <div class="absolute inset-0 z-0">

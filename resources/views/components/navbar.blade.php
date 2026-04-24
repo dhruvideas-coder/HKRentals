@@ -41,11 +41,23 @@
             </div>
 
             {{-- ── Desktop CTA ── --}}
-            <div class="hidden md:flex items-center gap-3">
+            <div class="hidden md:flex items-center gap-3" x-data="{ get cartCount() { return Alpine.store('cart').count() } }">
+                {{-- Cart icon button --}}
+                <button @click="$dispatch('open-cart')"
+                        class="relative p-2 rounded-lg hover:bg-brand-50 transition-base text-neutral-600 hover:text-brand-600"
+                        aria-label="Open shopping cart">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span x-show="cartCount > 0"
+                          class="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 border border-white"
+                          x-text="cartCount"></span>
+                </button>
                 <a href="{{ route('products') }}" class="btn btn-primary btn-sm">
                     Browse Rentals
                 </a>
             </div>
+
 
             {{-- ── Mobile Hamburger ── --}}
             <button @click="mobileOpen = !mobileOpen"
