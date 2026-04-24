@@ -2,7 +2,8 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+    base: '/',
     plugins: [
         laravel({
             input: [
@@ -30,4 +31,4 @@ export default defineConfig({
             },
         },
     },
-});
+}));
