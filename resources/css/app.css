@@ -1,0 +1,295 @@
+@import "tailwindcss";
+
+/* ============================================================
+   SK RENTALS — CUSTOM DESIGN SYSTEM
+   Wedding & Event Rental Platform
+   ============================================================ */
+
+@theme {
+    /* ── Brand Color Palette ── */
+    --color-brand-50:  #fdf8f0;
+    --color-brand-100: #f8edda;
+    --color-brand-200: #f0d9b0;
+    --color-brand-300: #e5c07e;
+    --color-brand-400: #d4a452;
+    --color-brand-500: #c8903a;   /* Primary Gold */
+    --color-brand-600: #b07a2e;
+    --color-brand-700: #8e6024;
+    --color-brand-800: #6e4a1c;
+    --color-brand-900: #4e3312;
+    --color-brand-950: #2e1e08;
+
+    /* ── Neutral / Stone ── */
+    --color-neutral-50:  #faf9f8;
+    --color-neutral-100: #f3f1ef;
+    --color-neutral-200: #e5e1dc;
+    --color-neutral-300: #ccc6be;
+    --color-neutral-400: #a89f96;
+    --color-neutral-500: #7d7469;
+    --color-neutral-600: #5e5550;
+    --color-neutral-700: #423d38;
+    --color-neutral-800: #2a2622;
+    --color-neutral-900: #16130f;
+    --color-neutral-950: #0a0907;
+
+    /* ── Beige ── */
+    --color-beige-50:  #fdf9f4;
+    --color-beige-100: #f7ede1;
+    --color-beige-200: #eddabf;
+    --color-beige-300: #e0c296;
+    --color-beige-400: #cfa56b;
+    --color-beige-500: #bc8c4a;
+
+    /* ── Cream ── */
+    --color-cream: #fdf6ee;
+
+    /* ── Fonts ── */
+    --font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Playfair Display', 'Georgia', serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* ── Extended Spacing ── */
+    --spacing-18: 4.5rem;
+    --spacing-22: 5.5rem;
+    --spacing-26: 6.5rem;
+    --spacing-30: 7.5rem;
+    --spacing-34: 8.5rem;
+    --spacing-72: 18rem;
+    --spacing-80: 20rem;
+    --spacing-96: 24rem;
+    --spacing-128: 32rem;
+
+    /* ── Extended Border Radius ── */
+    --radius-4xl: 2rem;
+    --radius-5xl: 2.5rem;
+
+    /* ── Extended Shadows ── */
+    --shadow-soft: 0 2px 15px -3px rgb(0 0 0 / 0.07), 0 10px 20px -2px rgb(0 0 0 / 0.04);
+    --shadow-glow: 0 0 30px -5px rgb(200 144 58 / 0.35);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
+    --shadow-elevated: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 20px 40px -4px rgb(0 0 0 / 0.12);
+
+    /* ── Max Widths ── */
+    --container-8xl: 88rem;
+    --container-9xl: 96rem;
+}
+
+/* ============================================================
+   BASE LAYER — Typography & Global Resets
+   ============================================================ */
+@layer base {
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        background-color: var(--color-cream);
+        color: var(--color-neutral-800);
+        line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--color-neutral-900);
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    img, video {
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    input, textarea, select, button {
+        font-family: inherit;
+    }
+}
+
+/* ============================================================
+   COMPONENT LAYER — Reusable UI Classes
+   ============================================================ */
+@layer components {
+
+    /* ── Buttons ── */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.5rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        font-family: var(--font-sans);
+        border-radius: 0.5rem;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        text-decoration: none;
+        line-height: 1.4;
+    }
+
+    .btn-primary {
+        background-color: var(--color-brand-500);
+        color: #fff;
+        border-color: var(--color-brand-500);
+    }
+    .btn-primary:hover {
+        background-color: var(--color-brand-600);
+        border-color: var(--color-brand-600);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: var(--color-brand-600);
+        border-color: var(--color-brand-400);
+    }
+    .btn-outline:hover {
+        background-color: var(--color-brand-50);
+        border-color: var(--color-brand-500);
+    }
+
+    .btn-ghost {
+        background-color: transparent;
+        color: var(--color-neutral-700);
+        border-color: transparent;
+    }
+    .btn-ghost:hover {
+        background-color: var(--color-neutral-100);
+    }
+
+    .btn-sm  { padding: 0.4rem 1rem;   font-size: 0.875rem; }
+    .btn-lg  { padding: 0.875rem 2rem; font-size: 1.0625rem; }
+
+    /* ── Cards ── */
+    .card {
+        background-color: #fff;
+        border-radius: 1rem;
+        border: 1px solid var(--color-neutral-100);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+    }
+
+    .card-body    { padding: 1.5rem; }
+    .card-header  { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--color-neutral-100); }
+    .card-footer  { padding: 1.25rem 1.5rem; border-top: 1px solid var(--color-neutral-100); }
+
+    /* ── Container ── */
+    .container-sk {
+        width: 100%;
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    @media (min-width: 640px) {
+        .container-sk {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .container-sk {
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+    }
+
+    /* ── Form Controls ── */
+    .form-input {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9375rem;
+        border: 1.5px solid var(--color-neutral-200);
+        border-radius: 0.5rem;
+        background-color: #fff;
+        color: var(--color-neutral-800);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        outline: none;
+    }
+    .form-input:focus {
+        border-color: var(--color-brand-400);
+        box-shadow: 0 0 0 3px rgb(200 144 58 / 0.15);
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-neutral-700);
+    }
+
+    /* ── Badge ── */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 9999px;
+    }
+    .badge-gold {
+        background-color: var(--color-brand-100);
+        color: var(--color-brand-700);
+    }
+    .badge-neutral {
+        background-color: var(--color-neutral-100);
+        color: var(--color-neutral-700);
+    }
+}
+
+/* ============================================================
+   UTILITY LAYER — Custom Utilities
+   ============================================================ */
+@layer utilities {
+    .text-gradient-gold {
+        background: linear-gradient(135deg, var(--color-brand-400), var(--color-brand-600));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .bg-cream { background-color: var(--color-cream); }
+
+    .border-brand { border-color: var(--color-brand-300); }
+
+    .transition-base {
+        transition: all 0.2s ease;
+    }
+
+    /* Subtle page animations */
+    .fade-in {
+        animation: fadeIn 0.4s ease both;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-down {
+        animation: slideDown 0.3s ease both;
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+}
