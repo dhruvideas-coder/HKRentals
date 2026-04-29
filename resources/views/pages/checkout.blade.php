@@ -1,11 +1,9 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>Checkout</x-slot>
+    <x-slot:metaDescription>Complete your rental booking with SK Rentals.</x-slot>
 
-@section('title', 'Checkout')
-@section('meta_description', 'Complete your rental booking with SK Rentals.')
 
-@section('content')
-
-<section class="py-14 bg-cream min-h-screen" aria-label="Checkout" x-data="{
+<x-section class="bg-cream min-h-screen" aria-label="Checkout" x-data="{
     step: 1,
     form: { firstName:'',lastName:'',email:'',phone:'',address:'',city:'',state:'',zip:'',notes:'',paymentMethod:'card' },
     get cartItems() { return Alpine.store('cart').items },
@@ -14,7 +12,7 @@
     prev() { if(this.step > 1) this.step-- },
     labels: ['Customer Details','Order Summary','Payment'],
 }">
-<div class="container-sk max-w-4xl">
+<x-container class="max-w-4xl">
 
     <div class="text-center mb-10">
         <span class="badge badge-gold mb-3">Secure Checkout</span>
@@ -49,15 +47,15 @@
             <div x-show="step===1" x-transition:enter="transition duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                 <h2 class="font-display text-xl font-semibold text-neutral-900 mb-6">Customer Details</h2>
                 <div class="grid sm:grid-cols-2 gap-5">
-                    <div><label class="form-label">First Name</label><input type="text" x-model="form.firstName" class="form-input" placeholder="Sarah" /></div>
-                    <div><label class="form-label">Last Name</label><input type="text" x-model="form.lastName" class="form-input" placeholder="Johnson" /></div>
-                    <div><label class="form-label">Email</label><input type="email" x-model="form.email" class="form-input" placeholder="sarah@email.com" /></div>
-                    <div><label class="form-label">Phone</label><input type="tel" x-model="form.phone" class="form-input" placeholder="+1 (865) 000-0000" /></div>
-                    <div class="sm:col-span-2"><label class="form-label">Delivery Address</label><input type="text" x-model="form.address" class="form-input" placeholder="123 Main Street" /></div>
-                    <div><label class="form-label">City</label><input type="text" x-model="form.city" class="form-input" placeholder="Knoxville" /></div>
+                    <div><x-input label="First Name" x-model="form.firstName" placeholder="Sarah" /></div>
+                    <div><x-input label="Last Name" x-model="form.lastName" placeholder="Johnson" /></div>
+                    <div><x-input label="Email" type="email" x-model="form.email" placeholder="sarah@email.com" /></div>
+                    <div><x-input label="Phone" type="tel" x-model="form.phone" placeholder="+1 (865) 000-0000" /></div>
+                    <div class="sm:col-span-2"><x-input label="Delivery Address" x-model="form.address" placeholder="123 Main Street" /></div>
+                    <div><x-input label="City" x-model="form.city" placeholder="Knoxville" /></div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="form-label">State</label><input type="text" x-model="form.state" class="form-input" placeholder="TN" maxlength="2" /></div>
-                        <div><label class="form-label">ZIP</label><input type="text" x-model="form.zip" class="form-input" placeholder="37901" /></div>
+                        <div><x-input label="State" x-model="form.state" placeholder="TN" maxlength="2" /></div>
+                        <div><x-input label="ZIP" x-model="form.zip" placeholder="37901" /></div>
                     </div>
                     <div class="sm:col-span-2"><label class="form-label">Special Notes <span class="text-neutral-400 font-normal">(optional)</span></label><textarea x-model="form.notes" class="form-input resize-none" rows="3" placeholder="Setup time, venue access..."></textarea></div>
                 </div>
@@ -125,36 +123,10 @@
 
         {{-- Sidebar --}}
         <div class="space-y-4">
-            <div class="card p-5">
-                <h3 class="font-semibold text-neutral-900 mb-4">Your Order</h3>
-                <div class="space-y-3">
-                    <template x-for="item in cartItems" :key="item.id">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <img :src="item.image" :alt="item.name" class="w-11 h-11 rounded-lg object-cover" />
-                                <span class="absolute -top-1 -right-1 w-4 h-4 bg-brand-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center" x-text="item.qty"></span>
-                            </div>
-                            <p class="flex-1 text-sm font-medium text-neutral-700 truncate" x-text="item.name"></p>
-                            <span class="text-sm font-semibold" x-text="'$'+(item.price*item.qty).toFixed(2)"></span>
-                        </div>
-                    </template>
-                </div>
-                <div class="border-t border-neutral-100 mt-4 pt-4 flex justify-between">
-                    <span class="text-sm text-neutral-500">Subtotal</span>
-                    <span class="font-bold text-neutral-900" x-text="'$'+subtotal"></span>
-                </div>
-            </div>
-            <div class="card p-5 space-y-3">
-                @foreach([['🔒','Secure Checkout','SSL encrypted'],['🚚','Free Delivery','Orders over $200'],['🔄','Free Changes','Up to 48 hrs before']] as [$icon,$t,$s])
-                <div class="flex items-center gap-3">
-                    <span class="text-xl">{{ $icon }}</span>
-                    <div><p class="text-sm font-semibold text-neutral-700">{{ $t }}</p><p class="text-xs text-neutral-400">{{ $s }}</p></div>
-                </div>
-                @endforeach
-            </div>
+            <x-checkout.summary />
         </div>
     </div>
-</div>
-</section>
+</x-container>
+</x-section>
 
-@endsection
+</x-layout.app-layout>

@@ -81,7 +81,7 @@
 
             {{-- Cart Items --}}
             <div x-show="items.length > 0" class="space-y-4">
-                <template x-for="(item, index) in items" :key="item.id">
+                <template x-for="(item, index) in items" :key="item.product_id || item.id">
                     <div class="flex gap-3 py-3 border-b border-neutral-100 last:border-0">
                         {{-- Image --}}
                         <div class="w-20 h-20 rounded-xl overflow-hidden bg-neutral-100 flex-shrink-0">
@@ -97,13 +97,13 @@
                             {{-- Qty + Remove row --}}
                             <div class="flex items-center justify-between mt-2.5">
                                 <div class="flex items-center gap-1.5">
-                                    <button class="qty-btn" @click="Alpine.store('cart').dec(index)" aria-label="Decrease">−</button>
-                                    <span class="w-7 text-center text-sm font-semibold text-neutral-800" x-text="item.qty"></span>
-                                    <button class="qty-btn" @click="Alpine.store('cart').inc(index)" aria-label="Increase">+</button>
+                                    <button class="qty-btn" @click="Alpine.store('cart').dec(item.product_id || item.id)" aria-label="Decrease">−</button>
+                                    <span class="w-7 text-center text-sm font-semibold text-neutral-800" x-text="item.quantity || item.qty"></span>
+                                    <button class="qty-btn" @click="Alpine.store('cart').inc(item.product_id || item.id)" aria-label="Increase">+</button>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <span class="font-bold text-brand-600 text-sm" x-text="'$' + (item.price * item.qty).toFixed(2)"></span>
-                                    <button @click="Alpine.store('cart').remove(index)"
+                                    <span class="font-bold text-brand-600 text-sm" x-text="'$' + (item.price * (item.quantity || item.qty)).toFixed(2)"></span>
+                                    <button @click="Alpine.store('cart').remove(item.product_id || item.id)"
                                             class="text-neutral-300 hover:text-red-500 transition-base"
                                             aria-label="Remove item">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

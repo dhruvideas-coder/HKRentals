@@ -6,15 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     {{-- SEO --}}
-    <title>@yield('title', config('app.name', 'SK Rentals')) — Wedding & Event Rentals</title>
-    <meta name="description" content="@yield('meta_description', 'SK Rentals — Premium wedding and event rental items in Knoxville. Elegant decor, furniture, and more for your special day.')" />
-    <meta name="keywords" content="@yield('meta_keywords', 'wedding rentals, event rentals, Knoxville, party supplies, decor')" />
+    <title>{{ $title ?? config('app.name', 'SK Rentals') }} — Wedding & Event Rentals</title>
+    <meta name="description" content="{{ $metaDescription ?? 'SK Rentals — Premium wedding and event rental items in Knoxville. Elegant decor, furniture, and more for your special day.' }}" />
+    <meta name="keywords" content="{{ $metaKeywords ?? 'wedding rentals, event rentals, Knoxville, party supplies, decor' }}" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="{{ url()->current() }}" />
 
     {{-- Open Graph --}}
-    <meta property="og:title" content="@yield('title', 'SK Rentals') — Wedding & Event Rentals" />
-    <meta property="og:description" content="@yield('meta_description', 'Premium wedding and event rental items in Knoxville.')" />
+    <meta property="og:title" content="{{ $title ?? 'SK Rentals' }} — Wedding & Event Rentals" />
+    <meta property="og:description" content="{{ $metaDescription ?? 'Premium wedding and event rental items in Knoxville.' }}" />
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:type" content="website" />
 
@@ -27,23 +27,23 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     {{-- Page-level head extras --}}
-    @stack('head')
+    {{ $head ?? '' }}
 </head>
 <body class="min-h-screen flex flex-col bg-cream" x-data="{}">
 
     {{-- ── Cart Drawer (global) ── --}}
-    @include('components.cart-drawer')
+    <x-cart.drawer />
 
     {{-- ── Navbar ── --}}
-    @include('components.navbar')
+    <x-navbar />
 
     {{-- ── Main Content ── --}}
     <main id="main-content" class="flex-1 fade-in" role="main">
-        @yield('content')
+        {{ $slot }}
     </main>
 
     {{-- ── Footer ── --}}
-    @include('components.footer')
+    <x-footer />
 
     {{-- ── Floating Cart FAB ── --}}
     <div x-data="{ get count() { return Alpine.store('cart').count() } }">
@@ -64,8 +64,7 @@
     </div>
 
     {{-- Page-level scripts --}}
-    @stack('scripts')
+    {{ $scripts ?? '' }}
 
 </body>
 </html>
-

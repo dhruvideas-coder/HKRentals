@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>Order Confirmed!</x-slot>
+    <x-slot:metaDescription>Your SK Rentals order has been confirmed. Thank you for booking with us!</x-slot>
 
-@section('title', 'Order Confirmed!')
-@section('meta_description', 'Your SK Rentals order has been confirmed. Thank you for booking with us!')
-
-@section('content')
 
 <section class="py-20 bg-cream min-h-screen flex items-center" aria-label="Order success"
          x-data x-init="Alpine.store('cart').clear()">
@@ -85,4 +83,4 @@
 </div>
 </section>
 
-@endsection
+</x-layout.app-layout>

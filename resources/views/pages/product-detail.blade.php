@@ -1,14 +1,12 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>Gold Chiavari Chairs</x-slot>
+    <x-slot:metaDescription>View full details, pricing, and availability for our premium rental items.</x-slot>
 
-@section('title', 'Gold Chiavari Chairs')
-@section('meta_description', 'View full details, pricing, and availability for our premium rental items.')
-
-@section('content')
 
 {{-- ══════════════════════════════════════════════════════════
      PRODUCT DETAIL — Full Page
 ══════════════════════════════════════════════════════════ --}}
-<section class="py-10 bg-cream" aria-label="Product detail" x-data="{
+<x-section class="bg-cream" aria-label="Product detail" x-data="{
     activeImage: '{{ asset('images/product-chairs.png') }}',
     qty: 1,
     startDate: '',
@@ -28,7 +26,7 @@
         $dispatch('open-cart');
     }
 }">
-<div class="container-sk">
+<x-container>
 
     {{-- Breadcrumb --}}
     <nav class="flex items-center gap-2 text-sm text-neutral-400 mb-8" aria-label="Breadcrumb">
@@ -79,8 +77,8 @@
             {{-- Title & Badges --}}
             <div>
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="badge badge-gold text-xs">{{ $product['cat'] ?? 'Seating' }}</span>
-                    <span class="badge badge-available text-xs">✓ Available</span>
+                    <x-badge variant="gold" class="text-xs">{{ $product['cat'] ?? 'Seating' }}</x-badge>
+                    <x-badge variant="available" class="text-xs">✓ Available</x-badge>
                 </div>
                 <h1 class="font-display text-3xl sm:text-4xl font-bold text-neutral-900 leading-tight mb-3">
                     {{ $product['name'] ?? 'Gold Chiavari Chairs' }}
@@ -104,14 +102,8 @@
 
             {{-- Date Picker --}}
             <div class="grid grid-cols-2 gap-4 bg-neutral-50 p-5 rounded-xl border border-neutral-100">
-                <div>
-                    <label class="form-label text-xs">Event Start Date</label>
-                    <input type="date" x-model="startDate" class="form-input text-sm" />
-                </div>
-                <div>
-                    <label class="form-label text-xs">Event End Date</label>
-                    <input type="date" x-model="endDate" class="form-input text-sm" />
-                </div>
+                <x-input id="start_date" label="Event Start Date" type="date" x-model="startDate" />
+                <x-input id="end_date" label="Event End Date" type="date" x-model="endDate" />
             </div>
 
             {{-- Qty + Add to Cart --}}
@@ -121,12 +113,12 @@
                     <span class="w-10 text-center font-bold text-lg text-neutral-800" x-text="qty"></span>
                     <button @click="inc" class="qty-btn" aria-label="Increase quantity">+</button>
                 </div>
-                <button @click="addToCart" class="btn btn-primary btn-lg flex-1 shadow-glow">
+                <x-button @click="addToCart" class="btn-lg flex-1 shadow-glow">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     Add to Cart
-                </button>
+                </x-button>
             </div>
 
             {{-- Trust Badges --}}
@@ -161,22 +153,11 @@
             ['id'=>5,'image'=>asset('images/product-lounge.png'),   'name'=>'White Lounge Suite', 'cat'=>'Furniture','price'=>200,'desc'=>'Luxurious white tufted sofa and armchair set.','available'=>true],
         ];
         @endphp
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach($related as $r)
-            <x-product-card
-                :id="$r['id']"
-                :name="$r['name']"
-                :image="$r['image']"
-                :category="$r['cat']"
-                :price="$r['price']"
-                :description="$r['desc']"
-                :available="$r['available']"
-            />
-            @endforeach
-        </div>
+        <x-product.grid :products="$related" />
     </div>
 
-</div>
-</section>
+</x-container>
+</x-section>
 
-@endsection
+</x-layout.app-layout>
+

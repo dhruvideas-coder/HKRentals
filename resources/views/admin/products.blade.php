@@ -1,9 +1,6 @@
-@extends('layouts.admin')
-
-@section('title', 'Products')
-@section('page_title', 'Products')
-
-@section('content')
+<x-layout.admin-layout>
+    <x-slot:title>Products</x-slot>
+    <x-slot:pageTitle>Products</x-slot>
 
 {{-- Header + Add Button --}}
 <div class="flex items-center justify-between mb-6">
@@ -140,4 +137,4 @@
     </div>
 </div>
 
-@endsection
+</x-layout.admin-layout>

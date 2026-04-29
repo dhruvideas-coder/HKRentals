@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>Welcome</x-slot>
+    <x-slot:metaDescription>SK Rentals — Premium wedding and event rental items in Knoxville, Tennessee. Browse our elegant collection and make your special day unforgettable.</x-slot>
 
-@section('title', 'Welcome')
-@section('meta_description', 'SK Rentals — Premium wedding and event rental items in Knoxville, Tennessee. Browse our elegant collection and make your special day unforgettable.')
-
-@section('content')
 
 {{-- ══════════════════════════════════════════════════════════
      HERO SECTION
@@ -78,8 +76,8 @@
 {{-- ══════════════════════════════════════════════════════════
      FEATURE STRIP — Photo + Text split
 ══════════════════════════════════════════════════════════ --}}
-<section class="py-20 bg-white" aria-labelledby="about-section-heading">
-    <div class="container-sk">
+<x-section class="bg-white" aria-labelledby="about-section-heading">
+    <x-container>
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
             {{-- Image side --}}
@@ -126,14 +124,14 @@
             </div>
 
         </div>
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 {{-- ══════════════════════════════════════════════════════════
      FEATURED PRODUCTS GALLERY
 ══════════════════════════════════════════════════════════ --}}
-<section id="gallery" class="py-20 bg-cream" aria-labelledby="products-section-heading">
-    <div class="container-sk">
+<x-section id="gallery" class="bg-cream" aria-labelledby="products-section-heading">
+    <x-container>
 
         <div class="text-center mb-14">
             <span class="badge badge-gold mb-3">Our Collection</span>
@@ -157,34 +155,7 @@
         ];
         @endphp
 
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-            @foreach ($items as $item)
-            <div class="group card overflow-hidden hover:shadow-elevated transition-all duration-300 hover:-translate-y-1">
-                {{-- Image --}}
-                <div class="relative overflow-hidden aspect-[4/3]">
-                    <img src="{{ asset('images/' . $item['image']) }}"
-                         alt="{{ $item['name'] }}"
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                         loading="lazy" />
-                    {{-- Category badge --}}
-                    <span class="absolute top-3 left-3 badge badge-gold text-xs">{{ $item['category'] }}</span>
-                </div>
-                {{-- Info --}}
-                <div class="p-5">
-                    <h3 class="font-display font-semibold text-neutral-900 text-lg mb-1">{{ $item['name'] }}</h3>
-                    <p class="text-neutral-500 text-sm mb-4 leading-relaxed">
-                        Premium quality rental piece for your special event.
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-brand-600 text-lg">
-                            {{ $item['price'] }}<span class="text-sm font-normal text-neutral-400">/day</span>
-                        </span>
-                        <a href="{{ route('products') }}" class="btn btn-primary btn-sm">Enquire</a>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
+        <x-product.grid :products="$items" />
 
         <div class="text-center mt-12">
             <a href="{{ route('products') }}" class="btn btn-outline btn-lg">
@@ -193,14 +164,14 @@
             </a>
         </div>
 
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 {{-- ══════════════════════════════════════════════════════════
      WHY CHOOSE US — Icon Grid
 ══════════════════════════════════════════════════════════ --}}
-<section class="py-20 bg-white" aria-labelledby="features-heading">
-    <div class="container-sk">
+<x-section class="bg-white" aria-labelledby="features-heading">
+    <x-container>
         <div class="text-center mb-14">
             <span class="badge badge-gold mb-3">Why SK Rentals</span>
             <h2 id="features-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-4">
@@ -224,15 +195,15 @@
             </div>
             @endforeach
         </div>
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 
 {{-- ══════════════════════════════════════════════════════════
      CATEGORIES GRID
 ══════════════════════════════════════════════════════════ --}}
-<section class="py-20 bg-cream" aria-labelledby="categories-heading">
-    <div class="container-sk">
+<x-section class="bg-cream" aria-labelledby="categories-heading">
+    <x-container>
         <div class="text-center mb-12">
             <span class="badge badge-gold mb-3">Browse By Style</span>
             <h2 id="categories-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3">
@@ -252,7 +223,7 @@
                 ['name'=>'Furniture', 'image'=>asset('images/product-lounge.png'),    'count'=>15, 'slug'=>'furniture'],
                 ['name'=>'Decor',     'image'=>asset('images/product-backdrop.png'),  'count'=>20, 'slug'=>'decor'],
             ] as $cat)
-            <x-category-card
+            <x-category.card
                 :name="$cat['name']"
                 :image="$cat['image']"
                 :count="$cat['count']"
@@ -260,13 +231,13 @@
             />
             @endforeach
         </div>
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 {{-- ══════════════════════════════════════════════════════════
      TESTIMONIALS SLIDER
 ══════════════════════════════════════════════════════════ --}}
-<section class="py-20 bg-white" aria-labelledby="testimonials-heading"
+<x-section class="bg-white" aria-labelledby="testimonials-heading"
          x-data="{
              active: 0,
              testimonials: [
@@ -279,7 +250,7 @@
              prev() { this.active = (this.active - 1 + this.testimonials.length) % this.testimonials.length },
          }"
          x-init="setInterval(() => next(), 5000)">
-    <div class="container-sk">
+    <x-container>
 
         <div class="text-center mb-12">
             <span class="badge badge-gold mb-3">What Our Clients Say</span>
@@ -347,8 +318,8 @@
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 {{-- ══════════════════════════════════════════════════════════
      CTA BAND — with background image
@@ -383,5 +354,4 @@
         </div>
     </div>
 </section>
-
-@endsection
+</x-layout.app-layout>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <title>@yield('title', 'Admin') — SK Rentals Dashboard</title>
+    <title>{{ $title ?? 'Admin' }} — SK Rentals Dashboard</title>
     <meta name="robots" content="noindex, nofollow" />
 
     {{-- Fonts --}}
@@ -15,7 +15,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    @stack('head')
+    {{ $head ?? '' }}
 
     <style>
         .admin-sidebar {
@@ -161,7 +161,7 @@
             </button>
 
             {{-- Page title --}}
-            <h1 class="text-base font-semibold text-neutral-800 flex-1">@yield('page_title', 'Dashboard')</h1>
+            <h1 class="text-base font-semibold text-neutral-800 flex-1">{{ $pageTitle ?? 'Dashboard' }}</h1>
 
             {{-- Right: user info --}}
             <div class="flex items-center gap-3">
@@ -190,13 +190,13 @@
                 </div>
             @endif
 
-            @yield('content')
+            {{ $slot }}
         </main>
 
     </div>
 
 </div>
 
-@stack('scripts')
+{{ $scripts ?? '' }}
 </body>
 </html>

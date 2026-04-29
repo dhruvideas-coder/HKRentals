@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>Contact Us</x-slot>
+    <x-slot:metaDescription>Contact SK Rentals — Knoxville's premier wedding and event rental company. Reach out to book a consultation, check availability, or get a custom quote.</x-slot>
 
-@section('title', 'Contact Us')
-@section('meta_description', 'Contact SK Rentals — Knoxville\'s premier wedding and event rental company. Reach out to book a consultation, check availability, or get a custom quote.')
-
-@section('content')
 
 {{-- ══════════════════════════════════════════════════════════
      HERO
@@ -436,4 +434,4 @@
     </div>
 </section>
 
-@endsection
+</x-layout.app-layout>

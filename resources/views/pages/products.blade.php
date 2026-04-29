@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>Our Collection</x-slot>
+    <x-slot:metaDescription>Browse SK Rentals' premium wedding and event rental collection. Elegant furniture, decor, and accessories for your special day in Knoxville.</x-slot>
 
-@section('title', 'Our Collection')
-@section('meta_description', 'Browse SK Rentals\' premium wedding and event rental collection. Elegant furniture, decor, and accessories for your special day in Knoxville.')
-
-@section('content')
 
 {{-- ══════════════════════════════════════════════════════════
      PAGE HERO — with background image
@@ -32,8 +30,8 @@
 {{-- ══════════════════════════════════════════════════════════
      FILTERS + PRODUCT GRID
 ══════════════════════════════════════════════════════════ --}}
-<section class="py-12 bg-cream" aria-label="Product listing">
-    <div class="container-sk">
+<x-section class="py-12 bg-cream" aria-label="Product listing">
+    <x-container>
         <div class="flex flex-col lg:flex-row gap-8">
 
             {{-- ── Sidebar Filters ── --}}
@@ -55,23 +53,20 @@
                             </select>
                         </div>
 
-                        <div>
-                            <label class="form-label">Event Date</label>
-                            <input type="date" class="form-input text-sm" />
-                        </div>
+                        <x-input id="date" label="Event Date" type="date" />
 
                         <div>
                             <label class="form-label">Price Range</label>
-                            <select class="form-input text-sm">
+                            <x-select>
                                 <option>Any Price</option>
                                 <option>Under $50/day</option>
                                 <option>$50–$150/day</option>
                                 <option>$150+/day</option>
-                            </select>
+                            </x-select>
                         </div>
 
-                        <button class="btn btn-primary w-full mt-2">Apply Filters</button>
-                        <button class="btn btn-ghost w-full text-neutral-500 text-sm">Clear All</button>
+                        <x-button class="w-full mt-2">Apply Filters</x-button>
+                        <x-button variant="ghost" class="w-full text-neutral-500 text-sm">Clear All</x-button>
                     </div>
 
                     {{-- Category quick-links --}}
@@ -117,47 +112,7 @@
                 ];
                 @endphp
 
-                <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    @foreach ($products as $product)
-                    <article class="group card overflow-hidden hover:shadow-elevated transition-all duration-300 hover:-translate-y-1">
-
-                        {{-- Image --}}
-                        <div class="relative overflow-hidden aspect-[4/3]">
-                            <img src="{{ asset('images/' . $product['image']) }}"
-                                 alt="{{ $product['name'] }}"
-                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                 loading="lazy" />
-
-                            {{-- Category badge --}}
-                            <span class="absolute top-3 left-3 badge badge-gold text-xs">{{ $product['cat'] }}</span>
-
-                            {{-- Quick-enquire overlay on hover --}}
-                            <div class="absolute inset-0 bg-brand-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <a href="#" class="btn bg-white text-brand-700 hover:bg-brand-50 border-transparent btn-sm shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                    Quick Enquire
-                                </a>
-                            </div>
-                        </div>
-
-                        {{-- Info --}}
-                        <div class="p-5">
-                            <h3 class="font-display font-semibold text-neutral-900 text-lg mb-1.5 leading-snug">
-                                {{ $product['name'] }}
-                            </h3>
-                            <p class="text-neutral-500 text-sm mb-4 leading-relaxed line-clamp-2">
-                                {{ $product['desc'] }}
-                            </p>
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <span class="font-bold text-brand-600 text-xl">{{ $product['price'] }}</span>
-                                    <span class="text-sm font-normal text-neutral-400">/day</span>
-                                </div>
-                                <button class="btn btn-primary btn-sm">Enquire</button>
-                            </div>
-                        </div>
-                    </article>
-                    @endforeach
-                </div>
+                <x-product.grid :products="$products" />
 
                 {{-- Pagination placeholder --}}
                 <div class="flex justify-center mt-10">
@@ -171,7 +126,7 @@
 
             </div>
         </div>
-    </div>
-</section>
+    </x-container>
+</x-section>
 
-@endsection
+</x-layout.app-layout>

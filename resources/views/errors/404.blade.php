@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<x-layout.app-layout>
+    <x-slot:title>404 — Page Not Found</x-slot>
+    <x-slot:metaDescription>The page you are looking for could not be found.</x-slot>
 
-@section('title', '404 — Page Not Found')
-@section('meta_description', 'The page you are looking for could not be found.')
-
-@section('content')
 
 <section class="min-h-[85vh] flex items-center justify-center py-20 bg-cream" aria-label="404 not found">
 <div class="container-sk max-w-2xl text-center">
@@ -58,4 +56,4 @@
 </div>
 </section>
 
-@endsection
+</x-layout.app-layout>

@@ -1,9 +1,6 @@
-@extends('layouts.admin')
-
-@section('title', 'Dashboard')
-@section('page_title', 'Dashboard')
-
-@section('content')
+<x-layout.admin-layout>
+    <x-slot:title>Dashboard</x-slot>
+    <x-slot:pageTitle>Dashboard</x-slot>
 
 {{-- Welcome strip with image accent --}}
 <div class="relative overflow-hidden rounded-2xl mb-8 bg-gradient-to-r from-neutral-900 to-neutral-800 p-7">
@@ -94,4 +91,4 @@
 
 </div>
 
-@endsection
+</x-layout.admin-layout>
