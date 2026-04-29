@@ -15,7 +15,7 @@ use App\Http\Controllers\Admin\DashboardController;
 
 Route::get('/',          [HomeController::class,    'index'])->name('home');
 Route::get('/products',  [ProductController::class, 'index'])->name('products');
-Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show')->where('id', '[0-9]+');
+Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/about',     [AboutController::class,   'index'])->name('about');
 Route::get('/contact',   [ContactController::class, 'index'])->name('contact');
 Route::post('/contact',  [ContactController::class, 'send'])->name('contact.send');
@@ -28,7 +28,7 @@ Route::post('/cart/update',  [\App\Http\Controllers\CartController::class, 'upda
 Route::post('/cart/remove',  [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear',   [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
 
-Route::get('/checkout',      fn () => view('pages.checkout'))->name('checkout');
+Route::get('/checkout',      [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
 Route::get('/order-success', fn () => view('pages.order-success'))->name('order.success');
 
 /*

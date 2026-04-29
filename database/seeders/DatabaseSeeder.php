@@ -15,11 +15,38 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $c1 = \App\Models\Category::create(['name' => 'Seating', 'slug' => 'seating']);
+        $c2 = \App\Models\Category::create(['name' => 'Ceremony', 'slug' => 'ceremony']);
+        $c3 = \App\Models\Category::create(['name' => 'Tableware', 'slug' => 'tableware']);
+        \App\Models\Category::create(['name' => 'Lighting', 'slug' => 'lighting']);
+        \App\Models\Category::create(['name' => 'Furniture', 'slug' => 'furniture']);
+        \App\Models\Category::create(['name' => 'Decor', 'slug' => 'decor']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        \App\Models\Product::create([
+            'category_id' => $c1->id, 
+            'name' => 'Gold Chiavari Chairs', 
+            'slug' => 'gold-chiavari-chairs', 
+            'price_per_day' => 4, 
+            'image' => 'product-chairs.png', 
+            'description' => 'Elegant gold chiavari chairs with white cushioned seats. Perfect for weddings and formal events.'
+        ]);
+
+        \App\Models\Product::create([
+            'category_id' => $c2->id, 
+            'name' => 'Floral Wedding Arch', 
+            'slug' => 'floral-wedding-arch', 
+            'price_per_day' => 120, 
+            'image' => 'product-arch.png', 
+            'description' => 'Stunning floral arch with fresh white roses and eucalyptus. Makes a breathtaking ceremony backdrop.'
+        ]);
+
+        \App\Models\Product::create([
+            'category_id' => $c3->id, 
+            'name' => 'Luxury Table Setting', 
+            'slug' => 'luxury-table-setting', 
+            'price_per_day' => 18, 
+            'image' => 'product-tableware.png', 
+            'description' => 'Complete premium table setting with white and gold dinnerware, crystal glasses, and silverware.'
         ]);
     }
 }

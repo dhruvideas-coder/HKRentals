@@ -36,49 +36,39 @@
 
             {{-- ── Sidebar Filters ── --}}
             <aside class="lg:w-60 flex-shrink-0" aria-label="Product filters">
-                <div class="card p-5 sticky top-24">
+                <form action="{{ route('products') }}" method="GET" class="card p-5 sticky top-24">
                     <h2 class="font-semibold text-neutral-800 text-sm uppercase tracking-wider mb-5">Filters</h2>
 
                     <div class="space-y-4">
                         <div>
                             <label class="form-label">Category</label>
-                            <select class="form-input text-sm">
-                                <option>All Categories</option>
-                                <option>Seating</option>
-                                <option>Ceremony</option>
-                                <option>Tableware</option>
-                                <option>Lighting</option>
-                                <option>Furniture</option>
-                                <option>Decor</option>
+                            <select name="category" class="form-input text-sm">
+                                <option value="">All Categories</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->slug }}" {{ request('category') == $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
                             </select>
                         </div>
 
-                        <x-input id="date" label="Event Date" type="date" />
-
                         <div>
-                            <label class="form-label">Price Range</label>
-                            <x-select>
-                                <option>Any Price</option>
-                                <option>Under $50/day</option>
-                                <option>$50–$150/day</option>
-                                <option>$150+/day</option>
-                            </x-select>
+                            <label class="form-label">Max Price ($/day)</label>
+                            <x-input name="max_price" type="number" value="{{ request('max_price') }}" placeholder="Any Price" />
                         </div>
 
-                        <x-button class="w-full mt-2">Apply Filters</x-button>
-                        <x-button variant="ghost" class="w-full text-neutral-500 text-sm">Clear All</x-button>
+                        <x-button type="submit" class="w-full mt-2">Apply Filters</x-button>
+                        <a href="{{ route('products') }}" class="btn btn-ghost w-full text-neutral-500 text-sm block text-center">Clear All</a>
                     </div>
 
                     {{-- Category quick-links --}}
                     <div class="mt-6 pt-5 border-t border-neutral-100">
                         <p class="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">Browse By</p>
                         <div class="flex flex-wrap gap-2">
-                            @foreach(['Seating','Lighting','Tableware','Decor','Ceremony','Furniture'] as $cat)
-                            <span class="badge badge-neutral cursor-pointer hover:bg-brand-50 hover:text-brand-700 transition-base">{{ $cat }}</span>
+                            @foreach($categories as $cat)
+                                <a href="{{ route('products', ['category' => $cat->slug]) }}" class="badge badge-neutral hover:bg-brand-50 hover:text-brand-700 transition-base">{{ $cat->name }}</a>
                             @endforeach
                         </div>
                     </div>
-                </div>
+                </form>
             </aside>
 
             {{-- ── Product Grid ── --}}
@@ -87,7 +77,7 @@
                 {{-- Sort + result count bar --}}
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-7">
                     <p class="text-sm text-neutral-500 font-medium">
-                        Showing <span class="text-neutral-800 font-semibold">6</span> items
+                        Showing <span class="text-neutral-800 font-semibold">{{ count($products) }}</span> items
                     </p>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-neutral-500 whitespace-nowrap">Sort by:</label>
@@ -101,17 +91,6 @@
                 </div>
 
                 {{-- Grid --}}
-                @php
-                $products = [
-                    ['image'=>'product-chairs.png',   'name'=>'Gold Chiavari Chairs',  'cat'=>'Seating',   'price'=>'$4',   'desc'=>'Elegant gold chiavari chairs with white cushioned seats. Perfect for weddings and formal events.'],
-                    ['image'=>'product-arch.png',      'name'=>'Floral Wedding Arch',   'cat'=>'Ceremony',  'price'=>'$120', 'desc'=>'Stunning floral arch with fresh white roses and eucalyptus. Makes a breathtaking ceremony backdrop.'],
-                    ['image'=>'product-tableware.png', 'name'=>'Luxury Table Setting',  'cat'=>'Tableware', 'price'=>'$18',  'desc'=>'Complete premium table setting with white and gold dinnerware, crystal glasses, and silverware.'],
-                    ['image'=>'product-lighting.png',  'name'=>'String Light Canopy',   'cat'=>'Lighting',  'price'=>'$85',  'desc'=>'Romantic Edison bulb and fairy light canopy for outdoor receptions. Creates magical ambiance.'],
-                    ['image'=>'product-lounge.png',    'name'=>'White Lounge Suite',    'cat'=>'Furniture', 'price'=>'$200', 'desc'=>'Luxurious white tufted sofa and armchair set with gold accent legs. Ideal for reception lounge areas.'],
-                    ['image'=>'product-backdrop.png',  'name'=>'Floral Hex Backdrop',   'cat'=>'Decor',     'price'=>'$95',  'desc'=>'Geometric hexagonal backdrop with white linen and lush floral arrangements. Perfect photo backdrop.'],
-                ];
-                @endphp
-
                 <x-product.grid :products="$products" />
 
                 {{-- Pagination placeholder --}}

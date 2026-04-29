@@ -6,10 +6,33 @@
 <x-section class="bg-cream min-h-screen" aria-label="Checkout" x-data="{
     step: 1,
     form: { firstName:'',lastName:'',email:'',phone:'',address:'',city:'',state:'',zip:'',notes:'',paymentMethod:'card' },
+    errors: {},
     get cartItems() { return Alpine.store('cart').items },
     get subtotal()  { return Alpine.store('cart').subtotal() },
-    next() { if(this.step < 3) this.step++ },
-    prev() { if(this.step > 1) this.step-- },
+    validateStep1() {
+        this.errors = {};
+        if (!this.form.firstName) this.errors.firstName = 'First name is required';
+        if (!this.form.lastName) this.errors.lastName = 'Last name is required';
+        if (!this.form.email) this.errors.email = 'Email is required';
+        else if (!/^\S+@\S+\.\S+$/.test(this.form.email)) this.errors.email = 'Invalid email format';
+        if (!this.form.phone) this.errors.phone = 'Phone is required';
+        if (!this.form.address) this.errors.address = 'Address is required';
+        if (!this.form.city) this.errors.city = 'City is required';
+        if (!this.form.state) this.errors.state = 'State is required';
+        if (!this.form.zip) this.errors.zip = 'ZIP is required';
+        return Object.keys(this.errors).length === 0;
+    },
+    next() { 
+        if (this.step === 1 && !this.validateStep1()) return;
+        if(this.step < 3) { this.step++; window.scrollTo({top: 0, behavior: 'smooth'}); }
+    },
+    prev() { 
+        if(this.step > 1) { this.step--; window.scrollTo({top: 0, behavior: 'smooth'}); }
+    },
+    submitOrder() {
+        // Here you would typically send the order to the backend
+        window.location.href = '{{ route('order.success') }}';
+    },
     labels: ['Customer Details','Order Summary','Payment'],
 }">
 <x-container class="max-w-4xl">
@@ -47,17 +70,44 @@
             <div x-show="step===1" x-transition:enter="transition duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                 <h2 class="font-display text-xl font-semibold text-neutral-900 mb-6">Customer Details</h2>
                 <div class="grid sm:grid-cols-2 gap-5">
-                    <div><x-input label="First Name" x-model="form.firstName" placeholder="Sarah" /></div>
-                    <div><x-input label="Last Name" x-model="form.lastName" placeholder="Johnson" /></div>
-                    <div><x-input label="Email" type="email" x-model="form.email" placeholder="sarah@email.com" /></div>
-                    <div><x-input label="Phone" type="tel" x-model="form.phone" placeholder="+1 (865) 000-0000" /></div>
-                    <div class="sm:col-span-2"><x-input label="Delivery Address" x-model="form.address" placeholder="123 Main Street" /></div>
-                    <div><x-input label="City" x-model="form.city" placeholder="Knoxville" /></div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><x-input label="State" x-model="form.state" placeholder="TN" maxlength="2" /></div>
-                        <div><x-input label="ZIP" x-model="form.zip" placeholder="37901" /></div>
+                    <div>
+                        <x-input label="First Name" x-model="form.firstName" placeholder="Sarah" :required="true" />
+                        <p class="text-red-500 text-xs" x-show="errors.firstName" x-text="errors.firstName"></p>
                     </div>
-                    <div class="sm:col-span-2"><label class="form-label">Special Notes <span class="text-neutral-400 font-normal">(optional)</span></label><textarea x-model="form.notes" class="form-input resize-none" rows="3" placeholder="Setup time, venue access..."></textarea></div>
+                    <div>
+                        <x-input label="Last Name" x-model="form.lastName" placeholder="Johnson" :required="true" />
+                        <p class="text-red-500 text-xs" x-show="errors.lastName" x-text="errors.lastName"></p>
+                    </div>
+                    <div>
+                        <x-input label="Email" type="email" x-model="form.email" placeholder="sarah@email.com" :required="true" />
+                        <p class="text-red-500 text-xs" x-show="errors.email" x-text="errors.email"></p>
+                    </div>
+                    <div>
+                        <x-input label="Phone" type="tel" x-model="form.phone" placeholder="+1 (865) 000-0000" :required="true" />
+                        <p class="text-red-500 text-xs" x-show="errors.phone" x-text="errors.phone"></p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-input label="Delivery Address" x-model="form.address" placeholder="123 Main Street" :required="true" />
+                        <p class="text-red-500 text-xs" x-show="errors.address" x-text="errors.address"></p>
+                    </div>
+                    <div>
+                        <x-input label="City" x-model="form.city" placeholder="Knoxville" :required="true" />
+                        <p class="text-red-500 text-xs" x-show="errors.city" x-text="errors.city"></p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <x-input label="State" x-model="form.state" placeholder="TN" maxlength="2" :required="true" />
+                            <p class="text-red-500 text-xs" x-show="errors.state" x-text="errors.state"></p>
+                        </div>
+                        <div>
+                            <x-input label="ZIP" x-model="form.zip" placeholder="37901" :required="true" />
+                            <p class="text-red-500 text-xs" x-show="errors.zip" x-text="errors.zip"></p>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="form-label">Special Notes <span class="text-neutral-400 font-normal">(optional)</span></label>
+                        <textarea x-model="form.notes" class="form-input resize-none" rows="3" placeholder="Setup time, venue access..."></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -115,7 +165,7 @@
             <div class="flex items-center justify-between mt-8 pt-6 border-t border-neutral-100">
                 <button @click="prev" x-show="step>1" class="btn btn-ghost text-neutral-600 btn-lg">← Back</button>
                 <div x-show="step===1" class="text-xs text-neutral-300">Step 1 of 3</div>
-                <button @click="step<3?next():window.location.href='{{ route('order.success') }}'" class="btn btn-primary btn-lg ml-auto shadow-glow">
+                <button @click="step<3?next():submitOrder()" class="btn btn-primary btn-lg ml-auto shadow-glow">
                     <span x-text="step<3?'Continue →':'Place Order 🎉'"></span>
                 </button>
             </div>

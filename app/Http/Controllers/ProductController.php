@@ -10,18 +10,32 @@ class ProductController extends Controller
     /**
      * Display the product catalogue listing.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        // TODO: Fetch products from DB when Product model is set up
-        return view('pages.products');
+        $query = \App\Models\Product::with('category')->where('status', 'available');
+
+        if ($request->has('category') && $request->category !== '') {
+            $query->whereHas('category', function($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
+        }
+
+        if ($request->has('max_price') && $request->max_price !== '') {
+            $query->where('price_per_day', '<=', $request->max_price);
+        }
+
+        $products = $query->get();
+        $categories = \App\Models\Category::all();
+
+        return view('pages.products', compact('products', 'categories'));
     }
 
     /**
      * Show a single product detail page.
      */
-    public function show(int $id): View
+    public function show(string $slug): View
     {
-        // TODO: Fetch product by ID
-        return view('pages.product-detail', compact('id'));
+        $product = \App\Models\Product::with('category')->where('slug', $slug)->firstOrFail();
+        return view('pages.product-detail', compact('product'));
     }
 }
