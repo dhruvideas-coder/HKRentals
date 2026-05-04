@@ -299,7 +299,126 @@
     .cart-fab:hover { background:var(--color-brand-600);transform:scale(1.08) translateY(-2px);box-shadow:0 8px 30px rgb(200 144 58/.5); }
     .cart-fab-badge { position:absolute;top:-4px;right:-4px;min-width:1.2rem;height:1.2rem;border-radius:9999px;background:#ef4444;color:#fff;font-size:.6875rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 .25rem;border:2px solid #fff; }
 
-    /* ── Testimonial card ── */
+    /* ── Testimonial Section ── */
+    .reviews-section-bg {
+        background: linear-gradient(160deg, #fdf8f0 0%, #fff9f2 40%, #fdf6ee 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .reviews-section-bg::before {
+        content: '';
+        position: absolute;
+        top: -120px; left: -120px;
+        width: 450px; height: 450px;
+        background: radial-gradient(circle, var(--color-brand-200) 0%, transparent 70%);
+        opacity: 0.35;
+        pointer-events: none;
+    }
+    .reviews-section-bg::after {
+        content: '';
+        position: absolute;
+        bottom: -100px; right: -80px;
+        width: 380px; height: 380px;
+        background: radial-gradient(circle, var(--color-brand-300) 0%, transparent 70%);
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    /* ── Review Card ── */
+    .review-card {
+        background: #fff;
+        border-radius: 1.5rem;
+        padding: 1.75rem;
+        border: 1px solid var(--color-neutral-100);
+        box-shadow: 0 2px 8px rgb(0 0 0 / 0.05), 0 16px 40px rgb(0 0 0 / 0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 1.125rem;
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: default;
+        height: 100%;
+    }
+    .review-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgb(0 0 0 / 0.08), 0 24px 56px rgb(0 0 0 / 0.12);
+    }
+    .review-card-quote {
+        position: absolute;
+        top: 1.25rem; right: 1.5rem;
+        font-size: 5rem;
+        line-height: 1;
+        font-family: var(--font-display);
+        color: var(--color-brand-100);
+        user-select: none;
+        pointer-events: none;
+        leading-trim: both;
+    }
+    .review-card-featured {
+        background: linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-brand-800) 100%);
+        border-color: transparent;
+    }
+    .review-card-featured .review-card-quote { color: rgba(255,255,255,0.12); }
+
+    /* ── Rating Stars ── */
+    .review-stars { display: flex; gap: 0.2rem; }
+    .review-star {
+        width: 1rem; height: 1rem;
+        color: var(--color-brand-400);
+        fill: currentColor;
+    }
+    .review-star.empty { color: var(--color-neutral-200); }
+
+    /* ── Avatar ── */
+    .review-avatar {
+        width: 3rem; height: 3rem;
+        border-radius: 9999px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.125rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        border: 2px solid var(--color-brand-200);
+        background: linear-gradient(135deg, var(--color-brand-100), var(--color-brand-200));
+        color: var(--color-brand-700);
+        letter-spacing: 0;
+    }
+    .review-avatar-lg {
+        width: 3.5rem; height: 3.5rem;
+        font-size: 1.25rem;
+    }
+
+    /* ── Rating Summary Bar ── */
+    .rating-bar-track {
+        height: 6px; border-radius: 9999px;
+        background: var(--color-neutral-100);
+        flex: 1;
+        overflow: hidden;
+    }
+    .rating-bar-fill {
+        height: 100%; border-radius: 9999px;
+        background: linear-gradient(90deg, var(--color-brand-400), var(--color-brand-500));
+        transition: width 1s ease;
+    }
+
+    /* ── Carousel track ── */
+    .reviews-track {
+        display: flex;
+        gap: 1.5rem;
+        transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: transform;
+    }
+    .reviews-slide {
+        min-width: calc((100% - 3rem) / 3);
+        flex-shrink: 0;
+    }
+    @media (max-width: 1023px) {
+        .reviews-slide { min-width: calc((100% - 1.5rem) / 2); }
+    }
+    @media (max-width: 639px) {
+        .reviews-slide { min-width: 100%; }
+    }
+
+    /* ── Testimonial card (legacy) ── */
     .testimonial-card { background:#fff;border-radius:1.25rem;padding:2rem;border:1px solid var(--color-neutral-100);box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:1rem; }
 }
 
