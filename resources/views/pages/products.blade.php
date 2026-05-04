@@ -89,28 +89,25 @@
             {{-- ── Product Grid ── --}}
             <div class="flex-1 min-w-0">
 
-                {{-- Sort + result count bar --}}
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-7">
-                    <p class="text-sm text-neutral-500 font-medium">
-                        Showing <span class="text-neutral-800 font-semibold">{{ $products->count() }}</span> of <span class="text-neutral-800 font-semibold">{{ $products->total() }}</span> items
-                    </p>
+                {{-- Sort bar --}}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-3 mb-7">
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-neutral-500 whitespace-nowrap">Sort by:</label>
-                        <select class="form-input w-44 text-sm" 
+                        <select class="form-input w-44 text-sm"
                                 onchange="window.location.href = '{{ route('products', array_merge(request()->query(), ['sort' => ''])) }}'.replace('sort=', 'sort=' + this.value)">
                             <option value="featured" {{ request('sort') == 'featured' ? 'selected' : '' }}>Featured</option>
-                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest First</option>
-                            <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price: Low → High</option>
+                            <option value="newest"   {{ request('sort') == 'newest'   ? 'selected' : '' }}>Newest First</option>
+                            <option value="price_low"  {{ request('sort') == 'price_low'  ? 'selected' : '' }}>Price: Low → High</option>
                             <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price: High → Low</option>
                         </select>
                     </div>
                 </div>
 
-                {{-- Grid --}}
+                {{-- Product Grid --}}
                 <x-product.grid :products="$products" />
 
                 {{-- Pagination --}}
-                <div class="mt-10">
+                <div class="border-t border-neutral-200">
                     {{ $products->links() }}
                 </div>
 
