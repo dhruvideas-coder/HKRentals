@@ -85,9 +85,31 @@ class CartService
     {
         $total = 0;
         foreach ($this->getCart() as $item) {
-            $total += $item['price'] * $item['quantity'];
+            $days = $this->calculateDays($item['dateRange'] ?? null);
+            $total += $item['price'] * $item['quantity'] * $days;
         }
         return (float) $total;
+    }
+
+    /**
+     * Calculate days from dateRange.
+     */
+    private function calculateDays(?string $dateRange): int
+    {
+        if (!$dateRange) return 1;
+        
+        $parts = explode(' → ', $dateRange);
+        if (count($parts) !== 2) return 1;
+
+        $start = strtotime($parts[0]);
+        $end = strtotime($parts[1]);
+
+        if (!$start || !$end) return 1;
+
+        $diff = $end - $start;
+        $days = (int) ceil($diff / (60 * 60 * 24));
+        
+        return $days > 0 ? $days : 1;
     }
 
     /**

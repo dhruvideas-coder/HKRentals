@@ -7,8 +7,10 @@
     step: 1,
     form: { firstName:'',lastName:'',email:'',phone:'',address:'',city:'',state:'',zip:'',notes:'',paymentMethod:'card' },
     errors: {},
-    get cartItems() { return Alpine.store('cart').items },
-    get subtotal()  { return Alpine.store('cart').subtotal() },
+    paymentState: 'idle', // idle, loading, success, error
+    paymentError: '',
+    get totalAmount() { return parseFloat(Alpine.store('cart').subtotal()) + parseFloat(Alpine.store('cart').subtotal()) * 0.085; },
+    getDays(dateRange) { return Alpine.store('cart').calculateDays(dateRange); },
     validateStep1() {
         this.errors = {};
         if (!this.form.firstName) this.errors.firstName = 'First name is required';
@@ -29,13 +31,84 @@
     prev() { 
         if(this.step > 1) { this.step--; window.scrollTo({top: 0, behavior: 'smooth'}); }
     },
-    submitOrder() {
-        // Here you would typically send the order to the backend
-        window.location.href = '{{ route('order.success') }}';
+    async submitOrder() {
+        if (this.paymentState === 'loading') return;
+        this.paymentState = 'loading';
+        this.paymentError = '';
+
+        try {
+            // 1. Create Order
+            let orderResponse = await fetch('{{ route('checkout.process') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ ...this.form, total_amount: this.totalAmount })
+            });
+            let orderData = await orderResponse.json();
+
+            if (!orderData.success) throw new Error('Order creation failed');
+
+            if (this.form.paymentMethod === 'card') {
+                // 2. Create Payment Intent
+                let intentResponse = await fetch('{{ route('payment.create-intent') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ amount: this.totalAmount, order_id: orderData.order_id })
+                });
+                let intentData = await intentResponse.json();
+
+                if (!intentData.id) throw new Error('Failed to initiate payment');
+
+                // Simulate processing delay
+                await new Promise(r => setTimeout(r, 1500));
+
+                // 3. Confirm Payment
+                let confirmResponse = await fetch('{{ route('payment.confirm') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ payment_intent_id: intentData.id, order_id: orderData.order_id, amount: this.totalAmount })
+                });
+                let confirmData = await confirmResponse.json();
+
+                if (!confirmData.success) throw new Error(confirmData.message || 'Payment failed');
+            }
+
+            // 4. Success State
+            this.paymentState = 'success';
+            Alpine.store('cart').clear(); // Clear cart
+            
+            setTimeout(() => {
+                window.location.href = '{{ route('order.success') }}';
+            }, 1500);
+
+        } catch (error) {
+            console.error(error);
+            this.paymentState = 'error';
+            this.paymentError = error.message || 'An error occurred during payment processing.';
+        }
     },
     labels: ['Customer Details','Order Summary','Payment'],
 }">
-<x-container class="max-w-4xl">
+<x-container class="max-w-4xl relative">
+
+    {{-- Loading Overlay --}}
+    <div x-show="paymentState === 'loading'" x-transition class="absolute inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl">
+        <div class="text-center">
+            <svg class="animate-spin h-12 w-12 text-brand-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <p class="font-semibold text-lg text-neutral-800">Processing payment...</p>
+            <p class="text-sm text-neutral-500">Please do not close this window.</p>
+        </div>
+    </div>
+
+    {{-- Success Overlay --}}
+    <div x-show="paymentState === 'success'" x-transition class="absolute inset-0 z-50 flex items-center justify-center bg-white rounded-3xl">
+        <div class="text-center">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 scale-up">
+                <svg class="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h2 class="font-display text-3xl font-bold text-neutral-900 mb-2">Payment Successful!</h2>
+            <p class="text-neutral-500">Redirecting to your order confirmation...</p>
+        </div>
+    </div>
 
     <div class="text-center mb-10">
         <span class="badge badge-gold mb-3">Secure Checkout</span>
@@ -62,9 +135,20 @@
         </template>
     </div>
 
-    <div class="grid lg:grid-cols-3 gap-8 items-start">
+    <div class="grid lg:grid-cols-3 gap-8 items-start relative">
 
         <div class="lg:col-span-2 card p-7">
+
+            {{-- Error Message --}}
+            <div x-show="paymentState === 'error'" x-transition class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <div>
+                        <h3 class="text-sm font-semibold text-red-800">Payment Failed</h3>
+                        <p class="text-sm text-red-700 mt-1" x-text="paymentError"></p>
+                    </div>
+                </div>
+            </div>
 
             {{-- Step 1 --}}
             <div x-show="step===1" x-transition:enter="transition duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
@@ -120,19 +204,19 @@
                     <p class="text-sm text-neutral-500" x-text="form.address + ', ' + form.city + ' ' + form.zip"></p>
                 </div>
                 <div class="space-y-3 mb-5">
-                    <template x-for="item in cartItems" :key="item.id">
+                    <template x-for="item in $store.cart.items" :key="item.product_id || item.id">
                         <div class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
                             <img :src="item.image" :alt="item.name" class="w-12 h-12 rounded-lg object-cover" />
-                            <div class="flex-1"><p class="font-semibold text-sm text-neutral-800" x-text="item.name"></p><p class="text-xs text-neutral-400" x-text="'Qty: ' + item.qty"></p></div>
-                            <span class="font-bold text-brand-600 text-sm" x-text="'$'+(item.price*item.qty).toFixed(2)"></span>
+                            <div class="flex-1"><p class="font-semibold text-sm text-neutral-800" x-text="item.name"></p><p class="text-xs text-neutral-400" x-text="'Qty: ' + (item.quantity || item.qty) + ' • ' + getDays(item.dateRange) + ' Days'"></p></div>
+                            <span class="font-bold text-brand-600 text-sm" x-text="'$'+(item.price*(item.quantity || item.qty)*getDays(item.dateRange)).toFixed(2)"></span>
                         </div>
                     </template>
                 </div>
                 <div class="bg-neutral-50 rounded-xl p-5 space-y-2">
-                    <div class="flex justify-between text-sm text-neutral-600"><span>Subtotal</span><span x-text="'$'+subtotal"></span></div>
+                    <div class="flex justify-between text-sm text-neutral-600"><span>Subtotal</span><span x-text="'$'+$store.cart.subtotal()"></span></div>
                     <div class="flex justify-between text-sm text-neutral-600"><span>Delivery &amp; Setup</span><span class="text-green-600 font-medium">Free</span></div>
-                    <div class="flex justify-between text-sm text-neutral-600"><span>Tax (8.5%)</span><span x-text="'$'+(subtotal*0.085).toFixed(2)"></span></div>
-                    <div class="flex justify-between font-bold text-neutral-900 text-lg pt-2 border-t border-neutral-200"><span>Total</span><span x-text="'$'+(parseFloat(subtotal)+parseFloat(subtotal)*0.085).toFixed(2)"></span></div>
+                    <div class="flex justify-between text-sm text-neutral-600"><span>Tax (8.5%)</span><span x-text="'$'+($store.cart.subtotal()*0.085).toFixed(2)"></span></div>
+                    <div class="flex justify-between font-bold text-neutral-900 text-lg pt-2 border-t border-neutral-200"><span>Total</span><span x-text="'$'+totalAmount.toFixed(2)"></span></div>
                 </div>
             </div>
 
@@ -163,10 +247,16 @@
 
             {{-- Navigation --}}
             <div class="flex items-center justify-between mt-8 pt-6 border-t border-neutral-100">
-                <button @click="prev" x-show="step>1" class="btn btn-ghost text-neutral-600 btn-lg">← Back</button>
+                <button @click="prev" x-show="step>1" class="btn btn-ghost text-neutral-600 btn-lg" :disabled="paymentState === 'loading'">← Back</button>
                 <div x-show="step===1" class="text-xs text-neutral-300">Step 1 of 3</div>
-                <button @click="step<3?next():submitOrder()" class="btn btn-primary btn-lg ml-auto shadow-glow">
-                    <span x-text="step<3?'Continue →':'Place Order 🎉'"></span>
+                
+                <button x-show="step < 3" @click="next()" class="btn btn-primary btn-lg ml-auto shadow-glow">
+                    Continue →
+                </button>
+
+                <button x-show="step === 3" @click="submitOrder()" class="btn btn-primary btn-lg ml-auto shadow-glow flex items-center gap-2" :disabled="paymentState === 'loading'">
+                    <span x-text="paymentState === 'error' ? 'Retry Payment' : 'Pay Deposit'"></span>
+                    <svg x-show="paymentState === 'idle' || paymentState === 'error'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </button>
             </div>
         </div>
@@ -178,5 +268,15 @@
     </div>
 </x-container>
 </x-section>
+
+<style>
+.scale-up {
+    animation: scaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes scaleUp {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+</style>
 
 </x-layout.app-layout>

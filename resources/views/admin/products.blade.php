@@ -15,8 +15,8 @@
 </div>
 
 {{-- Filters bar --}}
-<div class="card mb-6 p-4 flex flex-col sm:flex-row gap-3">
-    <div class="flex-1">
+<div class="card mb-6 p-4 flex flex-col sm:flex-row gap-3 flex-wrap">
+    <div class="flex-1 min-w-40">
         <input type="text" class="form-input text-sm" placeholder="Search products..." />
     </div>
     <select class="form-input text-sm w-full sm:w-44">
@@ -27,6 +27,24 @@
         <option>Ceremony</option>
         <option>Furniture</option>
         <option>Decor</option>
+    </select>
+    <select class="form-input text-sm w-full sm:w-36">
+        <option value="">All Colors</option>
+        <option>Gold</option>
+        <option>White</option>
+        <option>Silver</option>
+        <option>Black</option>
+        <option>Rose Gold</option>
+        <option>Ivory</option>
+    </select>
+    <select class="form-input text-sm w-full sm:w-40">
+        <option value="">All Materials</option>
+        <option>Wood</option>
+        <option>Metal</option>
+        <option>Fabric</option>
+        <option>Glass</option>
+        <option>Acrylic</option>
+        <option>Plastic</option>
     </select>
     <select class="form-input text-sm w-full sm:w-40">
         <option>All Status</option>
@@ -43,21 +61,32 @@
                 <tr>
                     <th>Product</th>
                     <th class="hidden sm:table-cell">Category</th>
+                    <th class="hidden md:table-cell">Color</th>
+                    <th class="hidden lg:table-cell">Material</th>
                     <th>Price/Day</th>
                     <th>Status</th>
-                    <th>Stock</th>
+                    <th class="hidden sm:table-cell">Stock</th>
                     <th class="text-right pr-5">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @php
                 $products = [
-                    ['image'=>'product-chairs.png',   'name'=>'Gold Chiavari Chairs', 'cat'=>'Seating',   'price'=>4,   'available'=>true, 'stock'=>50],
-                    ['image'=>'product-arch.png',      'name'=>'Floral Wedding Arch',  'cat'=>'Ceremony',  'price'=>120, 'available'=>true, 'stock'=>3],
-                    ['image'=>'product-tableware.png', 'name'=>'Luxury Table Setting', 'cat'=>'Tableware', 'price'=>18,  'available'=>true, 'stock'=>120],
-                    ['image'=>'product-lighting.png',  'name'=>'String Light Canopy',  'cat'=>'Lighting',  'price'=>85,  'available'=>false,'stock'=>2],
-                    ['image'=>'product-lounge.png',    'name'=>'White Lounge Suite',   'cat'=>'Furniture', 'price'=>200, 'available'=>true, 'stock'=>4],
-                    ['image'=>'product-backdrop.png',  'name'=>'Floral Hex Backdrop',  'cat'=>'Decor',     'price'=>95,  'available'=>true, 'stock'=>8],
+                    ['image'=>'product-chairs.png',   'name'=>'Gold Chiavari Chairs', 'cat'=>'Seating',   'color'=>'Gold',     'material'=>'Wood',   'price'=>4,   'available'=>true,  'stock'=>50],
+                    ['image'=>'product-arch.png',      'name'=>'Floral Wedding Arch',  'cat'=>'Ceremony',  'color'=>'White',    'material'=>'Metal',  'price'=>120, 'available'=>true,  'stock'=>3],
+                    ['image'=>'product-tableware.png', 'name'=>'Luxury Table Setting', 'cat'=>'Tableware', 'color'=>'Silver',   'material'=>'Glass',  'price'=>18,  'available'=>true,  'stock'=>120],
+                    ['image'=>'product-lighting.png',  'name'=>'String Light Canopy',  'cat'=>'Lighting',  'color'=>'Gold',     'material'=>'Metal',  'price'=>85,  'available'=>false, 'stock'=>2],
+                    ['image'=>'product-lounge.png',    'name'=>'White Lounge Suite',   'cat'=>'Furniture', 'color'=>'White',    'material'=>'Fabric', 'price'=>200, 'available'=>true,  'stock'=>4],
+                    ['image'=>'product-backdrop.png',  'name'=>'Floral Hex Backdrop',  'cat'=>'Decor',     'color'=>'Rose Gold', 'material'=>'Acrylic','price'=>95, 'available'=>true,  'stock'=>8],
+                ];
+
+                $colorMap = [
+                    'Gold'     => 'bg-yellow-400',
+                    'White'    => 'bg-white border border-neutral-200',
+                    'Silver'   => 'bg-neutral-300',
+                    'Black'    => 'bg-neutral-900',
+                    'Rose Gold'=> 'bg-rose-300',
+                    'Ivory'    => 'bg-amber-50 border border-neutral-200',
                 ];
                 @endphp
 
@@ -72,13 +101,24 @@
                     <td class="hidden sm:table-cell">
                         <span class="badge badge-gold text-xs">{{ $p['cat'] }}</span>
                     </td>
+                    {{-- Color column --}}
+                    <td class="hidden md:table-cell">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 rounded-full flex-shrink-0 {{ $colorMap[$p['color']] ?? 'bg-neutral-200' }}"></span>
+                            <span class="text-sm text-neutral-700">{{ $p['color'] }}</span>
+                        </div>
+                    </td>
+                    {{-- Material column --}}
+                    <td class="hidden lg:table-cell">
+                        <span class="text-sm text-neutral-600">{{ $p['material'] }}</span>
+                    </td>
                     <td class="font-semibold text-neutral-800">${{ $p['price'] }}<span class="text-xs font-normal text-neutral-400">/day</span></td>
                     <td>
                         <span class="badge {{ $p['available'] ? 'badge-available' : 'badge-unavailable' }} text-xs">
                             {{ $p['available'] ? 'Available' : 'Unavailable' }}
                         </span>
                     </td>
-                    <td>
+                    <td class="hidden sm:table-cell">
                         <span class="text-sm font-medium {{ $p['stock'] <= 3 ? 'text-amber-600' : 'text-neutral-700' }}">
                             {{ $p['stock'] }} units
                         </span>
@@ -110,7 +150,7 @@
 
 {{-- Add Product Modal --}}
 <div id="add-product-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-    <div class="bg-white rounded-2xl shadow-elevated w-full max-w-lg p-7">
+    <div class="bg-white rounded-2xl shadow-elevated w-full max-w-lg p-7 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
             <h3 class="font-display text-xl font-semibold text-neutral-900">Add New Product</h3>
             <button onclick="document.getElementById('add-product-modal').classList.add('hidden')" class="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center text-neutral-500">✕</button>
@@ -124,6 +164,17 @@
                 <div><label class="form-label">Price / Day ($)</label><input type="number" class="form-input" placeholder="0.00" /></div>
             </div>
             <div><label class="form-label">Description</label><textarea class="form-input resize-none" rows="3" placeholder="Product description..."></textarea></div>
+            {{-- Color & Material --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="form-label">Color</label>
+                    <input type="text" class="form-input" placeholder="e.g. Gold, White, Silver" />
+                </div>
+                <div>
+                    <label class="form-label">Material</label>
+                    <input type="text" class="form-input" placeholder="e.g. Wood, Metal, Fabric" />
+                </div>
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div><label class="form-label">Stock Units</label><input type="number" class="form-input" placeholder="10" /></div>
                 <div><label class="form-label">Status</label><select class="form-input"><option>Available</option><option>Unavailable</option></select></div>

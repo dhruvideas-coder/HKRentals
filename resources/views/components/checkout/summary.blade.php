@@ -1,13 +1,13 @@
 <div class="card p-5">
     <h3 class="font-semibold text-neutral-900 mb-4">Your Order</h3>
     <div class="space-y-3">
-        <template x-for="item in cartItems" :key="item.id">
+        <template x-for="item in $store.cart.items" :key="item.product_id || item.id">
             <x-cart.item />
         </template>
     </div>
     <div class="border-t border-neutral-100 mt-4 pt-4 flex justify-between">
         <span class="text-sm text-neutral-500">Subtotal</span>
-        <span class="font-bold text-neutral-900" x-text="'$'+subtotal"></span>
+        <span class="font-bold text-neutral-900" x-text="'$'+$store.cart.subtotal()"></span>
     </div>
 </div>
 <div class="card p-5 space-y-3 mt-4">

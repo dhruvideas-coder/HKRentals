@@ -29,7 +29,12 @@ Route::post('/cart/remove',  [\App\Http\Controllers\CartController::class, 'remo
 Route::post('/cart/clear',   [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
 
 Route::get('/checkout',      [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process'); // Assuming this exists or needed
 Route::get('/order-success', fn () => view('pages.order-success'))->name('order.success');
+
+// Mock Payment Routes
+Route::post('/payment/create-intent', [\App\Http\Controllers\PaymentController::class, 'createIntent'])->name('payment.create-intent');
+Route::post('/payment/confirm',       [\App\Http\Controllers\PaymentController::class, 'confirm'])->name('payment.confirm');
 
 /*
 |--------------------------------------------------------------------------

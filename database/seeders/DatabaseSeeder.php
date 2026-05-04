@@ -48,5 +48,32 @@ class DatabaseSeeder extends Seeder
             'image' => 'product-tableware.png', 
             'description' => 'Complete premium table setting with white and gold dinnerware, crystal glasses, and silverware.'
         ]);
+
+        \App\Models\Product::create([
+            'category_id' => \App\Models\Category::where('slug', 'decor')->first()->id, 
+            'name' => 'Vintage Backdrop', 
+            'slug' => 'vintage-backdrop', 
+            'price_per_day' => 85, 
+            'image' => 'product-backdrop.png', 
+            'description' => 'Beautifully aged vintage wood backdrop, perfect for photo booths or head tables.'
+        ]);
+
+        \App\Models\Product::create([
+            'category_id' => \App\Models\Category::where('slug', 'lighting')->first()->id, 
+            'name' => 'String Bistro Lights', 
+            'slug' => 'string-bistro-lights', 
+            'price_per_day' => 45, 
+            'image' => 'product-lighting.png', 
+            'description' => 'Warm Edison-style bistro lights to create a magical atmosphere for your evening event.'
+        ]);
+
+        \App\Models\Product::create([
+            'category_id' => \App\Models\Category::where('slug', 'furniture')->first()->id, 
+            'name' => 'Velvet Lounge Set', 
+            'slug' => 'velvet-lounge-set', 
+            'price_per_day' => 250, 
+            'image' => 'product-lounge.png', 
+            'description' => 'Sophisticated emerald velvet sofa with two matching armchairs and a gold coffee table.'
+        ]);
     }
 }

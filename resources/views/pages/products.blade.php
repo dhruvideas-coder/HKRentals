@@ -34,7 +34,6 @@
     <x-container>
         <div class="flex flex-col lg:flex-row gap-8">
 
-            {{-- ── Sidebar Filters ── --}}
             <aside class="lg:w-60 flex-shrink-0" aria-label="Product filters">
                 <form action="{{ route('products') }}" method="GET" class="card p-5 sticky top-24">
                     <h2 class="font-semibold text-neutral-800 text-sm uppercase tracking-wider mb-5">Filters</h2>
@@ -42,7 +41,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="form-label">Category</label>
-                            <select name="category" class="form-input text-sm">
+                            <select name="category" class="form-input text-sm" onchange="this.form.submit()">
                                 <option value="">All Categories</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->slug }}" {{ request('category') == $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -52,22 +51,38 @@
 
                         <div>
                             <label class="form-label">Max Price ($/day)</label>
-                            <x-input name="max_price" type="number" value="{{ request('max_price') }}" placeholder="Any Price" />
+                            <x-input name="max_price" type="number" value="{{ request('max_price') }}" placeholder="Any Price" onchange="this.form.submit()" />
                         </div>
 
-                        <x-button type="submit" class="w-full mt-2">Apply Filters</x-button>
+                        {{-- Color Filter --}}
+                        <div>
+                            <label class="form-label">Color</label>
+                            <select name="color" class="form-input text-sm" onchange="this.form.submit()">
+                                <option value="">All Colors</option>
+                                @foreach($colors as $color)
+                                    <option value="{{ $color }}" {{ request('color') == $color ? 'selected' : '' }}>
+                                        {{ ucfirst($color) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Material Filter --}}
+                        <div>
+                            <label class="form-label">Material</label>
+                            <select name="material" class="form-input text-sm" onchange="this.form.submit()">
+                                <option value="">All Materials</option>
+                                @foreach($materials as $material)
+                                    <option value="{{ $material }}" {{ request('material') == $material ? 'selected' : '' }}>
+                                        {{ ucfirst($material) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <a href="{{ route('products') }}" class="btn btn-ghost w-full text-neutral-500 text-sm block text-center">Clear All</a>
                     </div>
 
-                    {{-- Category quick-links --}}
-                    <div class="mt-6 pt-5 border-t border-neutral-100">
-                        <p class="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">Browse By</p>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($categories as $cat)
-                                <a href="{{ route('products', ['category' => $cat->slug]) }}" class="badge badge-neutral hover:bg-brand-50 hover:text-brand-700 transition-base">{{ $cat->name }}</a>
-                            @endforeach
-                        </div>
-                    </div>
                 </form>
             </aside>
 
@@ -77,15 +92,16 @@
                 {{-- Sort + result count bar --}}
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-7">
                     <p class="text-sm text-neutral-500 font-medium">
-                        Showing <span class="text-neutral-800 font-semibold">{{ count($products) }}</span> items
+                        Showing <span class="text-neutral-800 font-semibold">{{ $products->count() }}</span> of <span class="text-neutral-800 font-semibold">{{ $products->total() }}</span> items
                     </p>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-neutral-500 whitespace-nowrap">Sort by:</label>
-                        <select class="form-input w-44 text-sm">
-                            <option>Featured</option>
-                            <option>Newest First</option>
-                            <option>Price: Low → High</option>
-                            <option>Price: High → Low</option>
+                        <select class="form-input w-44 text-sm" 
+                                onchange="window.location.href = '{{ route('products', array_merge(request()->query(), ['sort' => ''])) }}'.replace('sort=', 'sort=' + this.value)">
+                            <option value="featured" {{ request('sort') == 'featured' ? 'selected' : '' }}>Featured</option>
+                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest First</option>
+                            <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price: Low → High</option>
+                            <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price: High → Low</option>
                         </select>
                     </div>
                 </div>
@@ -93,14 +109,9 @@
                 {{-- Grid --}}
                 <x-product.grid :products="$products" />
 
-                {{-- Pagination placeholder --}}
-                <div class="flex justify-center mt-10">
-                    <nav class="flex items-center gap-1" aria-label="Pagination">
-                        <button class="w-9 h-9 rounded-lg border border-neutral-200 text-sm text-neutral-500 hover:bg-neutral-50 transition-base flex items-center justify-center" aria-label="Previous">&laquo;</button>
-                        <button class="w-9 h-9 rounded-lg bg-brand-500 text-white text-sm font-semibold shadow-sm" aria-current="page">1</button>
-                        <button class="w-9 h-9 rounded-lg border border-neutral-200 text-sm text-neutral-500 hover:bg-neutral-50 transition-base">2</button>
-                        <button class="w-9 h-9 rounded-lg border border-neutral-200 text-sm text-neutral-500 hover:bg-neutral-50 transition-base flex items-center justify-center" aria-label="Next">&raquo;</button>
-                    </nav>
+                {{-- Pagination --}}
+                <div class="mt-10">
+                    {{ $products->links() }}
                 </div>
 
             </div>

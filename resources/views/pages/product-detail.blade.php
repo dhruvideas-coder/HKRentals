@@ -23,7 +23,6 @@
             qty: this.qty,
             dateRange: this.startDate && this.endDate ? this.startDate + ' → ' + this.endDate : null,
         });
-        $dispatch('open-cart');
     }
 }">
 <x-container>

@@ -26,7 +26,7 @@ Alpine.store('cart', {
         try {
             // product must have product_id, name, price, quantity, etc.
             const payload = {
-                product_id: product.id || product.product_id,
+                product_id: product.id !== undefined ? product.id : product.product_id,
                 name: product.name,
                 price: product.price,
                 quantity: product.quantity || product.qty || 1,
@@ -96,7 +96,22 @@ Alpine.store('cart', {
     },
 
     subtotal() {
-        return this.items.reduce((sum, i) => sum + parseFloat(i.price) * parseInt(i.quantity), 0).toFixed(2);
+        return this.items.reduce((sum, i) => {
+            const days = this.calculateDays(i.dateRange);
+            return sum + (parseFloat(i.price) * parseInt(i.quantity) * days);
+        }, 0).toFixed(2);
+    },
+
+    calculateDays(dateRange) {
+        if (!dateRange) return 1;
+        const parts = dateRange.split(' → ');
+        if (parts.length !== 2) return 1;
+        const start = new Date(parts[0]);
+        const end = new Date(parts[1]);
+        if (isNaN(start) || isNaN(end)) return 1;
+        const diffTime = end - start;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 0 ? diffDays : 1;
     }
 });
 

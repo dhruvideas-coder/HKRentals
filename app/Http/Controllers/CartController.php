@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\CartService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -39,15 +40,20 @@ class CartController extends Controller
      */
     public function add(Request $request)
     {
-        $validated = $request->validate([
-            'product_id' => 'required|string',
-            'name'       => 'required|string',
-            'price'      => 'required|numeric',
-            'quantity'   => 'nullable|integer|min:1',
-            'image'      => 'nullable|string',
-            'category'   => 'nullable|string',
-            'dateRange'  => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'product_id' => 'required',
+                'name'       => 'required|string',
+                'price'      => 'required|numeric',
+                'quantity'   => 'nullable|integer|min:1',
+                'image'      => 'nullable|string',
+                'category'   => 'nullable|string',
+                'dateRange'  => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Cart Add Validation Failed: ', $e->errors());
+            throw $e;
+        }
 
         $quantity = $validated['quantity'] ?? 1;
 
@@ -62,7 +68,7 @@ class CartController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|string',
+            'product_id' => 'required',
             'quantity'   => 'required|integer|min:0',
         ]);
 
@@ -77,7 +83,7 @@ class CartController extends Controller
     public function remove(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|string',
+            'product_id' => 'required',
         ]);
 
         $this->cartService->removeItem($request->product_id);
