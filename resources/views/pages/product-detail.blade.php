@@ -7,7 +7,7 @@
      PRODUCT DETAIL — Full Page
 ══════════════════════════════════════════════════════════ --}}
 <x-section class="bg-cream" aria-label="Product detail" x-data="{
-    activeImage: '{{ asset('images/product-chairs.png') }}',
+    activeImage: '{{ asset('images/products/product-chairs.png') }}',
     qty: 1,
     startDate: '',
     endDate: '',
@@ -52,10 +52,10 @@
             {{-- Thumbnails --}}
             @php
             $thumbs = [
-                asset('images/product-chairs.png'),
-                asset('images/product-arch.png'),
-                asset('images/product-tableware.png'),
-                asset('images/product-lighting.png'),
+                asset('images/products/product-chairs.png'),
+                asset('images/products/product-arch.png'),
+                asset('images/products/product-tableware.png'),
+                asset('images/products/product-lighting.png'),
             ];
             @endphp
             <div class="grid grid-cols-4 gap-2.5">
@@ -146,10 +146,10 @@
 
         @php
         $related = [
-            ['id'=>2,'image'=>asset('images/product-arch.png'),   'name'=>'Floral Wedding Arch', 'cat'=>'Ceremony', 'price'=>120,'desc'=>'Stunning floral arch with fresh white roses.','available'=>true],
-            ['id'=>3,'image'=>asset('images/product-tableware.png'),'name'=>'Luxury Table Setting','cat'=>'Tableware','price'=>18,'desc'=>'Complete premium table setting with gold dinnerware.','available'=>true],
-            ['id'=>4,'image'=>asset('images/product-lighting.png'), 'name'=>'String Light Canopy','cat'=>'Lighting',  'price'=>85,'desc'=>'Romantic Edison bulb canopy for outdoor receptions.','available'=>false],
-            ['id'=>5,'image'=>asset('images/product-lounge.png'),   'name'=>'White Lounge Suite', 'cat'=>'Furniture','price'=>200,'desc'=>'Luxurious white tufted sofa and armchair set.','available'=>true],
+            ['id'=>2,'image'=>asset('images/products/product-arch.png'),   'name'=>'Floral Wedding Arch', 'cat'=>'Ceremony', 'price'=>120,'desc'=>'Stunning floral arch with fresh white roses.','available'=>true],
+            ['id'=>3,'image'=>asset('images/products/product-tableware.png'),'name'=>'Luxury Table Setting','cat'=>'Tableware','price'=>18,'desc'=>'Complete premium table setting with gold dinnerware.','available'=>true],
+            ['id'=>4,'image'=>asset('images/products/product-lighting.png'), 'name'=>'String Light Canopy','cat'=>'Lighting',  'price'=>85,'desc'=>'Romantic Edison bulb canopy for outdoor receptions.','available'=>false],
+            ['id'=>5,'image'=>asset('images/products/product-lounge.png'),   'name'=>'White Lounge Suite', 'cat'=>'Furniture','price'=>200,'desc'=>'Luxurious white tufted sofa and armchair set.','available'=>true],
         ];
         @endphp
         <x-product.grid :products="$related" />

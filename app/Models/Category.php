@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'image'];
+    use SoftDeletes;
+
+    protected $fillable = ['name', 'slug', 'image', 'description', 'icon'];
 
     public function products()
     {

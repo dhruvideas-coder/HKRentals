@@ -73,14 +73,14 @@
                     </div>
                     {{-- Top-right stacked --}}
                     <div class="col-span-2 row-span-2 rounded-xl overflow-hidden shadow-card">
-                        <img src="{{ asset('images/product-arch.png') }}"
+                        <img src="{{ asset('images/products/product-arch.png') }}"
                              alt="Floral wedding arch rental"
                              class="w-full h-full object-cover"
                              loading="lazy" />
                     </div>
                     {{-- Bottom-right --}}
                     <div class="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-card">
-                        <img src="{{ asset('images/product-chairs.png') }}"
+                        <img src="{{ asset('images/products/product-chairs.png') }}"
                              alt="Gold chiavari chairs"
                              class="w-full h-full object-cover object-bottom"
                              loading="lazy" />

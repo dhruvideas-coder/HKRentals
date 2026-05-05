@@ -13,7 +13,13 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        // TODO: Pass real metrics (orders, revenue, active rentals, customers)
-        return view('admin.dashboard');
+        $metrics = [
+            'total_products' => \App\Models\Product::count(),
+            'total_categories' => \App\Models\Category::count(),
+            'total_orders' => \App\Models\Order::count(),
+            'recent_products' => \App\Models\Product::with('category')->latest()->take(5)->get(),
+        ];
+
+        return view('admin.dashboard', compact('metrics'));
     }
 }

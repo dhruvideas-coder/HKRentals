@@ -146,12 +146,12 @@
 
         @php
         $items = [
-            ['image' => 'product-chairs.png',    'name' => 'Gold Chiavari Chairs',  'category' => 'Seating',   'price' => '$4'],
-            ['image' => 'product-arch.png',       'name' => 'Floral Wedding Arch',   'category' => 'Ceremony',  'price' => '$120'],
-            ['image' => 'product-tableware.png',  'name' => 'Luxury Table Setting',  'category' => 'Tableware', 'price' => '$18'],
-            ['image' => 'product-lighting.png',   'name' => 'String Light Canopy',   'category' => 'Lighting',  'price' => '$85'],
-            ['image' => 'product-lounge.png',     'name' => 'White Lounge Suite',    'category' => 'Furniture', 'price' => '$200'],
-            ['image' => 'product-backdrop.png',   'name' => 'Floral Hex Backdrop',   'category' => 'Decor',     'price' => '$95'],
+            ['image' => 'images/products/product-chairs.png',    'name' => 'Gold Chiavari Chairs',  'category' => 'Seating',   'price' => '$4'],
+            ['image' => 'images/products/product-arch.png',       'name' => 'Floral Wedding Arch',   'category' => 'Ceremony',  'price' => '$120'],
+            ['image' => 'images/products/product-tableware.png',  'name' => 'Luxury Table Setting',  'category' => 'Tableware', 'price' => '$18'],
+            ['image' => 'images/products/product-lighting.png',   'name' => 'String Light Canopy',   'category' => 'Lighting',  'price' => '$85'],
+            ['image' => 'images/products/product-lounge.png',     'name' => 'White Lounge Suite',    'category' => 'Furniture', 'price' => '$200'],
+            ['image' => 'images/products/product-backdrop.png',   'name' => 'Floral Hex Backdrop',   'category' => 'Decor',     'price' => '$95'],
         ];
         @endphp
 
@@ -216,12 +216,12 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             @foreach([
-                ['name'=>'Seating',   'image'=>asset('images/product-chairs.png'),   'count'=>12, 'slug'=>'seating'],
-                ['name'=>'Ceremony',  'image'=>asset('images/product-arch.png'),      'count'=>8,  'slug'=>'ceremony'],
-                ['name'=>'Tableware', 'image'=>asset('images/product-tableware.png'), 'count'=>24, 'slug'=>'tableware'],
-                ['name'=>'Lighting',  'image'=>asset('images/product-lighting.png'),  'count'=>10, 'slug'=>'lighting'],
-                ['name'=>'Furniture', 'image'=>asset('images/product-lounge.png'),    'count'=>15, 'slug'=>'furniture'],
-                ['name'=>'Decor',     'image'=>asset('images/product-backdrop.png'),  'count'=>20, 'slug'=>'decor'],
+                ['name'=>'Seating',   'image'=>asset('images/products/product-chairs.png'),   'count'=>12, 'slug'=>'seating'],
+                ['name'=>'Ceremony',  'image'=>asset('images/products/product-arch.png'),      'count'=>8,  'slug'=>'ceremony'],
+                ['name'=>'Tableware', 'image'=>asset('images/products/product-tableware.png'), 'count'=>24, 'slug'=>'tableware'],
+                ['name'=>'Lighting',  'image'=>asset('images/products/product-lighting.png'),  'count'=>10, 'slug'=>'lighting'],
+                ['name'=>'Furniture', 'image'=>asset('images/products/product-lounge.png'),    'count'=>15, 'slug'=>'furniture'],
+                ['name'=>'Decor',     'image'=>asset('images/products/product-backdrop.png'),  'count'=>20, 'slug'=>'decor'],
             ] as $cat)
             <x-category.card
                 :name="$cat['name']"
@@ -417,7 +417,7 @@
 <section class="relative py-24 overflow-hidden" aria-labelledby="cta-heading">
     {{-- Background --}}
     <div class="absolute inset-0 z-0">
-        <img src="{{ asset('images/product-lighting.png') }}"
+        <img src="{{ asset('images/products/product-lighting.png') }}"
              alt="Beautiful fairy lights wedding reception"
              class="w-full h-full object-cover object-center" />
         <div class="absolute inset-0 bg-gradient-to-r from-brand-900/90 to-brand-800/85"></div>

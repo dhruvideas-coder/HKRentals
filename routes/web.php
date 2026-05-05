@@ -71,8 +71,11 @@ Route::prefix('admin')
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         // Catalogue
-        Route::get('/products',   fn () => view('admin.products'))->name('products');
-        Route::get('/categories', fn () => view('admin.categories'))->name('categories');
+        Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
+        Route::get('products-list', fn() => redirect()->route('admin.products.index'))->name('products'); // Alias
+
+        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+        Route::get('categories-list', fn() => redirect()->route('admin.categories.index'))->name('categories'); // Alias
 
         // Business
         Route::get('/orders',     fn () => view('admin.orders'))->name('orders');

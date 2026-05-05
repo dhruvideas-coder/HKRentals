@@ -10,7 +10,7 @@
             $categoryName = $isObj ? ($product->category?->name ?? '') : ($product['cat'] ?? $product['category'] ?? '');
             $price = $isObj ? $product->price_per_day : str_replace('$', '', $product['price'] ?? '0');
             $description = $isObj ? $product->description : ($product['desc'] ?? $product['description'] ?? '');
-            $imgUrl = isset($image) && !str_starts_with($image, 'http') ? asset('images/' . $image) : $image;
+            $imgUrl = isset($image) && !str_starts_with($image, 'http') ? asset($image) : $image;
             $available = $isObj ? ($product->status === 'available') : ($product['available'] ?? true);
         @endphp
         <x-product.card 
