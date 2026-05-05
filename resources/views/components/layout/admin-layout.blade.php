@@ -21,91 +21,173 @@
         .admin-sidebar {
             width: 260px;
             min-height: 100vh;
-            background: linear-gradient(180deg, #1a1612 0%, #2a2219 50%, #1a1612 100%);
-            border-right: 1px solid rgb(200 144 58 / 0.15);
+            background: #5b4132; /* Luxurious Deep Ebony Brown */
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 40;
+            z-index: 50;
             overflow-x: hidden;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 0 30px rgb(0 0 0 / 0.15);
         }
-        .admin-sidebar.collapsed {
-            width: 0;
-            border-right-width: 0;
-            opacity: 0;
-            pointer-events: none;
+
+        /* Mobile View (Overlay) */
+        @media (max-width: 1023px) {
+            .admin-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+            }
+            .admin-sidebar.collapsed {
+                transform: translateX(-100%);
+                width: 260px;
+                opacity: 1;
+                pointer-events: none;
+            }
         }
+
+        /* Desktop View (Push/Collapse) */
+        @media (min-width: 1024px) {
+            .admin-sidebar.collapsed {
+                width: 0;
+                border-right-width: 0;
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+
         .admin-sidebar-logo {
-            height: 64px;
+            height: 72px;
             display: flex;
             align-items: center;
             padding: 0 1.5rem;
-            border-bottom: 1px solid rgb(200 144 58 / 0.12);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             min-width: 260px;
         }
+
         .admin-content {
             flex: 1;
             min-width: 0;
             display: flex;
             flex-direction: column;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f9f8f6; /* Premium light canvas */
         }
+
         .admin-topbar {
-            height: 64px;
-            background: #fff;
-            border-bottom: 1px solid #f0ece6;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e5e1dc;
             display: flex;
             align-items: center;
-            padding: 0 1.5rem;
-            gap: 1rem;
+            padding: 0 1rem;
+            gap: 0.75rem;
             position: sticky;
             top: 0;
             z-index: 30;
-            box-shadow: 0 1px 4px rgb(0 0 0 / 0.04);
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.03);
         }
+
+        @media (min-width: 640px) {
+            .admin-topbar {
+                padding: 0 1.5rem;
+                gap: 1rem;
+            }
+        }
+
         .admin-nav-item {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.6rem 1.25rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.875rem;
+            font-size: 0.875rem;
             font-weight: 500;
-            color: rgb(255 255 255 / 0.65);
-            transition: all 0.18s ease;
+            color: rgba(253, 248, 240, 0.6); /* Warm off-white */
+            transition: all 0.2s ease;
             text-decoration: none;
             white-space: nowrap;
+            margin: 0.2rem 0;
         }
-        .admin-nav-item:hover,
+        .admin-nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
         .admin-nav-item.active {
-            background: rgb(200 144 58 / 0.15);
-            color: #e8b96c;
+            background: var(--color-brand-500);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgb(200 144 58 / 0.25);
         }
         .admin-nav-section {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: rgb(255 255 255 / 0.3);
-            padding: 0.5rem 1.25rem 0.25rem;
-            margin-top: 0.75rem;
+            color: rgba(253, 248, 240, 0.4);
+            padding: 1.75rem 1.25rem 0.625rem;
             white-space: nowrap;
         }
         
         [x-cloak] { display: none !important; }
+
+        /* Responsive Table Adjustments */
+        .admin-table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .admin-table {
+            width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+            .admin-table {
+                min-width: auto;
+            }
+        }
     </style>
 </head>
-<body class="h-full bg-neutral-50" x-data="{ sidebarOpen: true, userDropdownOpen: false }">
+<body class="h-full bg-neutral-50" x-data="{ sidebarOpen: window.innerWidth >= 1024, userDropdownOpen: false }" @resize.window="if (window.innerWidth < 1024) sidebarOpen = false">
 
-<div class="flex h-full overflow-hidden">
+<div class="flex h-full overflow-hidden relative">
+
+    {{-- Backdrop (Mobile only) --}}
+    <div x-show="sidebarOpen" 
+         x-cloak 
+         @click="sidebarOpen = false" 
+         class="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-40 lg:hidden"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+    </div>
 
     {{-- ── Sidebar ── --}}
-    <aside class="admin-sidebar flex-shrink-0 flex flex-col" :class="sidebarOpen ? '' : 'collapsed'">
+    <aside class="admin-sidebar" 
+           :class="sidebarOpen ? '' : 'collapsed'"
+           @click.away="if (window.innerWidth < 1024) sidebarOpen = false">
 
         {{-- Logo --}}
-        <div class="admin-sidebar-logo">
+        <div class="admin-sidebar-logo flex justify-between items-center">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-                <span class="text-xl font-display font-semibold text-white">SK <span class="text-gradient-gold">Rentals</span></span>
+                <span class="text-2xl font-display font-semibold text-white">SK <span class="text-gradient-gold">Rentals</span></span>
             </a>
+            
+            {{-- Close Button (Mobile Only) --}}
+            <button @click="sidebarOpen = false" 
+                    class="lg:hidden p-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                    aria-label="Close sidebar">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
 
         {{-- Navigation --}}
@@ -163,7 +245,7 @@
         {{-- Topbar --}}
         <header class="admin-topbar" role="banner">
             {{-- Sidebar toggle --}}
-            <button @click="sidebarOpen = !sidebarOpen" class="p-1.5 rounded-lg hover:bg-neutral-100 transition-base" aria-label="Toggle sidebar">
+            <button @click.stop="sidebarOpen = !sidebarOpen" class="p-1.5 rounded-lg hover:bg-neutral-100 transition-base" aria-label="Toggle sidebar">
                 <svg class="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
 

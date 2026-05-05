@@ -46,13 +46,13 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Order</th>
-                    <th>Customer</th>
-                    <th class="hidden md:table-cell">Event Date</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th class="text-right pr-5">Actions</th>
+                    <th class="whitespace-nowrap w-1">Order</th>
+                    <th class="min-w-[150px]">Customer</th>
+                    <th class="hidden md:table-cell whitespace-nowrap w-1">Event Date</th>
+                    <th class="whitespace-nowrap w-1">Items</th>
+                    <th class="whitespace-nowrap w-1">Total</th>
+                    <th class="whitespace-nowrap w-1">Status</th>
+                    <th class="text-right pr-5 w-1">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,11 +86,11 @@
                         </div>
                     </td>
                     <td class="hidden md:table-cell text-sm text-neutral-600">{{ $order['date'] }}</td>
-                    <td>
+                    <td class="whitespace-nowrap">
                         <span class="text-sm font-medium text-neutral-700">{{ $order['items'] }} item{{ $order['items']>1?'s':'' }}</span>
                     </td>
-                    <td class="font-bold text-neutral-900">${{ number_format($order['total']) }}</td>
-                    <td>
+                    <td class="font-bold text-neutral-900 whitespace-nowrap">${{ number_format($order['total']) }}</td>
+                    <td class="whitespace-nowrap">
                         <span class="badge {{ $statusColors[$order['status']] }} text-xs">{{ $order['status'] }}</span>
                     </td>
                     <td class="text-right">

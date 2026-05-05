@@ -183,15 +183,23 @@
     /* ── Cards ── */
     .card {
         background-color: #fff;
-        border-radius: 1rem;
-        border: 1px solid var(--color-neutral-100);
-        box-shadow: var(--shadow-card);
+        border-radius: 1.25rem;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 10px 30px -10px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03), 0 20px 40px -12px rgba(0, 0, 0, 0.12);
     }
 
-    .card-body    { padding: 1.5rem; }
-    .card-header  { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--color-neutral-100); }
-    .card-footer  { padding: 1.25rem 1.5rem; border-top: 1px solid var(--color-neutral-100); }
+    .card-body    { padding: 1.75rem; }
+    .card-header  { 
+        padding: 1.25rem 1.75rem; 
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04); 
+        background: rgba(0, 0, 0, 0.01);
+    }
+    .card-footer  { padding: 1.25rem 1.75rem; border-top: 1px solid rgba(0, 0, 0, 0.04); }
 
     /* ── Container ── */
     .container-sk {
@@ -275,10 +283,26 @@
 
     /* ── Admin Table ── */
     .admin-table { width:100%;border-collapse:collapse; }
-    .admin-table th { padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-neutral-500);background:var(--color-neutral-50);border-bottom:1px solid var(--color-neutral-100); }
-    .admin-table td { padding:.875rem 1rem;font-size:.9rem;border-bottom:1px solid var(--color-neutral-100);color:var(--color-neutral-700);vertical-align:middle; }
+    .admin-table th { 
+        padding:.875rem 1rem;
+        text-align:left;
+        font-size:.7rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.1em;
+        color:var(--color-neutral-400);
+        background:rgba(0, 0, 0, 0.02);
+        border-bottom:1px solid rgba(0, 0, 0, 0.05); 
+    }
+    .admin-table td { 
+        padding:1rem;
+        font-size:.9rem;
+        border-bottom:1px solid rgba(0, 0, 0, 0.03);
+        color:var(--color-neutral-800);
+        vertical-align:middle; 
+    }
     .admin-table tr:last-child td { border-bottom:none; }
-    .admin-table tr:hover td { background:var(--color-neutral-50); }
+    .admin-table tr:hover td { background:rgba(0, 0, 0, 0.01); }
 
     /* ── Skeleton Loader ── */
     .skeleton { background:linear-gradient(90deg,#f0ece6 25%,#e8e2da 50%,#f0ece6 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.5rem; }
@@ -478,4 +502,13 @@
     /* Scale-in card hover */
     .hover-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; }
     .hover-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-elevated); }
+
+    /* Float Animation */
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
 }

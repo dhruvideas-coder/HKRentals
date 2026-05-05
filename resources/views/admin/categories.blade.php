@@ -20,10 +20,10 @@
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>Category</th>
-                        <th>Slug</th>
-                        <th>Products</th>
-                        <th class="text-right pr-5">Actions</th>
+                        <th class="min-w-[120px]">Category</th>
+                        <th class="hidden sm:table-cell whitespace-nowrap w-1">Slug</th>
+                        <th class="whitespace-nowrap w-1">Products</th>
+                        <th class="text-right pr-5 w-1">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,8 +45,8 @@
                                 <span class="font-semibold text-neutral-800">{{ $cat['name'] }}</span>
                             </div>
                         </td>
-                        <td><code class="text-xs bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded">/{{ $cat['slug'] }}</code></td>
-                        <td>
+                        <td class="hidden sm:table-cell"><code class="text-xs bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded">/{{ $cat['slug'] }}</code></td>
+                        <td class="whitespace-nowrap">
                             <span class="badge badge-gold text-xs">{{ $cat['count'] }} items</span>
                         </td>
                         <td class="text-right">

@@ -59,14 +59,14 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th class="hidden sm:table-cell">Category</th>
-                    <th class="hidden md:table-cell">Color</th>
-                    <th class="hidden lg:table-cell">Material</th>
-                    <th>Price/Day</th>
-                    <th>Status</th>
-                    <th class="hidden sm:table-cell">Stock</th>
-                    <th class="text-right pr-5">Actions</th>
+                    <th class="min-w-[150px]">Product</th>
+                    <th class="hidden sm:table-cell whitespace-nowrap w-1">Category</th>
+                    <th class="hidden md:table-cell whitespace-nowrap w-1">Color</th>
+                    <th class="hidden lg:table-cell whitespace-nowrap w-1">Material</th>
+                    <th class="whitespace-nowrap w-1">Price/Day</th>
+                    <th class="whitespace-nowrap w-1">Status</th>
+                    <th class="hidden sm:table-cell whitespace-nowrap w-1">Stock</th>
+                    <th class="text-right pr-5 w-1">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -112,13 +112,13 @@
                     <td class="hidden lg:table-cell">
                         <span class="text-sm text-neutral-600">{{ $p['material'] }}</span>
                     </td>
-                    <td class="font-semibold text-neutral-800">${{ $p['price'] }}<span class="text-xs font-normal text-neutral-400">/day</span></td>
-                    <td>
+                    <td class="font-semibold text-neutral-800 whitespace-nowrap">${{ $p['price'] }}<span class="text-xs font-normal text-neutral-400">/day</span></td>
+                    <td class="whitespace-nowrap">
                         <span class="badge {{ $p['available'] ? 'badge-available' : 'badge-unavailable' }} text-xs">
                             {{ $p['available'] ? 'Available' : 'Unavailable' }}
                         </span>
                     </td>
-                    <td class="hidden sm:table-cell">
+                    <td class="hidden sm:table-cell whitespace-nowrap">
                         <span class="text-sm font-medium {{ $p['stock'] <= 3 ? 'text-amber-600' : 'text-neutral-700' }}">
                             {{ $p['stock'] }} units
                         </span>
