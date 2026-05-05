@@ -45,19 +45,31 @@ class AdminAuthController extends Controller
                 ->with('error', 'Google authentication failed. Please try again.');
         }
 
-        // Find or create the user by google_id or email
-        $user = User::where('google_id', $googleUser->getId())->first()
-              ?? User::where('email', $googleUser->getEmail())->first();
-
         // Get admin emails from .env
         $adminEmails = explode(',', env('ADMIN_EMAILS', ''));
         $isAdminEmail = in_array($googleUser->getEmail(), array_map('trim', $adminEmails));
+
+        // If the email is not in the allowed admin list, block immediately
+        if (!$isAdminEmail) {
+            return redirect()->route('admin.login')
+                ->with('error', 'you are not registered Admin user please contact to administrator.');
+        }
+
+        // Handle avatar size (check if URL is too long for database)
+        $avatar = $googleUser->getAvatar();
+        if (strlen($avatar) > 255) {
+            $avatar = null;
+        }
+
+        // Find or create the user by google_id or email
+        $user = User::where('google_id', $googleUser->getId())->first()
+              ?? User::where('email', $googleUser->getEmail())->first();
 
         if ($user) {
             // Update their Google info & avatar
             $user->update([
                 'google_id' => $googleUser->getId(),
-                'avatar'    => $googleUser->getAvatar(),
+                'avatar'    => $avatar,
                 'name'      => $googleUser->getName(),
             ]);
 
@@ -71,15 +83,15 @@ class AdminAuthController extends Controller
                 'name'      => $googleUser->getName(),
                 'email'     => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
-                'avatar'    => $googleUser->getAvatar(),
+                'avatar'    => $avatar,
                 'role'      => $isAdminEmail ? 'admin' : 'user',
             ]);
         }
 
-        // Only allow admin users to access the portal
+        // Final check: ensure the user has the admin role
         if (!$user->isAdmin()) {
             return redirect()->route('admin.login')
-                ->with('error', 'Access denied. Your Google account (' . $googleUser->getEmail() . ') does not have admin privileges. Contact the system administrator.');
+                ->with('error', 'you are not registered Admin user please contact to administrator.');
         }
 
         Auth::login($user, true);
