@@ -53,9 +53,24 @@
                           class="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 border border-white"
                           x-text="cartCount"></span>
                 </button>
-                <a href="{{ route('products') }}" class="btn btn-primary btn-sm">
-                    Browse Rentals
+                @auth
+                    @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-sm" style="background:linear-gradient(135deg,#c8903a,#8b5e1c);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(200,144,58,0.4);" aria-label="Go to Admin Dashboard">
+                        <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        Dashboard
+                    </a>
+                    @else
+                    <a href="{{ route('admin.login') }}" class="btn btn-sm" style="background:rgba(200,144,58,0.05); color:#8b5e1c; border:1.5px solid rgba(200,144,58,0.25); box-shadow:0 2px 10px rgba(200,144,58,0.05);" aria-label="Admin Portal">
+                        <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        Admin Portal
+                    </a>
+                    @endif
+                @else
+                <a href="{{ route('admin.login') }}" class="btn btn-sm" style="background:rgba(200,144,58,0.05); color:#8b5e1c; border:1.5px solid rgba(200,144,58,0.25); box-shadow:0 2px 10px rgba(200,144,58,0.05);" aria-label="Admin Portal">
+                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Admin Portal
                 </a>
+                @endauth
             </div>
 
 
@@ -89,7 +104,15 @@
             <a href="{{ route('about') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('about') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">About</a>
             <a href="{{ route('contact') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('contact') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Contact</a>
             <div class="pt-2 border-t border-neutral-100">
-                <a href="{{ route('products') }}" class="btn btn-primary w-full">Browse Rentals</a>
+                @auth
+                    @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="btn w-full" style="background:linear-gradient(135deg,#c8903a,#8b5e1c);color:#fff;border-color:transparent;">Dashboard</a>
+                    @else
+                    <a href="{{ route('admin.login') }}" class="btn w-full" style="background:rgba(200,144,58,0.05); color:#8b5e1c; border:1.5px solid rgba(200,144,58,0.25);">Admin Portal</a>
+                    @endif
+                @else
+                <a href="{{ route('admin.login') }}" class="btn w-full" style="background:rgba(200,144,58,0.05); color:#8b5e1c; border:1.5px solid rgba(200,144,58,0.25);">Admin Portal</a>
+                @endauth
             </div>
         </div>
     </div>

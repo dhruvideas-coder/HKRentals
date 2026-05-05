@@ -235,91 +235,180 @@
 </x-section>
 
 {{-- ══════════════════════════════════════════════════════════
-     TESTIMONIALS SLIDER
+     TESTIMONIALS — Real Stories, Real Joy
 ══════════════════════════════════════════════════════════ --}}
-<x-section class="bg-white" aria-labelledby="testimonials-heading"
-         x-data="{
-             active: 0,
-             testimonials: [
-                 { name: 'Emily & James Watson', event: 'Wedding · May 2025', rating: 5, avatar: '👰', text: 'SK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was wonderful!' },
-                 { name: 'Olivia Chen', event: 'Corporate Gala · March 2025', rating: 5, avatar: '✨', text: 'We hired SK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!' },
-                 { name: 'Sarah & Michael Brown', event: 'Wedding · January 2025', rating: 5, avatar: '💍', text: 'From the first enquiry to the final pickup, the SK Rentals team was professional, responsive, and genuinely caring. Our guests could not stop complimenting the decor.' },
-                 { name: 'Rachel Thompson', event: 'Baby Shower · April 2025', rating: 5, avatar: '🌸', text: 'I rented the tableware set and some beautiful backdrop panels. Everything was pristine, exactly as shown, and the delivery was seamless. Will use again!' },
-             ],
-             next() { this.active = (this.active + 1) % this.testimonials.length },
-             prev() { this.active = (this.active - 1 + this.testimonials.length) % this.testimonials.length },
-         }"
-         x-init="setInterval(() => next(), 5000)">
-    <x-container>
+<section class="reviews-section-bg py-20 sm:py-28" aria-labelledby="testimonials-heading"
+    x-data="{
+        current: 0,
+        perPage: 3,
+        reviews: [
+            { initials: 'EW', name: 'Emily & James Watson',   event: 'Wedding · May 2025',        rating: 5, tag: 'Verified Client',  color: '#c8903a', text: 'SK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was so kind!' },
+            { initials: 'OC', name: 'Olivia Chen',            event: 'Corporate Gala · Mar 2025', rating: 5, tag: 'Verified Client',  color: '#8e6024', text: 'We hired SK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!' },
+            { initials: 'SB', name: 'Sarah & Michael Brown',  event: 'Wedding · Jan 2025',        rating: 5, tag: 'Verified Client',  color: '#b07a2e', text: 'From the first enquiry to the final pickup, the team was professional and genuinely caring. Our guests could not stop complimenting the beautiful decor.' },
+            { initials: 'RT', name: 'Rachel Thompson',        event: 'Baby Shower · Apr 2025',    rating: 5, tag: 'Repeat Customer', color: '#c8903a', text: 'I rented the tableware set and beautiful backdrop panels. Everything was pristine, exactly as shown, and delivery was seamless. Will absolutely use again!' },
+            { initials: 'MK', name: 'Marcus & Kim Lee',       event: 'Anniversary · Feb 2025',    rating: 5, tag: 'Verified Client',  color: '#6e4a1c', text: 'The string light canopy transformed our backyard into a fairytale. Setup crew was fast, professional, and left everything spotless. Truly world-class service.' },
+            { initials: 'JD', name: 'Jessica Davis',          event: 'Bridal Shower · Mar 2025',  rating: 5, tag: 'Verified Client',  color: '#b07a2e', text: 'From the moment I reached out, the SK Rentals team was attentive and full of great ideas. The lounge furniture was gorgeous and everything fit perfectly in the space.' },
+        ],
+        get maxPage() {
+            if (window.innerWidth >= 1024) return Math.max(0, this.reviews.length - 3);
+            if (window.innerWidth >= 640)  return Math.max(0, this.reviews.length - 2);
+            return this.reviews.length - 1;
+        },
+        get offset() {
+            const cardW = this.\$el.querySelector('.reviews-slide')?.offsetWidth || 0;
+            const gap = 24;
+            return this.current * (cardW + gap);
+        },
+        next() { if (this.current < this.maxPage) this.current++; else this.current = 0; },
+        prev() { if (this.current > 0) this.current--; else this.current = this.maxPage; },
+    }"
+    x-init="setInterval(() => next(), 5500)">
 
-        <div class="text-center mb-12">
-            <span class="badge badge-gold mb-3">What Our Clients Say</span>
-            <h2 id="testimonials-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3">
-                Real Stories, Real Joy
-            </h2>
-        </div>
+    <div class="container-sk relative z-10">
 
-        <div class="max-w-3xl mx-auto">
-            <div class="testimonial-card relative overflow-hidden">
-                {{-- Stars --}}
-                <div class="flex items-center gap-0.5">
-                    <template x-for="s in 5" :key="s">
-                        <svg class="w-5 h-5 text-brand-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    </template>
-                </div>
+        {{-- Section Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-14">
+            <div>
+                <span class="badge badge-gold mb-3">⭐ What Our Clients Say</span>
+                <h2 id="testimonials-heading" class="font-display text-3xl sm:text-4xl font-bold text-neutral-900 leading-tight">
+                    Real Stories, <span class="text-gradient-gold">Real Joy</span>
+                </h2>
+                <p class="text-neutral-500 mt-3 max-w-md text-base leading-relaxed">
+                    Hear from the couples, families &amp; companies who trusted SK Rentals to make their event unforgettable.
+                </p>
+            </div>
 
-                {{-- Quote --}}
-                <blockquote>
-                    <template x-for="(t, i) in testimonials" :key="i">
-                        <p x-show="active === i"
-                           x-transition:enter="transition ease-out duration-400"
-                           x-transition:enter-start="opacity-0 translate-y-3"
-                           x-transition:enter-end="opacity-100 translate-y-0"
-                           x-transition:leave="transition ease-in duration-200"
-                           x-transition:leave-start="opacity-100"
-                           x-transition:leave-end="opacity-0"
-                           class="font-display text-xl sm:text-2xl text-neutral-800 leading-relaxed italic"
-                           x-text="`\u201c` + t.text + `\u201d`">
-                        </p>
-                    </template>
-                </blockquote>
-
-                {{-- Author --}}
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-2xl">
-                            <span x-text="testimonials[active].avatar"></span>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-neutral-900" x-text="testimonials[active].name"></p>
-                            <p class="text-sm text-neutral-400" x-text="testimonials[active].event"></p>
-                        </div>
+            {{-- Overall rating summary --}}
+            <div class="flex items-center gap-4 bg-white rounded-2xl px-5 py-4 shadow-card border border-neutral-100 flex-shrink-0">
+                <div class="text-center">
+                    <p class="font-display text-4xl font-bold text-neutral-900 leading-none">5.0</p>
+                    <div class="flex gap-0.5 mt-1 justify-center">
+                        @for ($s = 0; $s < 5; $s++)
+                            <svg class="w-4 h-4 text-brand-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @endfor
                     </div>
-
-                    {{-- Controls --}}
+                    <p class="text-xs text-neutral-400 mt-1 font-medium">500+ Reviews</p>
+                </div>
+                <div class="w-px h-12 bg-neutral-100"></div>
+                <div class="space-y-1.5">
+                    @foreach([[5,'92%'],[4,'6%'],[3,'2%']] as [$star,$pct])
                     <div class="flex items-center gap-2">
-                        <button @click="prev" class="w-9 h-9 rounded-full border border-neutral-200 hover:border-brand-400 hover:bg-brand-50 flex items-center justify-center transition-base" aria-label="Previous">
-                            <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                        </button>
-                        <button @click="next" class="w-9 h-9 rounded-full border border-neutral-200 hover:border-brand-400 hover:bg-brand-50 flex items-center justify-center transition-base" aria-label="Next">
-                            <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                        </button>
+                        <span class="text-xs text-neutral-500 w-3">{{ $star }}</span>
+                        <svg class="w-3 h-3 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <div class="rating-bar-track w-20"><div class="rating-bar-fill" style="width:{{ $pct }}"></div></div>
+                        <span class="text-xs text-neutral-400 w-6">{{ $pct }}</span>
                     </div>
-                </div>
-
-                {{-- Dots --}}
-                <div class="flex items-center gap-1.5 mt-2">
-                    <template x-for="(t, i) in testimonials" :key="i">
-                        <button @click="active = i"
-                                class="h-1.5 rounded-full transition-all duration-300"
-                                :class="active === i ? 'w-6 bg-brand-500' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'"
-                                :aria-label="'Go to testimonial ' + (i+1)"></button>
-                    </template>
+                    @endforeach
                 </div>
             </div>
         </div>
-    </x-container>
-</x-section>
+
+        {{-- Carousel Viewport --}}
+        <div class="overflow-hidden" style="border-radius:1rem">
+            <div class="reviews-track" :style="`transform: translateX(-${offset}px)`">
+
+                @php
+                $reviews = [
+                    ['initials'=>'EW','name'=>'Emily & James Watson',  'event'=>'Wedding · May 2025',       'rating'=>5,'tag'=>'Verified Client', 'color'=>'#c8903a','text'=>'SK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was so kind!'],
+                    ['initials'=>'OC','name'=>'Olivia Chen',           'event'=>'Corporate Gala · Mar 2025','rating'=>5,'tag'=>'Verified Client', 'color'=>'#8e6024','text'=>'We hired SK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!'],
+                    ['initials'=>'SB','name'=>'Sarah & Michael Brown', 'event'=>'Wedding · Jan 2025',       'rating'=>5,'tag'=>'Verified Client', 'color'=>'#b07a2e','text'=>'From the first enquiry to the final pickup, the team was professional and genuinely caring. Our guests could not stop complimenting the beautiful decor.'],
+                    ['initials'=>'RT','name'=>'Rachel Thompson',       'event'=>'Baby Shower · Apr 2025',   'rating'=>5,'tag'=>'Repeat Customer','color'=>'#c8903a','text'=>'I rented the tableware set and beautiful backdrop panels. Everything was pristine, exactly as shown, and delivery was seamless. Will absolutely use again!'],
+                    ['initials'=>'MK','name'=>'Marcus & Kim Lee',      'event'=>'Anniversary · Feb 2025',   'rating'=>5,'tag'=>'Verified Client', 'color'=>'#6e4a1c','text'=>'The string light canopy transformed our backyard into a fairytale. Setup crew was fast, professional, and left everything spotless. Truly world-class service.'],
+                    ['initials'=>'JD','name'=>'Jessica Davis',         'event'=>'Bridal Shower · Mar 2025', 'rating'=>5,'tag'=>'Verified Client', 'color'=>'#b07a2e','text'=>'From the moment I reached out, the SK Rentals team was attentive and full of great ideas. The lounge furniture was gorgeous and everything fit perfectly in the space.'],
+                ];
+                @endphp
+
+                @foreach($reviews as $i => $r)
+                <div class="reviews-slide">
+                    <div class="review-card {{ $i === 0 ? 'review-card-featured' : '' }}">
+                        {{-- Big decorative quote mark --}}
+                        <span class="review-card-quote" aria-hidden="true">&ldquo;</span>
+
+                        {{-- Stars --}}
+                        <div class="review-stars">
+                            @for($s = 0; $s < $r['rating']; $s++)
+                                <svg class="review-star" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            @endfor
+                        </div>
+
+                        {{-- Review Text --}}
+                        <p class="text-sm leading-relaxed flex-1 {{ $i === 0 ? 'text-white/90' : 'text-neutral-600' }}" style="font-style:italic">
+                            &ldquo;{{ $r['text'] }}&rdquo;
+                        </p>
+
+                        {{-- Author row --}}
+                        <div class="flex items-center gap-3 pt-2 border-t {{ $i === 0 ? 'border-white/20' : 'border-neutral-100' }}">
+                            <div class="review-avatar review-avatar-lg" style="background: linear-gradient(135deg, {{ $r['color'] }}22, {{ $r['color'] }}44); color:{{ $r['color'] }}; border-color:{{ $r['color'] }}44">
+                                {{ $r['initials'] }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-sm truncate {{ $i === 0 ? 'text-white' : 'text-neutral-900' }}">
+                                    {{ $r['name'] }}
+                                </p>
+                                <p class="text-xs truncate {{ $i === 0 ? 'text-white/60' : 'text-neutral-400' }}">
+                                    {{ $r['event'] }}
+                                </p>
+                            </div>
+                            {{-- Verified badge --}}
+                            <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full flex-shrink-0
+                                {{ $i === 0 ? 'bg-white/20 text-white' : 'bg-brand-50 text-brand-700' }}">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                {{ $r['tag'] }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+
+            </div>
+        </div>
+
+        {{-- Controls Row --}}
+        <div class="flex items-center justify-between mt-8">
+
+            {{-- Dot indicators --}}
+            <div class="flex items-center gap-2">
+                @foreach($reviews as $i => $r)
+                <button @click="current = {{ $i }}"
+                        class="rounded-full transition-all duration-300"
+                        :class="current === {{ $i }} ? 'w-7 h-2.5 bg-brand-500' : 'w-2.5 h-2.5 bg-neutral-200 hover:bg-neutral-300'"
+                        aria-label="Go to review {{ $i + 1 }}"></button>
+                @endforeach
+            </div>
+
+            {{-- Prev / Next buttons --}}
+            <div class="flex items-center gap-3">
+                <button @click="prev"
+                        class="w-10 h-10 rounded-full border-2 border-neutral-200 hover:border-brand-400 bg-white hover:bg-brand-50 flex items-center justify-center transition-all duration-200 shadow-sm"
+                        aria-label="Previous review">
+                    <svg class="w-4 h-4 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <button @click="next"
+                        class="w-10 h-10 rounded-full bg-brand-500 hover:bg-brand-600 flex items-center justify-center transition-all duration-200 shadow-glow"
+                        aria-label="Next review">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Bottom trust strip --}}
+        <div class="mt-12 pt-8 border-t border-neutral-200 flex flex-wrap items-center justify-center gap-8 text-sm text-neutral-500">
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                All reviews from real customers
+            </span>
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                Rated 5.0 stars across 500+ events
+            </span>
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                Trusted by Knoxville families since 2014
+            </span>
+        </div>
+
+    </div>
+</section>
 
 {{-- ══════════════════════════════════════════════════════════
      CTA BAND — with background image

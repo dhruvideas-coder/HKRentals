@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Auth\AdminAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +30,7 @@ Route::post('/cart/remove',  [\App\Http\Controllers\CartController::class, 'remo
 Route::post('/cart/clear',   [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
 
 Route::get('/checkout',      [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
-Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process'); // Assuming this exists or needed
+Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
 Route::get('/order-success', fn () => view('pages.order-success'))->name('order.success');
 
 // Mock Payment Routes
@@ -38,13 +39,33 @@ Route::post('/payment/confirm',       [\App\Http\Controllers\PaymentController::
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes
+| Admin Authentication Routes (Public — no middleware)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    // Login page
+    Route::get('/login',  [AdminAuthController::class, 'showLogin'])->name('login');
+
+    // Google OAuth flow
+    Route::get('/auth/google',          [AdminAuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [AdminAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+    // Logout
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes (Protected — admin middleware)
 |--------------------------------------------------------------------------
 */
 
 Route::prefix('admin')
     ->name('admin.')
-    // ->middleware(['auth', 'role:admin'])   // Uncomment when auth is set up
+    ->middleware(['web', 'admin'])
     ->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -60,7 +81,7 @@ Route::prefix('admin')
 
 /*
 |--------------------------------------------------------------------------
-| Logout
+| Legacy Logout (kept for compatibility)
 |--------------------------------------------------------------------------
 */
 Route::post('/logout', function () {
@@ -69,4 +90,3 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
-
