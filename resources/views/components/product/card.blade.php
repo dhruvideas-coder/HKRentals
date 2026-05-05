@@ -52,10 +52,10 @@
         <div class="flex-1"></div>
         @endif
 
-        <div class="flex items-center justify-between gap-2 mt-4 pt-4 border-t border-neutral-50">
-            <div class="flex flex-col">
-                <span class="font-bold text-brand-600 text-lg sm:text-xl leading-none">${{ $price }}</span>
-                <span class="text-[10px] sm:text-xs font-normal text-neutral-400 mt-1 uppercase tracking-wider">/ day</span>
+        <div class="flex items-center justify-between gap-1 mt-4 pt-4 border-t border-neutral-50 flex-nowrap">
+            <div class="flex items-baseline gap-1 whitespace-nowrap">
+                <span class="font-bold text-brand-600 text-base sm:text-lg leading-none">${{ $price }}</span>
+                <span class="text-[9px] sm:text-[10px] font-normal text-neutral-400 uppercase tracking-wider">/ day</span>
             </div>
             <button
                 @click="
@@ -68,10 +68,10 @@
                         qty: 1,
                     });
                 "
-                class="btn btn-primary btn-sm px-3 sm:px-4"
+                class="btn btn-primary btn-sm px-2 sm:px-4 flex-shrink-0"
                 {{ !$available ? 'disabled' : '' }}>
-                <span class="hidden sm:inline">Add to Cart</span>
-                <span class="sm:hidden">+ Cart</span>
+                <span class="hidden xl:inline">Add to Cart</span>
+                <span class="xl:hidden">+ Cart</span>
             </button>
         </div>
     </div>

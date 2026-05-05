@@ -38,12 +38,14 @@
                 left: 0;
                 top: 0;
                 bottom: 0;
-            }
-            .admin-sidebar.collapsed {
                 transform: translateX(-100%);
-                width: 260px;
-                opacity: 1;
+                opacity: 0;
                 pointer-events: none;
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+                opacity: 1;
+                pointer-events: auto;
             }
         }
 
@@ -171,7 +173,7 @@
 
     {{-- ── Sidebar ── --}}
     <aside class="admin-sidebar" 
-           :class="sidebarOpen ? '' : 'collapsed'"
+           :class="sidebarOpen ? 'open' : 'collapsed'"
            @click.away="if (window.innerWidth < 1024) sidebarOpen = false">
 
         {{-- Logo --}}
