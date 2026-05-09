@@ -18,8 +18,8 @@
             <form action="{{ route('admin.categories.update', $category) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <div class="p-10 space-y-10">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="p-6 md:p-10 space-y-8 md:space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                         {{-- Name --}}
                         <div class="md:col-span-2">
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Category Name</label>
@@ -74,11 +74,11 @@
                     </div>
                 </div>
 
-                <div class="px-10 py-8 bg-neutral-50/50 border-t border-neutral-100 flex items-center justify-between">
-                    <p class="text-xs text-neutral-400 font-medium italic">Updating this category will affect all linked products.</p>
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('admin.categories.index') }}" class="px-6 py-3 text-neutral-500 font-bold hover:text-neutral-700 transition-all">Cancel</a>
-                        <button type="submit" class="px-8 py-3 bg-brand-600 text-white rounded-xl font-bold shadow-lg shadow-brand-200 hover:bg-brand-700 hover:-translate-y-0.5 transition-all">
+                <div class="px-6 md:px-10 py-6 md:py-8 bg-neutral-50/50 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-xs text-neutral-400 font-medium italic text-center sm:text-left">Updating this category will affect all linked products.</p>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <a href="{{ route('admin.categories.index') }}" class="w-full sm:w-auto px-6 py-3 text-neutral-500 font-bold hover:text-neutral-700 transition-all text-center border border-neutral-200 sm:border-transparent rounded-xl sm:rounded-none bg-white sm:bg-transparent shadow-sm sm:shadow-none">Cancel</a>
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-brand-600 text-white rounded-xl font-bold shadow-lg shadow-brand-200 hover:bg-brand-700 hover:-translate-y-0.5 transition-all text-center">
                             Update Category
                         </button>
                     </div>

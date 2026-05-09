@@ -47,7 +47,7 @@
             <thead>
                 <tr>
                     <th class="whitespace-nowrap w-1">Order</th>
-                    <th class="min-w-[150px]">Customer</th>
+                    <th class="w-44">Customer</th>
                     <th class="hidden md:table-cell whitespace-nowrap w-1">Event Date</th>
                     <th class="whitespace-nowrap w-1">Items</th>
                     <th class="whitespace-nowrap w-1">Total</th>

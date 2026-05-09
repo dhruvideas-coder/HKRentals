@@ -1,15 +1,25 @@
 <x-layout.app-layout>
-    <x-slot:title>Our Collection</x-slot>
-    <x-slot:metaDescription>Browse SK Rentals' premium wedding and event rental collection. Elegant furniture, decor, and accessories for your special day in Knoxville.</x-slot>
+    <x-slot:title>{{ $selectedCategory ? $selectedCategory->name : 'Our Collection' }}</x-slot>
+    <x-slot:metaDescription>Browse HK Rentals' premium wedding and event rental collection. Elegant furniture, decor, and accessories for your special day in Knoxville.</x-slot>
 
 
 {{-- ══════════════════════════════════════════════════════════
      PAGE HERO — with background image
 ══════════════════════════════════════════════════════════ --}}
+@php
+    $heroImage = $selectedCategory && $selectedCategory->image
+        ? asset($selectedCategory->image)
+        : asset('images/products/product-tableware.png');
+    $heroAlt = $selectedCategory ? $selectedCategory->name : 'Elegant wedding table setting';
+    $heroTitle = $selectedCategory ? $selectedCategory->name : null;
+    $heroDesc = $selectedCategory && $selectedCategory->description
+        ? $selectedCategory->description
+        : 'Premium rentals for your perfect event.';
+@endphp
 <section class="relative h-64 sm:h-80 flex items-center overflow-hidden" aria-labelledby="products-page-heading">
     <div class="absolute inset-0 z-0">
-        <img src="{{ asset('images/product-tableware.png') }}"
-             alt="Elegant wedding table setting"
+        <img src="{{ $heroImage }}"
+             alt="{{ $heroAlt }}"
              class="w-full h-full object-cover object-center"
              loading="eager" fetchpriority="high" />
         <div class="absolute inset-0 bg-gradient-to-r from-neutral-950/80 to-neutral-900/50"></div>
@@ -18,12 +28,22 @@
         <nav class="flex items-center gap-2 text-sm text-white/50 mb-3" aria-label="Breadcrumb">
             <a href="{{ route('home') }}" class="hover:text-white transition-base">Home</a>
             <span>/</span>
-            <span class="text-white/80">Products</span>
+            @if($selectedCategory)
+                <a href="{{ route('products') }}" class="hover:text-white transition-base">Products</a>
+                <span>/</span>
+                <span class="text-white/80">{{ $selectedCategory->name }}</span>
+            @else
+                <span class="text-white/80">Products</span>
+            @endif
         </nav>
         <h1 id="products-page-heading" class="font-display text-4xl sm:text-5xl font-bold text-white">
-            Our <span class="text-gradient-gold">Collection</span>
+            @if($heroTitle)
+                <span class="text-gradient-gold">{{ $heroTitle }}</span>
+            @else
+                Our <span class="text-gradient-gold">Collection</span>
+            @endif
         </h1>
-        <p class="text-neutral-300 mt-2 text-base">Premium rentals for your perfect event.</p>
+        <p class="text-neutral-300 mt-2 text-base">{{ $heroDesc }}</p>
     </div>
 </section>
 

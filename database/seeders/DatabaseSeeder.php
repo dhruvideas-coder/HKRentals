@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\CategorySeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,12 +21,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ── Categories ───────────────────────────────────────────────
-        $seating   = Category::create(['name' => 'Seating',   'slug' => 'seating']);
-        $ceremony  = Category::create(['name' => 'Ceremony',  'slug' => 'ceremony']);
-        $tableware = Category::create(['name' => 'Tableware', 'slug' => 'tableware']);
-        $lighting  = Category::create(['name' => 'Lighting',  'slug' => 'lighting']);
-        $furniture = Category::create(['name' => 'Furniture', 'slug' => 'furniture']);
-        $decor     = Category::create(['name' => 'Decor',     'slug' => 'decor']);
+        $this->call(CategorySeeder::class);
+
+        $seating   = Category::firstOrCreate(['slug' => 'seating'],   ['name' => 'Seating']);
+        $ceremony  = Category::firstOrCreate(['slug' => 'ceremony'],  ['name' => 'Ceremony']);
+        $tableware = Category::firstOrCreate(['slug' => 'tableware'], ['name' => 'Tableware']);
+        $lighting  = Category::firstOrCreate(['slug' => 'lighting'],  ['name' => 'Lighting']);
+        $furniture = Category::firstOrCreate(['slug' => 'furniture'], ['name' => 'Furniture']);
+        $decor     = Category::firstOrCreate(['slug' => 'decor'],     ['name' => 'Decor']);
 
         // ────────────────────────────────────────────────────────────
         // SEATING  (5 products — 5 unique images)

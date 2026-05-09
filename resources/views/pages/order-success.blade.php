@@ -1,6 +1,6 @@
 <x-layout.app-layout>
     <x-slot:title>Order Confirmed!</x-slot>
-    <x-slot:metaDescription>Your SK Rentals order has been confirmed. Thank you for booking with us!</x-slot>
+    <x-slot:metaDescription>Your HK Rentals order has been confirmed. Thank you for booking with us!</x-slot>
 
 
 <section class="py-20 bg-cream min-h-screen flex items-center" aria-label="Order success"
@@ -25,7 +25,7 @@
     <span class="badge badge-gold mb-4">Booking Confirmed 🎉</span>
     <h1 class="font-display text-4xl sm:text-5xl font-bold text-neutral-900 mb-4 leading-tight">
         Thank You for<br/>
-        <span class="text-gradient-gold">Choosing SK Rentals!</span>
+        <span class="text-gradient-gold">Choosing HK Rentals!</span>
     </h1>
     <p class="text-neutral-500 text-lg mb-10 max-w-md mx-auto leading-relaxed">
         Your order has been received and is being processed. You'll receive a confirmation email shortly with all the details.

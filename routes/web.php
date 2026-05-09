@@ -5,7 +5,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Auth\AdminAuthController;
 
 /*
@@ -20,6 +22,9 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 Route::get('/about',     [AboutController::class,   'index'])->name('about');
 Route::get('/contact',   [ContactController::class, 'index'])->name('contact');
 Route::post('/contact',  [ContactController::class, 'send'])->name('contact.send');
+Route::get('/reviews',   fn () => view('pages.reviews'))->name('reviews');
+Route::get('/events',    fn () => view('pages.events'))->name('events');
+Route::get('/gallery',   fn () => view('pages.gallery'))->name('gallery');
 
 // Cart & Checkout
 Route::get('/cart',          [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
@@ -78,7 +83,20 @@ Route::prefix('admin')
         Route::get('categories-list', fn() => redirect()->route('admin.categories.index'))->name('categories'); // Alias
 
         // Business
-        Route::get('/orders',     fn () => view('admin.orders'))->name('orders');
+        Route::get('/orders',            [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}',    [OrderController::class, 'show'])->name('orders.show');
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
+        Route::get('/customers',          [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
+        Route::put('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+
+        // Settings
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
     });
 

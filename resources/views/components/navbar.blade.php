@@ -1,5 +1,9 @@
+@php
+    $navCategories = \App\Models\Category::orderBy('name')->get();
+@endphp
+
 <nav class="w-full bg-white/95 backdrop-blur-sm border-b border-neutral-100 sticky top-0 z-50"
-     x-data="{ mobileOpen: false }"
+     x-data="{ mobileOpen: false, catalogOpen: false }"
      role="navigation"
      aria-label="Main navigation">
 
@@ -7,12 +11,12 @@
         <div class="flex items-center justify-between h-16">
 
             {{-- ── Logo ── --}}
-            <a href="{{ route('home') }}" class="flex items-center gap-2.5 flex-shrink-0" aria-label="SK Rentals home">
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5 flex-shrink-0" aria-label="HK Rentals home">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-                    <span class="text-white font-display font-bold text-sm leading-none">SK</span>
+                    <span class="text-white font-display font-bold text-sm leading-none">HK</span>
                 </div>
                 <span class="font-display text-xl font-semibold text-neutral-900">
-                    SK <span class="text-gradient-gold">Rentals</span>
+                    HK <span class="text-gradient-gold">Rentals</span>
                 </span>
             </a>
 
@@ -25,13 +29,79 @@
                 </a>
                 <a href="{{ route('products') }}"
                    class="px-4 py-2 rounded-lg text-sm font-medium transition-base
-                          {{ request()->routeIs('products') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                          {{ request()->routeIs('products') && !request()->filled('category') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
                     Products
                 </a>
+
+                {{-- ── Catalog Dropdown ── --}}
+                <div class="relative" x-data @click.away="catalogOpen = false">
+                    <button @click="catalogOpen = !catalogOpen"
+                            :aria-expanded="catalogOpen"
+                            class="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-base
+                                   {{ request()->filled('category') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                        Catalog
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': catalogOpen }"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown panel --}}
+                    <div x-show="catalogOpen"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 translate-y-1 scale-98"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-1 scale-98"
+                         x-cloak
+                         class="absolute left-0 top-full mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-neutral-100 py-2 z-50 max-h-[70vh] overflow-y-auto">
+
+                        <a href="{{ route('products') }}"
+                           @click="catalogOpen = false"
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-base
+                                  {{ request()->routeIs('products') && !request()->filled('category') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                            <span class="text-base">🗂️</span>
+                            <span>All Categories</span>
+                        </a>
+
+                        <div class="my-1.5 border-t border-neutral-100"></div>
+
+                        @foreach($navCategories as $cat)
+                        <a href="{{ route('products', ['category' => $cat->slug]) }}"
+                           @click="catalogOpen = false"
+                           class="flex items-center gap-3 px-4 py-2 text-sm transition-base
+                                  {{ request()->get('category') === $cat->slug ? 'bg-brand-50 text-brand-700 font-medium' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                            @if($cat->icon)
+                                <span class="text-base w-5 text-center">{{ $cat->icon }}</span>
+                            @else
+                                <span class="w-5 h-5 rounded-full bg-neutral-100 flex-shrink-0"></span>
+                            @endif
+                            <span>{{ $cat->name }}</span>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 <a href="{{ route('about') }}"
                    class="px-4 py-2 rounded-lg text-sm font-medium transition-base
                           {{ request()->routeIs('about') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
                     About
+                </a>
+                <a href="{{ route('reviews') }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-base
+                          {{ request()->routeIs('reviews') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                    Reviews
+                </a>
+                <a href="{{ route('events') }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-base
+                          {{ request()->routeIs('events') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                    Events
+                </a>
+                <a href="{{ route('gallery') }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-base
+                          {{ request()->routeIs('gallery') ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900' }}">
+                    Gallery
                 </a>
                 <a href="{{ route('contact') }}"
                    class="px-4 py-2 rounded-lg text-sm font-medium transition-base
@@ -100,8 +170,37 @@
          @click.away="mobileOpen = false">
         <div class="container-sk py-3 flex flex-col gap-1">
             <a href="{{ route('home') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('home') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Home</a>
-            <a href="{{ route('products') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('products') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Products</a>
+            <a href="{{ route('products') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('products') && !request()->filled('category') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Products</a>
+
+            {{-- Mobile Catalog accordion --}}
+            <div x-data="{ open: {{ request()->filled('category') ? 'true' : 'false' }} }">
+                <button @click="open = !open"
+                        class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium
+                               {{ request()->filled('category') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">
+                    <span>Catalog</span>
+                    <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': open }"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="open" x-collapse class="pl-3 mt-1 flex flex-col gap-0.5 border-l-2 border-brand-100 ml-3">
+                    <a href="{{ route('products') }}"
+                       class="px-3 py-2 rounded-lg text-sm {{ request()->routeIs('products') && !request()->filled('category') ? 'text-brand-700 font-medium' : 'text-neutral-600 hover:bg-neutral-50' }}">
+                        🗂️ All Categories
+                    </a>
+                    @foreach($navCategories as $cat)
+                    <a href="{{ route('products', ['category' => $cat->slug]) }}"
+                       class="px-3 py-2 rounded-lg text-sm {{ request()->get('category') === $cat->slug ? 'text-brand-700 font-medium bg-brand-50' : 'text-neutral-600 hover:bg-neutral-50' }}">
+                        {{ $cat->icon ?? '' }} {{ $cat->name }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+
             <a href="{{ route('about') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('about') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">About</a>
+            <a href="{{ route('reviews') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('reviews') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Reviews</a>
+            <a href="{{ route('events') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('events') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Events</a>
+            <a href="{{ route('gallery') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('gallery') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Gallery</a>
             <a href="{{ route('contact') }}" class="px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('contact') ? 'bg-brand-50 text-brand-700' : 'text-neutral-700 hover:bg-neutral-50' }}">Contact</a>
             <div class="pt-2 border-t border-neutral-100">
                 @auth

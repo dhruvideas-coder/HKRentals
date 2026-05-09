@@ -1,6 +1,6 @@
 <x-layout.app-layout>
     <x-slot:title>Contact Us</x-slot>
-    <x-slot:metaDescription>Contact SK Rentals — Knoxville's premier wedding and event rental company. Reach out to book a consultation, check availability, or get a custom quote.</x-slot>
+    <x-slot:metaDescription>Contact HK Rentals — Knoxville's premier wedding and event rental company. Reach out to book a consultation, check availability, or get a custom quote.</x-slot>
 
 
 {{-- ══════════════════════════════════════════════════════════
@@ -9,7 +9,7 @@
 <section class="relative h-72 sm:h-96 flex items-center overflow-hidden" aria-labelledby="contact-hero-heading">
     <div class="absolute inset-0 z-0">
         <img src="{{ asset('images/contact-hero.png') }}"
-             alt="SK Rentals consultation office"
+             alt="HK Rentals consultation office"
              class="w-full h-full object-cover object-center"
              loading="eager" fetchpriority="high" />
         <div class="absolute inset-0 bg-gradient-to-r from-neutral-950/88 via-neutral-900/70 to-neutral-900/30"></div>
@@ -38,7 +38,7 @@
                 [
                     'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>',
                     'label' => 'Call Us',
-                    'value' => '+1 (865) 000-0000',
+                    'value' => '+1 9312152756',
                     'sub'   => 'Mon–Sat, 9am–6pm EST',
                     'color' => 'from-brand-500 to-brand-700',
                 ],
@@ -175,7 +175,7 @@
                                        name="phone"
                                        value="{{ old('phone') }}"
                                        class="form-input"
-                                       placeholder="+1 (865) 000-0000" />
+                                       placeholder="+1 9312152756" />
                             </div>
 
                             {{-- Event Type --}}
@@ -255,7 +255,7 @@
                 {{-- Image card --}}
                 <div class="relative rounded-2xl overflow-hidden shadow-elevated h-52 lg:h-64 flex-shrink-0">
                     <img src="{{ asset('images/about-story.png') }}"
-                         alt="SK Rentals consultation"
+                         alt="HK Rentals consultation"
                          class="w-full h-full object-cover" />
                     <div class="absolute inset-0 bg-gradient-to-t from-neutral-900/70 via-transparent to-transparent flex items-end p-5">
                         <div>
@@ -271,8 +271,8 @@
                     <div class="space-y-3">
                         @foreach([
                             ['label'=>'Facebook',  'handle'=>'@SKRentalsKnoxville', 'color'=>'text-blue-600 bg-blue-50',   'icon'=>'M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z'],
-                            ['label'=>'Instagram', 'handle'=>'@sk_rentals',          'color'=>'text-pink-600 bg-pink-50',   'icon'=>'M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM2 2h20v20H2z'],
-                            ['label'=>'Pinterest', 'handle'=>'SK Rentals Board',     'color'=>'text-red-600 bg-red-50',    'icon'=>'M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782'],
+                            ['label'=>'Instagram', 'handle'=>'@hk_rentals',          'color'=>'text-pink-600 bg-pink-50',   'icon'=>'M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM2 2h20v20H2z'],
+                            ['label'=>'Pinterest', 'handle'=>'HK Rentals Board',     'color'=>'text-red-600 bg-red-50',    'icon'=>'M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782'],
                         ] as $social)
                         <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-50 transition-base group">
                             <div class="w-9 h-9 rounded-lg {{ $social['color'] }} flex items-center justify-center flex-shrink-0">
@@ -324,7 +324,7 @@
 <section class="relative h-72 bg-neutral-200 overflow-hidden" aria-label="Location map">
     {{-- Use the ceremony image as a map stand-in with overlay --}}
     <img src="{{ asset('images/ceremony.png') }}"
-         alt="SK Rentals location in Knoxville Tennessee"
+         alt="HK Rentals location in Knoxville Tennessee"
          class="w-full h-full object-cover object-center opacity-50" />
     <div class="absolute inset-0 bg-neutral-900/60 flex items-center justify-center">
         <div class="text-center">
@@ -412,7 +412,7 @@
             {{-- Quotation mark --}}
             <div class="text-6xl text-brand-400 font-display leading-none mb-4 opacity-50">"</div>
             <blockquote class="font-display text-xl sm:text-2xl text-white font-medium leading-relaxed mb-6 italic">
-                Working with SK Rentals was the best decision we made for our wedding.
+                Working with HK Rentals was the best decision we made for our wedding.
                 Every piece was stunning and the team handled everything flawlessly.
             </blockquote>
             <div class="flex items-center justify-center gap-3 mb-8">

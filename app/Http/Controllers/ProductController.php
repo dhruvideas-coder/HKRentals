@@ -56,11 +56,13 @@ class ProductController extends Controller
         $products  = $query->paginate(9)->withQueryString();
         $categories = \App\Models\Category::all();
 
+        $selectedCategory = $request->filled('category') ? \App\Models\Category::where('slug', $request->category)->first(): null;
+
         // Distinct color & material values for filter dropdowns
         $colors    = \App\Models\Product::whereNotNull('color')->distinct()->orderBy('color')->pluck('color');
         $materials = \App\Models\Product::whereNotNull('material')->distinct()->orderBy('material')->pluck('material');
 
-        return view('pages.products', compact('products', 'categories', 'colors', 'materials'));
+        return view('pages.products', compact('products', 'categories', 'colors', 'materials', 'selectedCategory'));
     }
 
     /**

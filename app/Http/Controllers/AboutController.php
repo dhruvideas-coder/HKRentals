@@ -16,7 +16,7 @@ class AboutController extends Controller
             [
                 'name'  => 'Sarah Mitchell',
                 'role'  => 'Founder & Creative Director',
-                'bio'   => 'With over 15 years in luxury event design, Sarah founded SK Rentals to bring world-class rental experiences to the Knoxville community.',
+                'bio'   => 'With over 15 years in luxury event design, Sarah founded HK Rentals to bring world-class rental experiences to the Knoxville community.',
                 'image' => 'team-founder.png',
                 'email' => 'sarah@skrentals.com',
             ],
@@ -37,7 +37,7 @@ class AboutController extends Controller
         ];
 
         $milestones = [
-            ['year' => '2013', 'title' => 'Founded',          'desc' => 'SK Rentals opened its doors in downtown Knoxville with just 50 rental pieces.'],
+            ['year' => '2013', 'title' => 'Founded',          'desc' => 'HK Rentals opened its doors in downtown Knoxville with just 50 rental pieces.'],
             ['year' => '2016', 'title' => 'Expanded',         'desc' => 'Grew our collection to 500+ items and moved into our dedicated showroom space.'],
             ['year' => '2019', 'title' => 'Award Winning',    'desc' => 'Named Best Event Rental Company in Knoxville by East Tennessee Weddings Magazine.'],
             ['year' => '2023', 'title' => '500+ Events',      'desc' => 'Celebrated serving over 500 couples and corporate clients across the region.'],

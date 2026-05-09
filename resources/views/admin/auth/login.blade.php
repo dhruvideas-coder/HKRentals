@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Login — SK Rentals</title>
-    <meta name="description" content="SK Rentals Admin Portal — Secure Access" />
+    <title>Admin Login — HK Rentals</title>
+    <meta name="description" content="HK Rentals Admin Portal — Secure Access" />
     <meta name="robots" content="noindex, nofollow" />
 
     {{-- Fonts --}}
@@ -228,7 +228,7 @@
                 <span style="font-family:'Playfair Display',serif; font-weight:700; color:#fff; font-size:1.5rem;">SK</span>
             </div>
             <h1 class="login-heading">Admin Portal</h1>
-            <p class="login-subheading">Secure access for SK Rentals authorized personnel.</p>
+            <p class="login-subheading">Secure access for HK Rentals authorized personnel.</p>
         </div>
 
         @if (session('error'))
@@ -285,7 +285,7 @@
                 </svg>
                 Return to homepage
             </a>
-            <span style="font-size: 0.75rem; color: #cbd5e0;">© {{ date('Y') }} SK Rentals — Management Portal</span>
+            <span style="font-size: 0.75rem; color: #cbd5e0;">© {{ date('Y') }} HK Rentals — Management Portal</span>
         </div>
     </div>
 </div>

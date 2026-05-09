@@ -47,12 +47,12 @@
         <h3 class="font-display font-semibold text-neutral-900 text-lg mb-1.5 leading-snug line-clamp-1">{{ $name }}</h3>
         
         @if($description)
-        <p class="text-neutral-500 text-sm mb-4 leading-relaxed line-clamp-2 flex-1">{{ $description }}</p>
+        <p class="text-neutral-500 text-sm leading-relaxed line-clamp-2 flex-1">{{ $description }}</p>
         @else
         <div class="flex-1"></div>
         @endif
 
-        <div class="flex items-center justify-between gap-1 mt-4 pt-4 border-t border-neutral-50 flex-nowrap">
+        <div class="flex items-center justify-between gap-1 pt-4 border-t border-neutral-50 flex-nowrap">
             <div class="flex items-baseline gap-1 whitespace-nowrap">
                 <span class="font-bold text-brand-600 text-base sm:text-lg leading-none">${{ $price }}</span>
                 <span class="text-[9px] sm:text-[10px] font-normal text-neutral-400 uppercase tracking-wider">/ day</span>

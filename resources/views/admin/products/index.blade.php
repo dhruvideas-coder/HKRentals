@@ -18,7 +18,10 @@
 
         {{-- Enhanced Filters Bar --}}
         <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-5 mb-8">
-            <form action="{{ route('admin.products.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" id="filterForm">
+            <form action="{{ route('admin.products.index') }}" method="GET"
+                  x-data="{ hasFilters: {{ request()->anyFilled(['search', 'category', 'color', 'material', 'status']) ? 'true' : 'false' }} }"
+                  :class="hasFilters ? 'lg:grid-cols-6' : 'lg:grid-cols-5'"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-4" id="filterForm">
                 <div class="lg:col-span-1">
                     <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 ml-1">Search Products</label>
                     <div class="relative">

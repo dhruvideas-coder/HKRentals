@@ -25,11 +25,11 @@
             <div class="lg:col-span-2 space-y-8">
                 {{-- Basic Information Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-10 py-8 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="text-lg font-bold text-neutral-800">Essential Information</h3>
                         <p class="text-sm text-neutral-400 mt-1">Provide the core details of your rental item.</p>
                     </div>
-                    <div class="p-10 space-y-6">
+                    <div class="p-6 md:p-10 space-y-6">
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Product Title</label>
                             <input type="text" name="name" required value="{{ old('name') }}"
@@ -64,11 +64,11 @@
 
                 {{-- Pricing & Inventory Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-10 py-8 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="text-lg font-bold text-neutral-800">Pricing & Inventory</h3>
                         <p class="text-sm text-neutral-400 mt-1">Manage rental rates and stock levels.</p>
                     </div>
-                    <div class="p-10 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div class="p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Daily Rental Rate</label>
                             <div class="relative group">
@@ -95,10 +95,10 @@
             <div class="space-y-8">
                 {{-- Media Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="font-bold text-neutral-800">Product Image</h3>
                     </div>
-                    <div class="p-8" x-data="{ preview: null }">
+                    <div class="p-6 md:p-8" x-data="{ preview: null }">
                         <input type="file" name="image" id="image_upload" class="hidden" @change="preview = URL.createObjectURL($event.target.files[0])">
                         <div class="relative group cursor-pointer" @click="document.getElementById('image_upload').click()">
                             <div class="aspect-square rounded-3xl bg-neutral-50 border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-brand-300 group-hover:bg-white shadow-inner">
@@ -125,10 +125,10 @@
 
                 {{-- Classification Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="font-bold text-neutral-800">Classification</h3>
                     </div>
-                    <div class="p-8 space-y-6">
+                    <div class="p-6 md:p-8 space-y-6">
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Category</label>
                             <div class="relative">
@@ -162,8 +162,7 @@
                     </div>
                 </div>
 
-                {{-- Action Card --}}
-                <div class="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-200">
+                <div class="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-neutral-200">
                     <h4 class="text-white font-bold text-lg mb-2">Publish Product</h4>
                     <p class="text-neutral-400 text-sm mb-8 leading-relaxed">Once you publish, this item will be available for customers to view in your digital collection.</p>
                     <div class="flex flex-col gap-3">

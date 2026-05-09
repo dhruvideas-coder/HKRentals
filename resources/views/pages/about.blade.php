@@ -1,6 +1,6 @@
 <x-layout.app-layout>
     <x-slot:title>About Us</x-slot>
-    <x-slot:metaDescription>Learn about SK Rentals — Knoxville's premier wedding and event rental company. Meet our team, discover our story, and see why 500+ couples trust us for their special day.</x-slot>
+    <x-slot:metaDescription>Learn about HK Rentals — Knoxville's premier wedding and event rental company. Meet our team, discover our story, and see why 500+ couples trust us for their special day.</x-slot>
 
 
 {{-- ══════════════════════════════════════════════════════════
@@ -11,7 +11,7 @@
     {{-- Background Image --}}
     <div class="absolute inset-0 z-0">
         <img src="{{ asset('images/about-hero.png') }}"
-             alt="SK Rentals elegant showroom interior"
+             alt="HK Rentals elegant showroom interior"
              class="w-full h-full object-cover object-center"
              loading="eager" fetchpriority="high" />
         <div class="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/70 to-neutral-900/30"></div>
@@ -42,7 +42,7 @@
     <div class="absolute bottom-0 left-0 right-0 z-10">
         <div class="container-sk pb-0">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-px bg-neutral-800/60 backdrop-blur-sm border-t border-white/10 overflow-hidden rounded-t-2xl">
-                @foreach([['500+','Happy Couples'],['200+','Rental Items'],['10+','Years Experience'],['5★','Average Rating']] as [$num, $lbl])
+                @foreach([['500+','Happy Couples'],['200+','Rental Items'],['5+','Years Experience'],['5★','Average Rating']] as [$num, $lbl])
                 <div class="bg-neutral-900/80 backdrop-blur-sm px-6 py-5 text-center">
                     <p class="font-display text-2xl font-bold text-brand-400">{{ $num }}</p>
                     <p class="text-xs text-neutral-400 mt-0.5 uppercase tracking-wide">{{ $lbl }}</p>
@@ -67,7 +67,7 @@
                     {{-- Main large image --}}
                     <div class="col-span-3 row-span-3 rounded-2xl overflow-hidden shadow-elevated">
                         <img src="{{ asset('images/about-story.png') }}"
-                             alt="SK Rentals consultation session with client"
+                             alt="HK Rentals consultation session with client"
                              class="w-full h-full object-cover"
                              loading="lazy" />
                     </div>
@@ -105,12 +105,12 @@
                 </h2>
                 <div class="space-y-4 text-neutral-500 text-base leading-relaxed">
                     <p>
-                        SK Rentals was founded in 2013 by Sarah Mitchell, a lifelong lover of elegant design and
+                        HK Rentals was founded in 2013 by Sarah Mitchell, a lifelong lover of elegant design and
                         meaningful celebrations. After years of working in event planning across Tennessee, Sarah saw
                         a gap — Knoxville needed a rental partner that combined premium quality with genuine personal service.
                     </p>
                     <p>
-                        Starting with just 50 carefully curated pieces out of a small warehouse, SK Rentals quickly
+                        Starting with just 50 carefully curated pieces out of a small warehouse, HK Rentals quickly
                         earned a reputation for reliability, beauty, and a client-first approach. Today, our
                         200+ item collection spans every style from classic romantic to modern minimalist.
                     </p>
@@ -151,7 +151,7 @@
             {{-- Image side --}}
             <div class="relative h-96 lg:h-auto lg:aspect-[4/3] rounded-2xl overflow-hidden shadow-elevated order-last lg:order-first">
                 <img src="{{ asset('images/about-values.png') }}"
-                     alt="SK Rentals team setting up wedding reception"
+                     alt="HK Rentals team setting up wedding reception"
                      class="w-full h-full object-cover"
                      loading="lazy" />
                 <div class="absolute inset-0 bg-gradient-to-t from-neutral-900/50 via-transparent to-transparent"></div>
@@ -188,7 +188,7 @@
         <div class="text-center mb-14">
             <span class="badge badge-gold mb-3">How It Works</span>
             <h2 id="process-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-4">
-                Your Journey With SK Rentals
+                Your Journey With HK Rentals
             </h2>
             <p class="text-neutral-500 max-w-lg mx-auto text-base leading-relaxed">
                 From first enquiry to final pickup, we make the rental process effortless and enjoyable.
@@ -359,7 +359,7 @@
             <div class="relative">
                 <div class="rounded-2xl overflow-hidden shadow-elevated aspect-[4/3]">
                     <img src="{{ asset('images/about-warehouse.png') }}"
-                         alt="SK Rentals showroom and warehouse"
+                         alt="HK Rentals showroom and warehouse"
                          class="w-full h-full object-cover"
                          loading="lazy" />
                 </div>

@@ -6,14 +6,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     {{-- SEO --}}
-    <title>{{ $title ?? config('app.name', 'SK Rentals') }} — Wedding & Event Rentals</title>
-    <meta name="description" content="{{ $metaDescription ?? 'SK Rentals — Premium wedding and event rental items in Knoxville. Elegant decor, furniture, and more for your special day.' }}" />
+    <title>{{ $title ?? config('app.name', 'HK Rentals') }} — Wedding & Event Rentals</title>
+    <meta name="description" content="{{ $metaDescription ?? 'HK Rentals — Premium wedding and event rental items in Knoxville. Elegant decor, furniture, and more for your special day.' }}" />
     <meta name="keywords" content="{{ $metaKeywords ?? 'wedding rentals, event rentals, Knoxville, party supplies, decor' }}" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="{{ url()->current() }}" />
 
     {{-- Open Graph --}}
-    <meta property="og:title" content="{{ $title ?? 'SK Rentals' }} — Wedding & Event Rentals" />
+    <meta property="og:title" content="{{ $title ?? 'HK Rentals' }} — Wedding & Event Rentals" />
     <meta property="og:description" content="{{ $metaDescription ?? 'Premium wedding and event rental items in Knoxville.' }}" />
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:type" content="website" />
@@ -65,6 +65,7 @@
     </div>
 
     {{-- Page-level scripts --}}
+    <x-auth.session-timeout />
     {{ $scripts ?? '' }}
 
 </body>
