@@ -49,25 +49,9 @@
 </section>
 
 {{-- ══════════════════════════════════════════════════════════
-     RATING OVERVIEW STRIP
-══════════════════════════════════════════════════════════ --}}
-<div class="bg-white border-b border-neutral-100">
-    <div class="container-sk py-8">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            @foreach([['5.0','Overall Rating'],['500+','Happy Clients'],['100%','On-Time Delivery'],['5+','Years Serving Knoxville']] as [$num,$lbl])
-            <div class="text-center">
-                <p class="font-display text-3xl font-bold text-brand-600 leading-none">{{ $num }}</p>
-                <p class="text-sm text-neutral-500 mt-1">{{ $lbl }}</p>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</div>
-
-{{-- ══════════════════════════════════════════════════════════
      FEATURED REVIEW (full-width)
 ══════════════════════════════════════════════════════════ --}}
-<section class="bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900 py-16 sm:py-20" aria-label="Featured review">
+{{-- <section class="bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900 py-16 sm:py-20" aria-label="Featured review">
     <div class="container-sk">
         <div class="max-w-3xl mx-auto text-center">
             <svg class="w-12 h-12 text-brand-300/50 mx-auto mb-6" fill="currentColor" viewBox="0 0 24 24">
@@ -95,12 +79,12 @@
             </div>
         </div>
     </div>
-</section>
+</section> --}}
 
 {{-- ══════════════════════════════════════════════════════════
      REVIEWS GRID
 ══════════════════════════════════════════════════════════ --}}
-<section class="reviews-section-bg py-20 sm:py-28" aria-labelledby="all-reviews-heading">
+<section class="reviews-section-bg py-10 sm:py-20" aria-labelledby="all-reviews-heading">
     <div class="container-sk">
 
         <div class="text-center mb-14">

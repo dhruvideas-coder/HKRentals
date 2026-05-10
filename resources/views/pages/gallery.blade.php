@@ -36,42 +36,15 @@
 </section>
 
 {{-- ══════════════════════════════════════════════════════════
-     GALLERY WITH FILTER + LIGHTBOX
+     GALLERY WITH FILTER
 ══════════════════════════════════════════════════════════ --}}
 <section class="bg-white py-20 sm:py-28" aria-labelledby="gallery-grid-heading"
     x-data="{
         activeFilter: 'all',
-        lightbox: false,
-        lightboxSrc: '',
-        lightboxAlt: '',
-        lightboxIndex: 0,
         photos: [],
         get filtered() {
             if (this.activeFilter === 'all') return this.photos;
             return this.photos.filter(p => p.category === this.activeFilter);
-        },
-        openLightbox(src, alt, index) {
-            this.lightboxSrc  = src;
-            this.lightboxAlt  = alt;
-            this.lightboxIndex = index;
-            this.lightbox = true;
-            document.body.style.overflow = 'hidden';
-        },
-        closeLightbox() {
-            this.lightbox = false;
-            document.body.style.overflow = '';
-        },
-        prevPhoto() {
-            const list = this.filtered;
-            this.lightboxIndex = (this.lightboxIndex - 1 + list.length) % list.length;
-            this.lightboxSrc = list[this.lightboxIndex].src;
-            this.lightboxAlt = list[this.lightboxIndex].alt;
-        },
-        nextPhoto() {
-            const list = this.filtered;
-            this.lightboxIndex = (this.lightboxIndex + 1) % list.length;
-            this.lightboxSrc = list[this.lightboxIndex].src;
-            this.lightboxAlt = list[this.lightboxIndex].alt;
         },
     }"
     x-init="
@@ -102,7 +75,7 @@
             { src: '{{ asset('images/ceremony.png') }}',                            alt: 'Outdoor wedding ceremony setup',       category: 'weddings',  span: 'tall'   },
         ];
     "
-    @keydown.escape.window="closeLightbox()">
+>
 
     <div class="container-sk">
 
@@ -112,7 +85,7 @@
                 Moments We've <span class="text-gradient-gold">Made Special</span>
             </h2>
             <p class="text-neutral-500 max-w-md mx-auto text-base">
-                Browse our portfolio by category. Click any photo to view it full size.
+                Browse our portfolio by category.
             </p>
         </div>
 
@@ -148,23 +121,13 @@
         <div class="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3"
              x-ref="gallery">
             <template x-for="(photo, index) in filtered" :key="photo.src + index">
-                <div class="break-inside-avoid group cursor-pointer overflow-hidden rounded-xl bg-neutral-100 relative shadow-sm hover:shadow-elevated transition-shadow duration-300"
-                     @click="openLightbox(photo.src, photo.alt, index)"
+                <div class="break-inside-avoid overflow-hidden rounded-xl bg-neutral-100 relative shadow-sm"
                      :class="photo.span === 'tall' ? 'mb-3' : ''">
                     <img :src="photo.src"
                          :alt="photo.alt"
-                         class="w-full object-cover transition-transform duration-500 group-hover:scale-105 block"
+                         class="w-full object-cover block"
                          :class="photo.span === 'tall' ? 'h-80' : 'h-48'"
                          loading="lazy" />
-                    {{-- Overlay on hover --}}
-                    <div class="absolute inset-0 bg-neutral-900/0 group-hover:bg-neutral-900/40 transition-all duration-300 flex items-center justify-center">
-                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/95 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-medium text-neutral-800 shadow-lg">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                            </svg>
-                            View Photo
-                        </div>
-                    </div>
                 </div>
             </template>
 
@@ -181,55 +144,6 @@
 
     </div>
 
-    {{-- ── Lightbox ── --}}
-    <div x-show="lightbox"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         x-cloak
-         class="fixed inset-0 z-[100] bg-neutral-950/95 backdrop-blur-sm flex items-center justify-center p-4"
-         @click.self="closeLightbox()">
-
-        {{-- Close button --}}
-        <button @click="closeLightbox()"
-                class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-                aria-label="Close lightbox">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-
-        {{-- Prev button --}}
-        <button @click.stop="prevPhoto()"
-                class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-                aria-label="Previous photo">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </button>
-
-        {{-- Next button --}}
-        <button @click.stop="nextPhoto()"
-                class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-                aria-label="Next photo">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-        </button>
-
-        {{-- Image --}}
-        <div class="max-w-4xl max-h-[85vh] w-full flex flex-col items-center gap-4">
-            <img :src="lightboxSrc"
-                 :alt="lightboxAlt"
-                 class="max-h-[75vh] max-w-full object-contain rounded-xl shadow-2xl"
-                 @click.stop />
-            <p class="text-white/70 text-sm text-center" x-text="lightboxAlt"></p>
-        </div>
-
-    </div>
 
 </section>
 

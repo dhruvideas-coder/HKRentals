@@ -39,7 +39,7 @@
     </div>
 
     {{-- Stat chips floating at bottom --}}
-    <div class="absolute bottom-0 left-0 right-0 z-10">
+    {{-- <div class="absolute bottom-0 left-0 right-0 z-10">
         <div class="container-sk pb-0">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-px bg-neutral-800/60 backdrop-blur-sm border-t border-white/10 overflow-hidden rounded-t-2xl">
                 @foreach([['500+','Happy Couples'],['200+','Rental Items'],['5+','Years Experience'],['5★','Average Rating']] as [$num, $lbl])
@@ -50,7 +50,7 @@
                 @endforeach
             </div>
         </div>
-    </div>
+    </div> --}}
 
 </section>
 

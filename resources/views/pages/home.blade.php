@@ -79,12 +79,6 @@
         </div>
     </div>
 
-    {{-- Scroll indicator --}}
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-white/40 text-xs" aria-hidden="true">
-        <span class="tracking-widest uppercase text-[10px]">Scroll</span>
-        <div class="w-px h-8 bg-gradient-to-b from-white/40 to-transparent animate-pulse"></div>
-    </div>
-
 </section>
 
 {{-- ══════════════════════════════════════════════════════════
@@ -262,34 +256,208 @@
 </x-section>
 
 {{-- ══════════════════════════════════════════════════════════
+     HOW IT WORKS — Interactive Flow Selector
+══════════════════════════════════════════════════════════ --}}
+@php
+$hiw_flows = [
+    'booking' => [
+        'label'   => 'Online Booking',
+        'badge'   => 'Book Instantly',
+        'cta'     => 'Book Now',
+        'ctaHref' => route('products'),
+        'steps'   => [
+            ['num' => '01', 'icon' => 'viewfinder',   'title' => 'Browse the Catalog',     'desc' => 'Explore our full collection online. Filter by category, style, or price to find exactly what your event needs.'],
+            ['num' => '02', 'icon' => 'bag',           'title' => 'Select Your Items',      'desc' => 'Pick your rental pieces and choose your preferred event date. Availability is shown in real time.'],
+            ['num' => '03', 'icon' => 'lock',          'title' => 'Confirm and Pay Deposit','desc' => 'Secure your booking with a simple deposit online. You will receive an instant confirmation email.'],
+            ['num' => '04', 'icon' => 'truck',         'title' => 'We Deliver and Set Up',  'desc' => 'Our crew arrives at your venue, sets everything up exactly as planned — no effort needed from you.'],
+            ['num' => '05', 'icon' => 'gift',          'title' => 'Enjoy Your Event',       'desc' => 'Focus on celebrating. Everything is in place and looking stunning, just as you imagined.'],
+            ['num' => '06', 'icon' => 'tray-down',     'title' => 'We Collect and Wrap Up', 'desc' => 'After the event we return to pack and collect everything. No cleanup stress on your end.'],
+        ],
+    ],
+    'quote' => [
+        'label'   => 'Request a Quote',
+        'badge'   => 'Custom Quote',
+        'cta'     => 'Request a Quote',
+        'ctaHref' => route('products'),
+        'steps'   => [
+            ['num' => '01', 'icon' => 'viewfinder',   'title' => 'Browse and Note Items',  'desc' => 'Explore the catalog and note the pieces you love. No need to commit yet — just build your wish list.'],
+            ['num' => '02', 'icon' => 'pencil',        'title' => 'Submit Your Request',    'desc' => 'Send us your event details, date, and item list. Takes less than two minutes.'],
+            ['num' => '03', 'icon' => 'bubbles',       'title' => 'Receive Your Quote',     'desc' => 'We send a personalised quote within 24 hours, tailored to your exact event needs.'],
+            ['num' => '04', 'icon' => 'shield-check',  'title' => 'Approve and Book',       'desc' => 'Happy with the quote? Simply approve it and we lock in your date right away.'],
+            ['num' => '05', 'icon' => 'truck',         'title' => 'We Deliver and Set Up',  'desc' => 'Our team handles delivery, professional setup, and all the heavy lifting on event day.'],
+            ['num' => '06', 'icon' => 'tray-down',     'title' => 'We Collect and Wrap Up', 'desc' => 'Post-event, we return for a hassle-free pickup. Just leave the rest to us.'],
+        ],
+    ],
+    'consult' => [
+        'label'   => 'Call and Consult',
+        'badge'   => 'Personal Touch',
+        'cta'     => 'Call Us Today',
+        'ctaHref' => '#contact',
+        'steps'   => [
+            ['num' => '01', 'icon' => 'phone',         'title' => 'Give Us a Call',          'desc' => 'Speak directly with one of our friendly team members. We are here to help you plan the perfect event.'],
+            ['num' => '02', 'icon' => 'lightbulb',     'title' => 'Share Your Vision',       'desc' => 'Tell us about your event, your style, your venue, and your guest count. The more detail, the better.'],
+            ['num' => '03', 'icon' => 'clipboard',     'title' => 'We Build Your Package',   'desc' => 'We craft a custom rental package with the right pieces, quantities, and layout suggestions just for you.'],
+            ['num' => '04', 'icon' => 'badge-check',   'title' => 'Confirm and Pay Deposit', 'desc' => 'Review your bespoke proposal, give the go-ahead, and secure your date with a deposit.'],
+            ['num' => '05', 'icon' => 'truck',         'title' => 'We Deliver and Set Up',   'desc' => 'On event day our crew handles everything — delivery, setup, and styling — exactly to plan.'],
+            ['num' => '06', 'icon' => 'tray-down',     'title' => 'We Collect and Wrap Up',  'desc' => 'We return after your event for a smooth, stress-free pickup. All done.'],
+        ],
+    ],
+];
+@endphp
+
+<x-section class="bg-white" aria-labelledby="how-it-works-heading">
+    <x-container>
+        <div x-data='{ active: "quote", flows: @json($hiw_flows), get current() { return this.flows[this.active]; } }'>
+
+            {{-- Section Header --}}
+            <div class="text-center mb-10">
+                <span class="badge badge-gold mb-3">Simple &amp; Stress-Free</span>
+                <h2 id="how-it-works-heading" class="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-4">
+                    How It <span class="text-gradient-gold">Works</span>
+                </h2>
+                <p class="text-neutral-500 max-w-xl mx-auto text-base leading-relaxed">
+                    Choose your preferred way to book and we will walk you through every step, start to finish.
+                </p>
+            </div>
+
+            {{-- ── Flow Selector Tabs ── --}}
+            <div class="flex justify-center mb-10 px-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center bg-neutral-100 rounded-2xl p-1.5 gap-1.5 shadow-inner w-full max-w-xs sm:max-w-none sm:w-auto">
+                    <template x-for="[key, flow] in Object.entries(flows)" :key="key">
+                        <button
+                            @click="active = key"
+                            :class="active === key
+                                ? 'bg-white text-brand-700 shadow-card border border-brand-100 font-semibold'
+                                : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'"
+                            class="relative flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-sm transition-all duration-200 cursor-pointer">
+                            {{-- cart: online booking --}}
+                            <svg x-show="key === 'booking'" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+                            </svg>
+                            {{-- document: request a quote --}}
+                            <svg x-show="key === 'quote'" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                            </svg>
+                            {{-- phone: call and consult --}}
+                            <svg x-show="key === 'consult'" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/>
+                            </svg>
+                            <span x-text="flow.label"></span>
+                            <span x-show="active === key" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-500 rounded-full border-2 border-white shadow-sm" aria-hidden="true"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            {{-- ── Active Flow Badge ── --}}
+            <div class="flex justify-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 rounded-full px-4 py-1.5 text-sm text-brand-700 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse flex-shrink-0"></span>
+                    <span x-text="current.badge + ' — here is your journey'"></span>
+                </div>
+            </div>
+
+            {{-- ── Steps Panel ── --}}
+            <div class="relative">
+
+                {{-- Connecting line desktop --}}
+                <div class="hidden lg:block absolute top-[52px] left-[10%] right-[10%] h-px z-0" aria-hidden="true">
+                    <div class="w-full h-full bg-gradient-to-r from-transparent via-brand-200 to-transparent"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-3 relative z-10">
+                    <template x-for="(step, i) in current.steps" :key="step.num">
+                        <div class="flex flex-col items-center text-center group">
+
+                            {{-- Bubble with floating number badge --}}
+                            <div class="relative mb-6">
+
+                                {{-- Step number badge --}}
+                                <span class="absolute -top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-[11px] font-bold shadow-md border-2 border-white leading-none" x-text="step.num"></span>
+
+                                {{-- Outer ring --}}
+                                <div class="w-[88px] h-[88px] rounded-full bg-white border-2 border-brand-100 group-hover:border-brand-400 transition-all duration-300 shadow-md group-hover:shadow-glow flex items-center justify-center">
+
+                                    {{-- Inner filled circle --}}
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-50 to-brand-100 group-hover:from-brand-100 group-hover:to-brand-200 transition-all duration-300 flex items-center justify-center">
+
+                                        {{-- Each icon has its own <svg> + x-show; x-if inside <svg> breaks SVG namespace and prevents rendering --}}
+                                        <svg x-show="step.icon === 'viewfinder'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'bag'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'lock'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'truck'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.129-1.125V11.25a9 9 0 0 0-9-9h-2.25"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'gift'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'tray-down'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'pencil'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'bubbles'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'shield-check'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'phone'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'lightbulb'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'clipboard'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/>
+                                        </svg>
+                                        <svg x-show="step.icon === 'badge-check'" class="w-8 h-8 text-brand-600 group-hover:text-brand-700 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                {{-- Mobile arrow --}}
+                                <div x-show="i < current.steps.length - 1"
+                                     class="lg:hidden absolute -bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center" aria-hidden="true">
+                                    <div class="w-px h-5 bg-brand-200"></div>
+                                    <svg class="w-3 h-3 text-brand-300" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <h3 class="font-display text-sm font-semibold text-neutral-900 mb-1.5 leading-snug" x-text="step.title"></h3>
+                            <p class="text-neutral-500 text-xs leading-relaxed max-w-[9rem] lg:max-w-[8rem]" x-text="step.desc"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            {{-- ── Bottom CTA ── --}}
+            <div class="text-center mt-14">
+                <a :href="current.ctaHref" class="btn btn-primary btn-lg shadow-glow">
+                    <span x-text="current.cta"></span>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+                <p class="text-xs text-neutral-400 mt-3">No commitment required. Switch methods any time.</p>
+            </div>
+
+        </div>
+    </x-container>
+</x-section>
+
+{{-- ══════════════════════════════════════════════════════════
      TESTIMONIALS — Real Stories, Real Joy
 ══════════════════════════════════════════════════════════ --}}
-<section class="reviews-section-bg py-20 sm:py-28" aria-labelledby="testimonials-heading"
-    x-data="{
-        current: 0,
-        perPage: 3,
-        reviews: [
-            { initials: 'EW', name: 'Emily & James Watson',   event: 'Wedding · May 2025',        rating: 5, tag: 'Verified Client',  color: '#c8903a', text: 'HK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was so kind!' },
-            { initials: 'OC', name: 'Olivia Chen',            event: 'Corporate Gala · Mar 2025', rating: 5, tag: 'Verified Client',  color: '#8e6024', text: 'We hired HK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!' },
-            { initials: 'SB', name: 'Sarah & Michael Brown',  event: 'Wedding · Jan 2025',        rating: 5, tag: 'Verified Client',  color: '#b07a2e', text: 'From the first enquiry to the final pickup, the team was professional and genuinely caring. Our guests could not stop complimenting the beautiful decor.' },
-            { initials: 'RT', name: 'Rachel Thompson',        event: 'Baby Shower · Apr 2025',    rating: 5, tag: 'Repeat Customer', color: '#c8903a', text: 'I rented the tableware set and beautiful backdrop panels. Everything was pristine, exactly as shown, and delivery was seamless. Will absolutely use again!' },
-            { initials: 'MK', name: 'Marcus & Kim Lee',       event: 'Anniversary · Feb 2025',    rating: 5, tag: 'Verified Client',  color: '#6e4a1c', text: 'The string light canopy transformed our backyard into a fairytale. Setup crew was fast, professional, and left everything spotless. Truly world-class service.' },
-            { initials: 'JD', name: 'Jessica Davis',          event: 'Bridal Shower · Mar 2025',  rating: 5, tag: 'Verified Client',  color: '#b07a2e', text: 'From the moment I reached out, the HK Rentals team was attentive and full of great ideas. The lounge furniture was gorgeous and everything fit perfectly in the space.' },
-        ],
-        get maxPage() {
-            if (window.innerWidth >= 1024) return Math.max(0, this.reviews.length - 3);
-            if (window.innerWidth >= 640)  return Math.max(0, this.reviews.length - 2);
-            return this.reviews.length - 1;
-        },
-        get offset() {
-            const cardW = this.\$el.querySelector('.reviews-slide')?.offsetWidth || 0;
-            const gap = 24;
-            return this.current * (cardW + gap);
-        },
-        next() { if (this.current < this.maxPage) this.current++; else this.current = 0; },
-        prev() { if (this.current > 0) this.current--; else this.current = this.maxPage; },
-    }"
-    x-init="setInterval(() => next(), 5500)">
+<section class="reviews-section-bg py-20 sm:py-28" aria-labelledby="testimonials-heading">
 
     <div class="container-sk relative z-10">
 
@@ -330,92 +498,95 @@
             </div>
         </div>
 
-        {{-- Carousel Viewport --}}
-        <div class="overflow-hidden" style="border-radius:1rem">
-            <div class="reviews-track" :style="`transform: translateX(-${offset}px)`">
+        @php
+        $homeReviews = [
+            ['initials'=>'EW','name'=>'Emily & James Watson',  'event'=>'Wedding · May 2025',        'rating'=>5,'tag'=>'Verified Client', 'color'=>'#c8903a','text'=>'HK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was so kind!'],
+            ['initials'=>'OC','name'=>'Olivia Chen',           'event'=>'Corporate Gala · Mar 2025', 'rating'=>5,'tag'=>'Verified Client', 'color'=>'#8e6024','text'=>'We hired HK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!'],
+            ['initials'=>'SB','name'=>'Sarah & Michael Brown', 'event'=>'Wedding · Jan 2025',        'rating'=>5,'tag'=>'Verified Client', 'color'=>'#b07a2e','text'=>'From the first enquiry to the final pickup, the team was professional and genuinely caring. Our guests could not stop complimenting the beautiful decor.'],
+            ['initials'=>'RT','name'=>'Rachel Thompson',       'event'=>'Baby Shower · Apr 2025',    'rating'=>5,'tag'=>'Repeat Customer','color'=>'#c8903a','text'=>'I rented the tableware set and beautiful backdrop panels. Everything was pristine, exactly as shown, and delivery was seamless. Will absolutely use again!'],
+            ['initials'=>'MK','name'=>'Marcus & Kim Lee',      'event'=>'Anniversary · Feb 2025',    'rating'=>5,'tag'=>'Verified Client', 'color'=>'#6e4a1c','text'=>'The string light canopy transformed our backyard into a fairytale. Setup crew was fast, professional, and left everything spotless. Truly world-class service.'],
+        ];
+        @endphp
 
-                @php
-                $reviews = [
-                    ['initials'=>'EW','name'=>'Emily & James Watson',  'event'=>'Wedding · May 2025',       'rating'=>5,'tag'=>'Verified Client', 'color'=>'#c8903a','text'=>'HK Rentals made our wedding day absolutely magical. The gold chiavari chairs and floral arch were beyond beautiful. Everything arrived perfectly on time and the setup team was so kind!'],
-                    ['initials'=>'OC','name'=>'Olivia Chen',           'event'=>'Corporate Gala · Mar 2025','rating'=>5,'tag'=>'Verified Client', 'color'=>'#8e6024','text'=>'We hired HK Rentals for our annual company gala and the results were stunning. The lounge suite and lighting created such an elegant atmosphere. Highly recommend!'],
-                    ['initials'=>'SB','name'=>'Sarah & Michael Brown', 'event'=>'Wedding · Jan 2025',       'rating'=>5,'tag'=>'Verified Client', 'color'=>'#b07a2e','text'=>'From the first enquiry to the final pickup, the team was professional and genuinely caring. Our guests could not stop complimenting the beautiful decor.'],
-                    ['initials'=>'RT','name'=>'Rachel Thompson',       'event'=>'Baby Shower · Apr 2025',   'rating'=>5,'tag'=>'Repeat Customer','color'=>'#c8903a','text'=>'I rented the tableware set and beautiful backdrop panels. Everything was pristine, exactly as shown, and delivery was seamless. Will absolutely use again!'],
-                    ['initials'=>'MK','name'=>'Marcus & Kim Lee',      'event'=>'Anniversary · Feb 2025',   'rating'=>5,'tag'=>'Verified Client', 'color'=>'#6e4a1c','text'=>'The string light canopy transformed our backyard into a fairytale. Setup crew was fast, professional, and left everything spotless. Truly world-class service.'],
-                    ['initials'=>'JD','name'=>'Jessica Davis',         'event'=>'Bridal Shower · Mar 2025', 'rating'=>5,'tag'=>'Verified Client', 'color'=>'#b07a2e','text'=>'From the moment I reached out, the HK Rentals team was attentive and full of great ideas. The lounge furniture was gorgeous and everything fit perfectly in the space.'],
-                ];
-                @endphp
+        {{-- ── Featured hero review (full-width) ── --}}
+        <div class="relative overflow-hidden rounded-3xl p-8 sm:p-10 mb-6"
+             style="background: linear-gradient(135deg, #c8903a 0%, #7a4f1a 100%)">
 
-                @foreach($reviews as $i => $r)
-                <div class="reviews-slide">
-                    <div class="review-card {{ $i === 0 ? 'review-card-featured' : '' }}">
-                        {{-- Big decorative quote mark --}}
-                        <span class="review-card-quote" aria-hidden="true">&ldquo;</span>
+            <span class="absolute top-2 right-6 text-[9rem] leading-none font-display text-white/10 select-none pointer-events-none" aria-hidden="true">&ldquo;</span>
 
-                        {{-- Stars --}}
-                        <div class="review-stars">
-                            @for($s = 0; $s < $r['rating']; $s++)
-                                <svg class="review-star" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            @endfor
-                        </div>
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-center gap-8">
 
-                        {{-- Review Text --}}
-                        <p class="text-sm leading-relaxed flex-1 {{ $i === 0 ? 'text-white/90' : 'text-neutral-600' }}" style="font-style:italic">
-                            &ldquo;{{ $r['text'] }}&rdquo;
-                        </p>
+                {{-- Quote side --}}
+                <div class="flex-1 min-w-0">
+                    <div class="flex gap-1 mb-5">
+                        @for ($s = 0; $s < 5; $s++)
+                            <svg class="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @endfor
+                    </div>
+                    <p class="text-white text-lg sm:text-xl leading-relaxed font-light italic">
+                        &ldquo;{{ $homeReviews[0]['text'] }}&rdquo;
+                    </p>
+                </div>
 
-                        {{-- Author row --}}
-                        <div class="flex items-center gap-3 pt-2 border-t {{ $i === 0 ? 'border-white/20' : 'border-neutral-100' }}">
-                            <div class="review-avatar review-avatar-lg" style="background: linear-gradient(135deg, {{ $r['color'] }}22, {{ $r['color'] }}44); color:{{ $r['color'] }}; border-color:{{ $r['color'] }}44">
-                                {{ $r['initials'] }}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-sm truncate {{ $i === 0 ? 'text-white' : 'text-neutral-900' }}">
-                                    {{ $r['name'] }}
-                                </p>
-                                <p class="text-xs truncate {{ $i === 0 ? 'text-white/60' : 'text-neutral-400' }}">
-                                    {{ $r['event'] }}
-                                </p>
-                            </div>
-                            {{-- Verified badge --}}
-                            <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full flex-shrink-0
-                                {{ $i === 0 ? 'bg-white/20 text-white' : 'bg-brand-50 text-brand-700' }}">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                {{ $r['tag'] }}
-                            </span>
-                        </div>
+                {{-- Author side --}}
+                <div class="flex sm:flex-col items-center gap-4 sm:text-center sm:min-w-[160px]">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0"
+                         style="background: rgba(255,255,255,0.18); color:#fff; border: 2px solid rgba(255,255,255,0.35)">
+                        {{ $homeReviews[0]['initials'] }}
+                    </div>
+                    <div>
+                        <p class="text-white font-semibold text-sm leading-snug">{{ $homeReviews[0]['name'] }}</p>
+                        <p class="text-white/60 text-xs mt-0.5">{{ $homeReviews[0]['event'] }}</p>
+                        <span class="inline-flex items-center gap-1 mt-2 text-xs font-medium px-2.5 py-1 rounded-full bg-white/20 text-white">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            {{ $homeReviews[0]['tag'] }}
+                        </span>
                     </div>
                 </div>
-                @endforeach
 
             </div>
         </div>
 
-        {{-- Controls Row --}}
-        <div class="flex items-center justify-between mt-8">
+        {{-- ── Supporting reviews: 2×2 grid ── --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            @foreach(array_slice($homeReviews, 1, 4) as $r)
+            <div class="review-card">
+                <span class="review-card-quote" aria-hidden="true">&ldquo;</span>
 
-            {{-- Dot indicators --}}
-            <div class="flex items-center gap-2">
-                @foreach($reviews as $i => $r)
-                <button @click="current = {{ $i }}"
-                        class="rounded-full transition-all duration-300"
-                        :class="current === {{ $i }} ? 'w-7 h-2.5 bg-brand-500' : 'w-2.5 h-2.5 bg-neutral-200 hover:bg-neutral-300'"
-                        aria-label="Go to review {{ $i + 1 }}"></button>
-                @endforeach
-            </div>
+                <div class="review-stars">
+                    @for ($s = 0; $s < $r['rating']; $s++)
+                        <svg class="review-star" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    @endfor
+                </div>
 
-            {{-- Prev / Next buttons --}}
-            <div class="flex items-center gap-3">
-                <button @click="prev"
-                        class="w-10 h-10 rounded-full border-2 border-neutral-200 hover:border-brand-400 bg-white hover:bg-brand-50 flex items-center justify-center transition-all duration-200 shadow-sm"
-                        aria-label="Previous review">
-                    <svg class="w-4 h-4 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <button @click="next"
-                        class="w-10 h-10 rounded-full bg-brand-500 hover:bg-brand-600 flex items-center justify-center transition-all duration-200 shadow-glow"
-                        aria-label="Next review">
-                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </button>
+                <p class="text-sm leading-relaxed flex-1 text-neutral-600" style="font-style:italic">
+                    &ldquo;{{ $r['text'] }}&rdquo;
+                </p>
+
+                <div class="flex items-center gap-3 pt-2 border-t border-neutral-100">
+                    <div class="review-avatar review-avatar-lg"
+                         style="background: linear-gradient(135deg, {{ $r['color'] }}22, {{ $r['color'] }}44); color:{{ $r['color'] }}; border-color:{{ $r['color'] }}44">
+                        {{ $r['initials'] }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm truncate text-neutral-900">{{ $r['name'] }}</p>
+                        <p class="text-xs truncate text-neutral-400">{{ $r['event'] }}</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full flex-shrink-0 bg-brand-50 text-brand-700">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        {{ $r['tag'] }}
+                    </span>
+                </div>
             </div>
+            @endforeach
+        </div>
+
+        {{-- ── View all CTA ── --}}
+        <div class="text-center mt-10">
+            <a href="{{ route('reviews') }}" class="btn btn-outline btn-lg">
+                Read All 500+ Reviews
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
         </div>
 
         {{-- Bottom trust strip --}}
