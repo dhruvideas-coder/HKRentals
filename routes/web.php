@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AboutController;
@@ -99,6 +100,55 @@ Route::prefix('admin')
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
     });
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Production Image Fixer (for Shared Hosting without Symlink support)
+|--------------------------------------------------------------------------
+*/
+Route::get('/fix-images', function () {
+    $results = [];
+
+    // 1. Move files if they exist in storage but not in public
+    $sourcePath = storage_path('app/public/categories');
+    $destPath = public_path('images/categories');
+
+    if (!File::exists($destPath)) {
+        File::makeDirectory($destPath, 0755, true);
+        $results[] = "Created directory: public/images/categories";
+    }
+
+    if (File::exists($sourcePath)) {
+        $files = File::files($sourcePath);
+        foreach ($files as $file) {
+            $filename = $file->getFilename();
+            if (!File::exists($destPath . '/' . $filename)) {
+                File::copy($file->getRealPath(), $destPath . '/' . $filename);
+                $results[] = "Copied: {$filename} to public/images/categories";
+            }
+        }
+    } else {
+        $results[] = "Source storage path not found or already moved.";
+    }
+
+    // 2. Update Database paths
+    try {
+        $count = \App\Models\Category::where('image', 'like', 'storage/categories/%')
+            ->get()
+            ->each(function($category) {
+                $category->image = str_replace('storage/categories/', 'images/categories/', $category->image);
+                $category->save();
+            })->count();
+        
+        $results[] = "Updated {$count} database records to use public/images path.";
+    } catch (\Exception $e) {
+        $results[] = "DB Update Error: " . $e->getMessage();
+    }
+
+    return response()->json($results);
+});
 
 /*
 |--------------------------------------------------------------------------
