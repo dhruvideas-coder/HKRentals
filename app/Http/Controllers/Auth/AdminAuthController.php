@@ -10,106 +10,103 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AdminAuthController extends Controller
 {
-    /**
-     * Show the admin login page.
-     */
     public function showLogin()
     {
-        // If already authenticated as admin, go to dashboard
-        if (auth()->check() && auth()->user()->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        }
+        try {
+            if (auth()->check() && auth()->user()->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
 
-        return view('admin.auth.login');
+            return view('admin.auth.login');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return view('admin.auth.login');
+        }
     }
 
-    /**
-     * Redirect to Google OAuth.
-     */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')
-            ->with(['prompt' => 'select_account'])
-            ->redirect();
+        try {
+            return Socialite::driver('google')
+                ->with(['prompt' => 'select_account'])
+                ->redirect();
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->route('admin.login')->with('error', 'Could not initiate Google login. Please try again.');
+        }
     }
 
-    /**
-     * Handle callback from Google OAuth.
-     */
     public function handleGoogleCallback(Request $request)
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-        } catch (\Exception $e) {
-            return redirect()->route('admin.login')
-                ->with('error', 'Google authentication failed. Please try again.');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->route('admin.login')->with('error', 'Google authentication failed. Please try again.');
         }
 
-        // Get admin emails from .env
-        $adminEmails = explode(',', env('ADMIN_EMAILS', ''));
-        $isAdminEmail = in_array($googleUser->getEmail(), array_map('trim', $adminEmails));
+        try {
+            $adminEmails = explode(',', env('ADMIN_EMAILS', ''));
+            $isAdminEmail = in_array($googleUser->getEmail(), array_map('trim', $adminEmails));
 
-        // If the email is not in the allowed admin list, block immediately
-        if (!$isAdminEmail) {
-            return redirect()->route('admin.login')
-                ->with('error', 'you are not registered Admin user please contact to administrator.');
-        }
-
-        // Handle avatar size (check if URL is too long for database)
-        $avatar = $googleUser->getAvatar();
-        if (strlen($avatar) > 255) {
-            $avatar = null;
-        }
-
-        // Find or create the user by google_id or email
-        $user = User::where('google_id', $googleUser->getId())->first()
-              ?? User::where('email', $googleUser->getEmail())->first();
-
-        if ($user) {
-            // Update their Google info & avatar
-            $user->update([
-                'google_id' => $googleUser->getId(),
-                'avatar'    => $avatar,
-                'name'      => $googleUser->getName(),
-            ]);
-
-            // If their email is in the admin list but they aren't admin, promote them
-            if ($isAdminEmail && $user->role !== 'admin') {
-                $user->update(['role' => 'admin']);
+            if (!$isAdminEmail) {
+                return redirect()->route('admin.login')
+                    ->with('error', 'You are not a registered Admin user. Please contact the administrator.');
             }
-        } else {
-            // First-time login: create user
-            $user = User::create([
-                'name'      => $googleUser->getName(),
-                'email'     => $googleUser->getEmail(),
-                'google_id' => $googleUser->getId(),
-                'avatar'    => $avatar,
-                'role'      => $isAdminEmail ? 'admin' : 'user',
-            ]);
+
+            $avatar = $googleUser->getAvatar();
+            if (strlen($avatar) > 255) {
+                $avatar = null;
+            }
+
+            $user = User::where('google_id', $googleUser->getId())->first()
+                  ?? User::where('email', $googleUser->getEmail())->first();
+
+            if ($user) {
+                $user->update([
+                    'google_id' => $googleUser->getId(),
+                    'avatar'    => $avatar,
+                    'name'      => $googleUser->getName(),
+                ]);
+
+                if ($isAdminEmail && $user->role !== 'admin') {
+                    $user->update(['role' => 'admin']);
+                }
+            } else {
+                $user = User::create([
+                    'name'      => $googleUser->getName(),
+                    'email'     => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar'    => $avatar,
+                    'role'      => $isAdminEmail ? 'admin' : 'user',
+                ]);
+            }
+
+            if (!$user->isAdmin()) {
+                return redirect()->route('admin.login')
+                    ->with('error', 'You are not a registered Admin user. Please contact the administrator.');
+            }
+
+            Auth::login($user, true);
+
+            return redirect()->route('admin.dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->route('admin.login')->with('error', 'An error occurred during login. Please try again.');
         }
-
-        // Final check: ensure the user has the admin role
-        if (!$user->isAdmin()) {
-            return redirect()->route('admin.login')
-                ->with('error', 'you are not registered Admin user please contact to administrator.');
-        }
-
-        Auth::login($user, true);
-
-        return redirect()->route('admin.dashboard')
-            ->with('success', 'Welcome back, ' . $user->name . '!');
     }
 
-    /**
-     * Logout from admin portal.
-     */
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        try {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-        return redirect()->route('home')
-            ->with('success', 'You have been logged out successfully.');
+            return redirect()->route('home')->with('success', 'You have been logged out successfully.');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->route('home');
+        }
     }
 }

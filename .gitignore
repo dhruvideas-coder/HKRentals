@@ -15,6 +15,8 @@
 /node_modules
 /public/hot
 /public/storage
+/public/images/products/
+/public/images/categories/
 /storage/*.key
 /storage/pail
 /vendor

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\CartService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -15,29 +14,30 @@ class CartController extends Controller
         $this->cartService = $cartService;
     }
 
-    /**
-     * Show the cart page.
-     */
     public function index()
     {
-        return view('pages.cart', [
-            'cart' => $this->cartService->getCart(),
-            'total' => $this->cartService->getTotal(),
-            'count' => $this->cartService->getCount()
-        ]);
+        try {
+            return view('pages.cart', [
+                'cart'  => $this->cartService->getCart(),
+                'total' => $this->cartService->getTotal(),
+                'count' => $this->cartService->getCount(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return view('pages.cart', ['cart' => [], 'total' => 0, 'count' => 0, 'error' => 'Could not load cart.']);
+        }
     }
 
-    /**
-     * Get the cart data as JSON.
-     */
     public function data()
     {
-        return $this->jsonResponse('Cart data retrieved');
+        try {
+            return $this->jsonResponse('Cart data retrieved');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return response()->json(['success' => false, 'message' => 'Could not retrieve cart data.'], 500);
+        }
     }
 
-    /**
-     * Add item to the cart (AJAX).
-     */
     public function add(Request $request)
     {
         try {
@@ -50,66 +50,72 @@ class CartController extends Controller
                 'category'   => 'nullable|string',
                 'dateRange'  => 'nullable|string',
             ]);
+
+            $this->cartService->addItem($validated, $validated['quantity'] ?? 1);
+
+            return $this->jsonResponse('Item added to cart');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Cart Add Validation Failed: ', $e->errors());
             throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return response()->json(['success' => false, 'message' => 'Could not add item to cart.'], 500);
         }
-
-        $quantity = $validated['quantity'] ?? 1;
-
-        $this->cartService->addItem($validated, $quantity);
-
-        return $this->jsonResponse('Item added to cart');
     }
 
-    /**
-     * Update item quantity in the cart (AJAX).
-     */
     public function update(Request $request)
     {
-        $request->validate([
-            'product_id' => 'required',
-            'quantity'   => 'required|integer|min:0',
-        ]);
+        try {
+            $request->validate([
+                'product_id' => 'required',
+                'quantity'   => 'required|integer|min:0',
+            ]);
 
-        $this->cartService->updateItem($request->product_id, $request->quantity);
+            $this->cartService->updateItem($request->product_id, $request->quantity);
 
-        return $this->jsonResponse('Cart updated');
+            return $this->jsonResponse('Cart updated');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return response()->json(['success' => false, 'message' => 'Could not update cart.'], 500);
+        }
     }
 
-    /**
-     * Remove item from the cart (AJAX).
-     */
     public function remove(Request $request)
     {
-        $request->validate([
-            'product_id' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'product_id' => 'required',
+            ]);
 
-        $this->cartService->removeItem($request->product_id);
+            $this->cartService->removeItem($request->product_id);
 
-        return $this->jsonResponse('Item removed from cart');
+            return $this->jsonResponse('Item removed from cart');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return response()->json(['success' => false, 'message' => 'Could not remove item from cart.'], 500);
+        }
     }
 
-    /**
-     * Clear the cart (AJAX).
-     */
     public function clear(Request $request)
     {
-        $this->cartService->clearCart();
-
-        return $this->jsonResponse('Cart cleared');
+        try {
+            $this->cartService->clearCart();
+            return $this->jsonResponse('Cart cleared');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return response()->json(['success' => false, 'message' => 'Could not clear cart.'], 500);
+        }
     }
 
-    /**
-     * Helper to return consistent JSON state.
-     */
     private function jsonResponse(string $message)
     {
         return response()->json([
             'success' => true,
             'message' => $message,
-            'cart'    => array_values($this->cartService->getCart()), // Re-index array for JSON
+            'cart'    => array_values($this->cartService->getCart()),
             'total'   => $this->cartService->getTotal(),
             'count'   => $this->cartService->getCount(),
         ]);

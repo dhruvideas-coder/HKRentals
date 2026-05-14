@@ -21,8 +21,13 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.users.index', compact('users'));
+        try {
+            $users = User::orderBy('created_at', 'desc')->paginate(15);
+            return view('admin.users.index', compact('users'));
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return view('admin.users.index', ['users' => collect(), 'error' => 'Could not load users.']);
+        }
     }
 
     public function create()
@@ -32,20 +37,26 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'role' => ['required', Rule::in(['super_admin', 'admin', 'member'])],
-        ]);
+        try {
+            $request->validate([
+                'name'  => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'role'  => ['required', Rule::in(['super_admin', 'admin', 'member'])],
+            ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            // Google auth will handle password or we don't set one
-        ]);
+            User::create([
+                'name'  => $request->name,
+                'email' => $request->email,
+                'role'  => $request->role,
+            ]);
 
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+            return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->back()->withInput()->with('error', 'Could not create user. Please try again.');
+        }
     }
 
     public function edit(User $user)
@@ -59,33 +70,45 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if ($user->id === auth()->id()) {
-            return redirect()->route('admin.users.index')->with('error', 'You cannot update your own role here.');
+        try {
+            if ($user->id === auth()->id()) {
+                return redirect()->route('admin.users.index')->with('error', 'You cannot update your own role here.');
+            }
+
+            $request->validate([
+                'name'  => 'required|string|max:255',
+                'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'role'  => ['required', Rule::in(['super_admin', 'admin', 'member'])],
+            ]);
+
+            $user->update([
+                'name'  => $request->name,
+                'email' => $request->email,
+                'role'  => $request->role,
+            ]);
+
+            return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['user_id' => $user->id]);
+            return redirect()->back()->withInput()->with('error', 'Could not update user. Please try again.');
         }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', Rule::in(['super_admin', 'admin', 'member'])],
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-        ]);
-
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     public function destroy(User $user)
     {
-        if ($user->id === auth()->id()) {
-            return redirect()->route('admin.users.index')->with('error', 'You cannot delete yourself.');
+        try {
+            if ($user->id === auth()->id()) {
+                return redirect()->route('admin.users.index')->with('error', 'You cannot delete yourself.');
+            }
+
+            $user->delete();
+
+            return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['user_id' => $user->id]);
+            return redirect()->back()->with('error', 'Could not delete user. Please try again.');
         }
-
-        $user->delete();
-
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 }
