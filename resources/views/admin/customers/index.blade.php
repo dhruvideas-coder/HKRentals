@@ -2,7 +2,9 @@
     <x-slot:title>Customers</x-slot>
     <x-slot:pageTitle>Customers</x-slot>
 
-<div x-data="{ deleteModalOpen: false, deleteId: null, deleteName: '' }">
+<div x-data="{ deleteModalOpen: false, deleteId: null, deleteName: '' }"
+     x-init="$watch('deleteModalOpen', val => { const m = document.getElementById('admin-content'); m.style.overflow = val ? 'hidden' : ''; })"
+     @keydown.escape.window="deleteModalOpen = false">
 
 {{-- Header --}}
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
@@ -189,25 +191,33 @@
 </div>
 
 {{-- ─── Delete Confirmation Modal ─── --}}
+{{-- Backdrop: own transition so backdrop-filter renders independently --}}
+<template x-teleport="body">
 <div x-show="deleteModalOpen"
      x-cloak
-     class="fixed inset-0 z-[70] flex items-center justify-center p-4"
-     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter="transition-opacity ease-out duration-200"
      x-transition:enter-start="opacity-0"
      x-transition:enter-end="opacity-100"
-     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave="transition-opacity ease-in duration-200"
      x-transition:leave-start="opacity-100"
-     x-transition:leave-end="opacity-0">
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-[69] bg-neutral-900/60 backdrop-blur-md"
+     @click="deleteModalOpen = false"></div>
+</template>
 
-    <div class="absolute inset-0 bg-neutral-900/60 backdrop-blur-md" @click="deleteModalOpen = false"></div>
+{{-- Card: own scale + fade transition --}}
+<template x-teleport="body">
+<div x-show="deleteModalOpen"
+     x-cloak
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-95"
+     x-transition:enter-end="opacity-100 scale-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 scale-100"
+     x-transition:leave-end="opacity-0 scale-95"
+     class="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
 
-    <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95">
+    <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center pointer-events-auto">
 
         {{-- Icon --}}
         <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
@@ -238,6 +248,7 @@
         </div>
     </div>
 </div>
+</template>
 
 </div>{{-- end x-data --}}
 

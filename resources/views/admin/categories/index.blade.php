@@ -2,7 +2,9 @@
     <x-slot:title>Categories Management</x-slot>
     <x-slot:pageTitle>Categories</x-slot>
 
-    <div x-data="{ deleteModalOpen: false, deleteId: '' }">
+    <div x-data="{ deleteModalOpen: false, deleteId: '' }"
+         x-init="$watch('deleteModalOpen', val => { const m = document.getElementById('admin-content'); m.style.overflow = val ? 'hidden' : ''; })"
+         @keydown.escape.window="deleteModalOpen = false">
 
         {{-- Header + Add Button --}}
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
@@ -109,27 +111,41 @@
         </div>
 
         {{-- Delete Confirmation Modal --}}
-        <div x-show="deleteModalOpen" 
+        {{-- Backdrop: own transition so backdrop-filter renders independently --}}
+        <template x-teleport="body">
+        <div x-show="deleteModalOpen"
              x-cloak
-             class="fixed inset-0 z-[70] flex items-center justify-center p-4"
-             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter="transition-opacity ease-out duration-200"
              x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100">
-            
-            <div class="absolute inset-0 bg-neutral-900/60 backdrop-blur-md" @click="deleteModalOpen = false"></div>
-            
-            <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center"
-                 x-transition:enter="transition ease-out duration-300 scale-90"
-                 x-transition:enter-start="opacity-0 scale-90"
-                 x-transition:enter-end="opacity-100 scale-100">
-                
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-[69] bg-neutral-900/60 backdrop-blur-md"
+             @click="deleteModalOpen = false"></div>
+        </template>
+
+        {{-- Card: own scale + fade transition --}}
+        <template x-teleport="body">
+        <div x-show="deleteModalOpen"
+             x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
+
+            <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center pointer-events-auto">
+
                 <div class="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-12">
                     <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </div>
-                
+
                 <h3 class="text-2xl font-bold text-neutral-900 mb-2">Delete Category?</h3>
                 <p class="text-neutral-500 mb-8 px-4">This category will be moved to trash. Products linked to this category may lose their reference.</p>
-                
+
                 <div class="flex flex-col gap-3">
                     <form :action="'{{ route('admin.categories.index') }}/' + deleteId" method="POST" id="deleteCatForm">
                         @csrf
@@ -144,6 +160,7 @@
                 </div>
             </div>
         </div>
+        </template>
 
     </div>
 
