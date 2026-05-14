@@ -74,8 +74,8 @@
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Daily Rental Rate</label>
                             <div class="relative group">
                                 <span class="absolute left-6 top-1/2 -translate-y-1/2 text-neutral-400 font-bold group-focus-within:text-brand-600 transition-colors">$</span>
-                                <input type="number" step="0.01" name="price_per_day" required value="{{ old('price_per_day', $product->price_per_day) }}"
-                                       class="block w-full pl-12 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-900 font-extrabold shadow-sm" 
+                                <input type="number" step="0.01" name="price_per_day" inputmode="decimal" required value="{{ old('price_per_day', $product->price_per_day) }}"
+                                       class="block w-full pl-12 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-900 font-extrabold shadow-sm"
                                        placeholder="0.00" />
                                 @error('price_per_day') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
                             </div>
@@ -83,8 +83,8 @@
 
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Total Units in Stock</label>
-                            <input type="number" name="total_quantity" required value="{{ old('total_quantity', $product->total_quantity) }}"
-                                   class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-900 font-extrabold shadow-sm" 
+                            <input type="number" name="total_quantity" inputmode="numeric" required value="{{ old('total_quantity', $product->total_quantity) }}"
+                                   class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-900 font-extrabold shadow-sm"
                                    placeholder="10" />
                             @error('total_quantity') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
                         </div>

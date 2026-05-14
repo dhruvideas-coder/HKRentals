@@ -173,6 +173,7 @@
                                 <input type="tel"
                                        id="contact_phone"
                                        name="phone"
+                                       inputmode="tel"
                                        value="{{ old('phone') }}"
                                        class="form-input"
                                        placeholder="+1 9312152756" />

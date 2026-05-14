@@ -75,7 +75,7 @@
                             <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 px-1">Max Price <span class="normal-case font-medium">($/day)</span></label>
                             <div class="relative group">
                                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm transition-colors group-focus-within:text-brand-500">$</span>
-                                <input type="number" name="max_price" value="{{ request('max_price') }}" placeholder="Max Price" 
+                                <input type="number" name="max_price" inputmode="decimal" value="{{ request('max_price') }}" placeholder="Max Price"
                                        class="form-input text-sm h-11 pl-8" onchange="this.form.submit()" />
                             </div>
                         </div>

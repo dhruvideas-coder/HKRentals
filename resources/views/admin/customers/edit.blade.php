@@ -69,7 +69,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Phone Number</label>
-                                <input type="text" name="phone"
+                                <input type="tel" name="phone" inputmode="tel"
                                        value="{{ old('phone', $customer->phone) }}"
                                        class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium placeholder-neutral-300 shadow-sm"
                                        placeholder="+1 (555) 000-0000" />

@@ -372,7 +372,7 @@
                         <p class="text-red-500 text-xs mt-1" x-show="errors.email" x-text="errors.email"></p>
                     </div>
                     <div>
-                        <x-input label="Phone" type="tel" x-model="form.phone" placeholder="+1 9312152756" :required="true" />
+                        <x-input label="Phone" type="tel" inputmode="tel" x-model="form.phone" placeholder="+1 9312152756" :required="true" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.phone" x-text="errors.phone"></p>
                     </div>
                     <div class="sm:col-span-2">
@@ -455,7 +455,7 @@
                             <p class="text-red-500 text-xs mt-1" x-show="errors.state" x-text="errors.state"></p>
                         </div>
                         <div>
-                            <x-input label="ZIP" x-model="form.zip" placeholder="37901" :required="true" />
+                            <x-input label="ZIP" inputmode="numeric" x-model="form.zip" placeholder="37901" :required="true" />
                             <p class="text-red-500 text-xs mt-1" x-show="errors.zip" x-text="errors.zip"></p>
                         </div>
                     </div>
@@ -536,10 +536,10 @@
                 </div>
                 <div x-show="form.paymentMethod==='card'" class="space-y-4">
                     <div><label class="form-label">Cardholder Name</label><input type="text" class="form-input" placeholder="Sarah Johnson" /></div>
-                    <div><label class="form-label">Card Number</label><input type="text" class="form-input" placeholder="•••• •••• •••• ••••" maxlength="19" /></div>
+                    <div><label class="form-label">Card Number</label><input type="text" inputmode="numeric" class="form-input" placeholder="•••• •••• •••• ••••" maxlength="19" /></div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="form-label">Expiry</label><input type="text" class="form-input" placeholder="MM / YY" maxlength="7" /></div>
-                        <div><label class="form-label">CVV</label><input type="text" class="form-input" placeholder="•••" maxlength="4" /></div>
+                        <div><label class="form-label">Expiry</label><input type="text" inputmode="numeric" class="form-input" placeholder="MM / YY" maxlength="7" /></div>
+                        <div><label class="form-label">CVV</label><input type="text" inputmode="numeric" class="form-input" placeholder="•••" maxlength="4" /></div>
                     </div>
                     <div class="flex items-center gap-2 bg-green-50 rounded-lg p-3 border border-green-100">
                         <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>

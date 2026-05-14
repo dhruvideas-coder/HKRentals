@@ -83,7 +83,7 @@
                         <div class="pt-6 border-t border-neutral-100">
                             <label for="free_delivery_distance" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Free Delivery Distance</label>
                             <div class="relative">
-                                <input type="number" step="0.01" name="free_delivery_distance" id="free_delivery_distance" value="{{ old('free_delivery_distance', $settings->free_delivery_distance) }}" 
+                                <input type="number" step="0.01" name="free_delivery_distance" id="free_delivery_distance" inputmode="decimal" value="{{ old('free_delivery_distance', $settings->free_delivery_distance) }}"
                                        class="block w-full px-6 pr-12 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold shadow-sm text-lg" required>
                                 <div class="absolute inset-y-0 right-0 pr-6 flex items-center pointer-events-none">
                                     <span class="text-neutral-400 font-bold">km</span>
@@ -99,7 +99,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                                     <span class="text-neutral-500 font-bold">$</span>
                                 </div>
-                                <input type="number" step="0.01" name="charge_per_km" id="charge_per_km" value="{{ old('charge_per_km', $settings->charge_per_km) }}" 
+                                <input type="number" step="0.01" name="charge_per_km" id="charge_per_km" inputmode="decimal" value="{{ old('charge_per_km', $settings->charge_per_km) }}"
                                        class="block w-full pl-10 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold shadow-sm text-lg" required>
                             </div>
                             @error('charge_per_km') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
