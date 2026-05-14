@@ -1,13 +1,16 @@
 <x-layout.app-layout>
-    <x-slot:title>Gold Chiavari Chairs</x-slot>
-    <x-slot:metaDescription>View full details, pricing, and availability for our premium rental items.</x-slot>
+    <x-slot:title>{{ $product->name }}</x-slot>
+    <x-slot:metaDescription>{{ Str::limit($product->description, 160) }}</x-slot>
 
 
 {{-- ══════════════════════════════════════════════════════════
      PRODUCT DETAIL — Full Page
 ══════════════════════════════════════════════════════════ --}}
+@php
+    $mainImage = $product->image ? asset($product->image) : asset('images/products/product-chairs.png');
+@endphp
 <x-section class="bg-cream" aria-label="Product detail" x-data="{
-    activeImage: '{{ asset('images/products/product-chairs.png') }}',
+    activeImage: '{{ $mainImage }}',
     qty: 1,
     startDate: '',
     endDate: '',
@@ -15,11 +18,11 @@
     dec() { if(this.qty > 1) this.qty-- },
     addToCart() {
         Alpine.store('cart').add({
-            id: {{ $product['id'] ?? 1 }},
-            name: '{{ addslashes($product['name'] ?? 'Gold Chiavari Chairs') }}',
+            id: {{ $product->id }},
+            name: '{{ addslashes($product->name) }}',
             image: this.activeImage,
-            category: '{{ $product['cat'] ?? 'Seating' }}',
-            price: {{ $product['price'] ?? 4 }},
+            category: '{{ addslashes($product->category?->name ?? '') }}',
+            price: {{ (float) $product->price_per_day }},
             qty: this.qty,
             dateRange: this.startDate && this.endDate ? this.startDate + ' → ' + this.endDate : null,
         });
@@ -32,8 +35,12 @@
         <a href="{{ route('home') }}" class="hover:text-brand-600 transition-base">Home</a>
         <span>/</span>
         <a href="{{ route('products') }}" class="hover:text-brand-600 transition-base">Products</a>
+        @if($product->category)
         <span>/</span>
-        <span class="text-neutral-700 font-medium">{{ $product['name'] ?? 'Gold Chiavari Chairs' }}</span>
+        <a href="{{ route('products', ['category' => $product->category->slug]) }}" class="hover:text-brand-600 transition-base">{{ $product->category->name }}</a>
+        @endif
+        <span>/</span>
+        <span class="text-neutral-700 font-medium">{{ $product->name }}</span>
     </nav>
 
     <div class="grid lg:grid-cols-2 gap-12 xl:gap-16 items-start">
@@ -44,29 +51,18 @@
             {{-- Main Image --}}
             <div class="aspect-square rounded-2xl overflow-hidden bg-neutral-100 shadow-elevated">
                 <img :src="activeImage"
-                     alt="Product image"
+                     alt="{{ $product->name }}"
                      class="w-full h-full object-cover transition-all duration-500"
                      loading="eager" />
             </div>
 
-            {{-- Thumbnails --}}
-            @php
-            $thumbs = [
-                asset('images/products/product-chairs.png'),
-                asset('images/products/product-arch.png'),
-                asset('images/products/product-tableware.png'),
-                asset('images/products/product-lighting.png'),
-            ];
-            @endphp
+            {{-- Thumbnail — single product image, shown as active --}}
             <div class="grid grid-cols-4 gap-2.5">
-                @foreach($thumbs as $thumb)
-                <button @click="activeImage = '{{ $thumb }}'"
-                        class="aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200"
-                        :class="activeImage === '{{ $thumb }}' ? 'border-brand-500 opacity-100 shadow-sm' : 'border-transparent opacity-60 hover:opacity-85'"
-                        aria-label="View image">
-                    <img src="{{ $thumb }}" alt="" class="w-full h-full object-cover" loading="lazy" />
+                <button @click="activeImage = '{{ $mainImage }}'"
+                        class="aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 border-brand-500 opacity-100 shadow-sm"
+                        aria-label="View product image">
+                    <img src="{{ $mainImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover" loading="lazy" />
                 </button>
-                @endforeach
             </div>
         </div>
 
@@ -76,27 +72,51 @@
             {{-- Title & Badges --}}
             <div>
                 <div class="flex items-center gap-2 mb-3">
-                    <x-badge variant="gold" class="text-xs">{{ $product['cat'] ?? 'Seating' }}</x-badge>
-                    <x-badge variant="available" class="text-xs">✓ Available</x-badge>
+                    @if($product->category)
+                    <x-badge variant="gold" class="text-xs">{{ $product->category->name }}</x-badge>
+                    @endif
+                    <x-badge variant="{{ $product->status === 'available' ? 'available' : 'unavailable' }}" class="text-xs">
+                        {{ $product->status === 'available' ? '✓ Available' : '✗ Unavailable' }}
+                    </x-badge>
                 </div>
                 <h1 class="font-display text-3xl sm:text-4xl font-bold text-neutral-900 leading-tight mb-3">
-                    {{ $product['name'] ?? 'Gold Chiavari Chairs' }}
+                    {{ $product->name }}
                 </h1>
                 <div class="flex items-baseline gap-2">
-                    <span class="font-bold text-brand-600 text-4xl">${{ $product['price'] ?? '4' }}</span>
+                    <span class="font-bold text-brand-600 text-4xl">${{ number_format($product->price_per_day, 2) }}</span>
                     <span class="text-neutral-400 text-lg">/ day</span>
                 </div>
             </div>
 
+            {{-- Attributes --}}
+            @if($product->color || $product->material)
+            <div class="flex flex-wrap gap-3">
+                @if($product->color)
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-sm text-neutral-600 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-neutral-400"></span>{{ $product->color }}
+                </span>
+                @endif
+                @if($product->material)
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-sm text-neutral-600 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-neutral-400"></span>{{ $product->material }}
+                </span>
+                @endif
+            </div>
+            @endif
+
             {{-- Description --}}
+            @if($product->description)
             <div class="prose prose-sm text-neutral-500 leading-relaxed border-t border-neutral-100 pt-6">
-                <p>{{ $product['desc'] ?? 'Elegant gold chiavari chairs with white cushioned seats. Crafted from durable resin with a polished gold finish, these chairs add a touch of luxury to any wedding, gala, or formal event. Perfect for both indoor and outdoor settings.' }}</p>
-                <ul class="mt-4 space-y-1 text-sm text-neutral-500 list-disc list-inside">
-                    <li>Weight capacity: 300 lbs per chair</li>
-                    <li>Dimensions: 36"H × 16"W × 14"D</li>
-                    <li>Available as individual chairs or full table sets</li>
-                    <li>White, ivory, or blush cushion options included</li>
-                </ul>
+                <p>{{ $product->description }}</p>
+            </div>
+            @endif
+
+            {{-- Stock info --}}
+            <div class="flex items-center gap-2 text-sm text-neutral-500 border-t border-neutral-100 pt-4">
+                <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <span>{{ $product->total_quantity }} units available</span>
             </div>
 
             {{-- Date Picker --}}
@@ -112,11 +132,11 @@
                     <span class="w-10 text-center font-bold text-lg text-neutral-800" x-text="qty"></span>
                     <button @click="inc" class="qty-btn" aria-label="Increase quantity">+</button>
                 </div>
-                <x-button @click="addToCart" class="btn-lg flex-1 shadow-glow">
+                <x-button @click="addToCart" class="btn-lg flex-1 shadow-glow" {{ $product->status !== 'available' ? 'disabled' : '' }}>
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    Add to Cart
+                    {{ $product->status === 'available' ? 'Add to Cart' : 'Unavailable' }}
                 </x-button>
             </div>
 
@@ -135,6 +155,7 @@
     </div>
 
     {{-- Related Products --}}
+    @if($related->isNotEmpty())
     <div class="mt-20">
         <div class="flex items-center justify-between mb-8">
             <div>
@@ -143,20 +164,11 @@
             </div>
             <a href="{{ route('products') }}" class="btn btn-outline btn-sm hidden sm:inline-flex">View All</a>
         </div>
-
-        @php
-        $related = [
-            ['id'=>2,'image'=>asset('images/products/product-arch.png'),   'name'=>'Floral Wedding Arch', 'cat'=>'Ceremony', 'price'=>120,'desc'=>'Stunning floral arch with fresh white roses.','available'=>true],
-            ['id'=>3,'image'=>asset('images/products/product-tableware.png'),'name'=>'Luxury Table Setting','cat'=>'Tableware','price'=>18,'desc'=>'Complete premium table setting with gold dinnerware.','available'=>true],
-            ['id'=>4,'image'=>asset('images/products/product-lighting.png'), 'name'=>'String Light Canopy','cat'=>'Lighting',  'price'=>85,'desc'=>'Romantic Edison bulb canopy for outdoor receptions.','available'=>false],
-            ['id'=>5,'image'=>asset('images/products/product-lounge.png'),   'name'=>'White Lounge Suite', 'cat'=>'Furniture','price'=>200,'desc'=>'Luxurious white tufted sofa and armchair set.','available'=>true],
-        ];
-        @endphp
         <x-product.grid :products="$related" />
     </div>
+    @endif
 
 </x-container>
 </x-section>
 
 </x-layout.app-layout>
-

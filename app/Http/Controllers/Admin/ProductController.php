@@ -75,7 +75,7 @@ class ProductController extends Controller
             'color' => 'nullable|string|max:100',
             'material' => 'nullable|string|max:100',
             'status' => 'required|string|in:available,unavailable',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         if (!$request->has('slug')) {
@@ -115,7 +115,7 @@ class ProductController extends Controller
             'color' => 'nullable|string|max:100',
             'material' => 'nullable|string|max:100',
             'status' => 'required|string|in:available,unavailable',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         if ($request->name !== $product->name) {

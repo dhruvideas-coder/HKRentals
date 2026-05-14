@@ -71,6 +71,14 @@ class ProductController extends Controller
     public function show(string $slug): View
     {
         $product = \App\Models\Product::with('category')->where('slug', $slug)->firstOrFail();
-        return view('pages.product-detail', compact('product'));
+
+        $related = \App\Models\Product::with('category')
+            ->where('id', '!=', $product->id)
+            ->where('category_id', $product->category_id)
+            ->where('status', 'available')
+            ->limit(4)
+            ->get();
+
+        return view('pages.product-detail', compact('product', 'related'));
     }
 }

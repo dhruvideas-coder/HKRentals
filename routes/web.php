@@ -88,8 +88,13 @@ Route::prefix('admin')
         Route::get('/orders/{order}',    [OrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
-        Route::get('/customers',          [CustomerController::class, 'index'])->name('customers.index');
-        Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+        Route::get('/customers',                       [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/create',              [CustomerController::class, 'create'])->name('customers.create');
+        Route::post('/customers',                    [CustomerController::class, 'store'])->name('customers.store');
+        Route::get('/customers/{customer}',          [CustomerController::class, 'show'])->name('customers.show');
+        Route::get('/customers/{customer}/edit',     [CustomerController::class, 'edit'])->name('customers.edit');
+        Route::put('/customers/{customer}',          [CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{customer}',       [CustomerController::class, 'destroy'])->name('customers.destroy');
 
         // Profile
         Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
@@ -111,43 +116,98 @@ Route::prefix('admin')
 Route::get('/fix-images', function () {
     $results = [];
 
-    // 1. Move files if they exist in storage but not in public
-    $sourcePath = storage_path('app/public/categories');
-    $destPath = public_path('images/categories');
-
-    if (!File::exists($destPath)) {
-        File::makeDirectory($destPath, 0755, true);
-        $results[] = "Created directory: public/images/categories";
-    }
-
-    if (File::exists($sourcePath)) {
-        $files = File::files($sourcePath);
-        foreach ($files as $file) {
-            $filename = $file->getFilename();
-            if (!File::exists($destPath . '/' . $filename)) {
-                File::copy($file->getRealPath(), $destPath . '/' . $filename);
-                $results[] = "Copied: {$filename} to public/images/categories";
-            }
+    // ── Helper: ensure directory exists ──────────────────────────────
+    $ensureDir = function (string $dir) use (&$results) {
+        if (!File::exists($dir)) {
+            File::makeDirectory($dir, 0755, true);
+            $results[] = "Created directory: {$dir}";
         }
-    } else {
-        $results[] = "Source storage path not found or already moved.";
+    };
+
+    // ── 1. Products ───────────────────────────────────────────────────
+    $productsPublic  = public_path('images/products');
+    $productsStorage = storage_path('app/public/products');
+    $ensureDir($productsPublic);
+
+    // 1a. Move any files still sitting in storage/app/public/products
+    if (File::exists($productsStorage)) {
+        foreach (File::files($productsStorage) as $file) {
+            $dest = $productsPublic . '/' . $file->getFilename();
+            if (!File::exists($dest)) {
+                File::copy($file->getRealPath(), $dest);
+                $results[] = "Moved product image: {$file->getFilename()}";
+            } else {
+                $results[] = "Already in public, removed duplicate: {$file->getFilename()}";
+            }
+            File::delete($file->getRealPath());
+        }
     }
 
-    // 2. Update Database paths
-    try {
-        $count = \App\Models\Category::where('image', 'like', 'storage/categories/%')
-            ->get()
-            ->each(function($category) {
-                $category->image = str_replace('storage/categories/', 'images/categories/', $category->image);
-                $category->save();
-            })->count();
-        
-        $results[] = "Updated {$count} database records to use public/images path.";
-    } catch (\Exception $e) {
-        $results[] = "DB Update Error: " . $e->getMessage();
+    // 1b. Fix DB records: bare filename → images/products/filename
+    $bareCount = \App\Models\Product::whereNotNull('image')
+        ->where('image', 'not like', 'images/%')
+        ->where('image', 'not like', 'storage/%')
+        ->where('image', 'not like', 'http%')
+        ->get()
+        ->each(function ($p) {
+            $p->image = 'images/products/' . $p->image;
+            $p->save();
+        })->count();
+    $results[] = "Products — fixed {$bareCount} bare-filename records";
+
+    // 1c. Fix DB records: storage/products/… → images/products/…
+    $storageCount = \App\Models\Product::where('image', 'like', 'storage/products/%')
+        ->orWhere('image', 'like', 'storage/%')
+        ->get()
+        ->each(function ($p) {
+            // storage/app/public/products/x.webp  OR  storage/products/x.webp
+            $p->image = preg_replace('#storage(/app/public)?/products/#', 'images/products/', $p->image);
+            $p->save();
+        })->count();
+    $results[] = "Products — fixed {$storageCount} storage-path records";
+
+    // ── 2. Categories ─────────────────────────────────────────────────
+    $categoriesPublic  = public_path('images/categories');
+    $categoriesStorage = storage_path('app/public/categories');
+    $ensureDir($categoriesPublic);
+
+    if (File::exists($categoriesStorage)) {
+        foreach (File::files($categoriesStorage) as $file) {
+            $dest = $categoriesPublic . '/' . $file->getFilename();
+            if (!File::exists($dest)) {
+                File::copy($file->getRealPath(), $dest);
+                $results[] = "Moved category image: {$file->getFilename()}";
+            } else {
+                $results[] = "Already in public, removed duplicate: {$file->getFilename()}";
+            }
+            File::delete($file->getRealPath());
+        }
     }
 
-    return response()->json($results);
+    $catBareCount = \App\Models\Category::whereNotNull('image')
+        ->where('image', 'not like', 'images/%')
+        ->where('image', 'not like', 'storage/%')
+        ->where('image', 'not like', 'http%')
+        ->get()
+        ->each(function ($c) {
+            $c->image = 'images/categories/' . $c->image;
+            $c->save();
+        })->count();
+    $results[] = "Categories — fixed {$catBareCount} bare-filename records";
+
+    $catStorageCount = \App\Models\Category::where('image', 'like', 'storage/categories/%')
+        ->orWhere('image', 'like', 'storage/%')
+        ->get()
+        ->each(function ($c) {
+            $c->image = preg_replace('#storage(/app/public)?/categories/#', 'images/categories/', $c->image);
+            $c->save();
+        })->count();
+    $results[] = "Categories — fixed {$catStorageCount} storage-path records";
+
+    // ── 3. Summary ────────────────────────────────────────────────────
+    $results[] = "Done. Refresh the admin panel to see images.";
+
+    return response()->json($results, 200, [], JSON_PRETTY_PRINT);
 });
 
 /*

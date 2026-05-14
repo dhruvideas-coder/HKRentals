@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 150,
             'color'         => 'Gold',
             'material'      => 'Wood',
-            'image'         => 'product-chairs.png',          // existing
+            'image'         => 'images/products/product-chairs.png',
             'status'        => 'available',
             'description'   => 'Elegant gold chiavari chairs with white cushioned seats. Perfect for weddings and formal events.',
         ]);
@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 200,
             'color'         => 'White',
             'material'      => 'Plastic',
-            'image'         => 'chair-folding-white.png',
+            'image'         => 'images/products/chair-folding-white.png',
             'status'        => 'available',
             'description'   => 'Lightweight white folding chairs ideal for outdoor ceremonies, receptions, and garden parties.',
         ]);
@@ -67,7 +67,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 80,
             'color'         => 'Silver',
             'material'      => 'Metal',
-            'image'         => 'chair-crossback-silver.png',
+            'image'         => 'images/products/chair-crossback-silver.png',
             'status'        => 'available',
             'description'   => 'Brushed silver metal cross-back dining chair with a linen cushion. A rustic-modern favourite for barn and garden weddings.',
         ]);
@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 100,
             'color'         => 'Black',
             'material'      => 'Wood',
-            'image'         => 'chair-bentwood-black.png',
+            'image'         => 'images/products/chair-bentwood-black.png',
             'status'        => 'available',
             'description'   => 'Sleek black bentwood chair with timeless curved lines. Versatile for elegant banquets and cocktail events.',
         ]);
@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 60,
             'color'         => 'Rose Gold',
             'material'      => 'Acrylic',
-            'image'         => 'chair-ghost-rosegold.png',
+            'image'         => 'images/products/chair-ghost-rosegold.png',
             'status'        => 'available',
             'description'   => 'Modern transparent acrylic ghost chair with a rose gold metallic sheen. Stunning for luxury and contemporary wedding receptions.',
         ]);
@@ -109,7 +109,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 3,
             'color'         => 'White',
             'material'      => 'Metal',
-            'image'         => 'product-arch.png',            // existing
+            'image'         => 'images/products/product-arch.png',
             'status'        => 'available',
             'description'   => 'Stunning floral arch with fresh white roses and eucalyptus. Makes a breathtaking ceremony backdrop.',
         ]);
@@ -122,7 +122,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 4,
             'color'         => 'Ivory',
             'material'      => 'Wood',
-            'image'         => 'arch-rustic-wooden.png',
+            'image'         => 'images/products/arch-rustic-wooden.png',
             'status'        => 'available',
             'description'   => 'Handcrafted rustic wooden arch with a natural finish. A timeless choice for barn and outdoor weddings.',
         ]);
@@ -135,7 +135,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 5,
             'color'         => 'Gold',
             'material'      => 'Metal',
-            'image'         => 'arch-gold-metal.png',
+            'image'         => 'images/products/arch-gold-metal.png',
             'status'        => 'available',
             'description'   => 'Sleek geometric gold metal arch. The perfect frame for your vows, draped with florals or fabric.',
         ]);
@@ -151,7 +151,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 120,
             'color'         => 'Gold',
             'material'      => 'Glass',
-            'image'         => 'product-tableware.png',       // existing
+            'image'         => 'images/products/product-tableware.png',
             'status'        => 'available',
             'description'   => 'Complete premium table setting with white and gold dinnerware, crystal glasses, and silverware.',
         ]);
@@ -164,7 +164,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 200,
             'color'         => 'Silver',
             'material'      => 'Metal',
-            'image'         => 'tableware-silver-charger.png',
+            'image'         => 'images/products/tableware-silver-charger.png',
             'status'        => 'available',
             'description'   => 'Elegant silver charger plates with a beaded rim. Set of 10, perfect for formal dinner reception tables.',
         ]);
@@ -177,7 +177,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 150,
             'color'         => 'Silver',
             'material'      => 'Glass',
-            'image'         => 'tableware-crystal-glass.png',
+            'image'         => 'images/products/tableware-crystal-glass.png',
             'status'        => 'available',
             'description'   => 'Sparkling crystal wine and champagne glasses. Set of 12 for an opulent table presentation.',
         ]);
@@ -193,7 +193,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 20,
             'color'         => 'Gold',
             'material'      => 'Metal',
-            'image'         => 'product-lighting.png',        // existing
+            'image'         => 'images/products/product-lighting.png',
             'status'        => 'available',
             'description'   => 'Warm Edison-style bistro lights to create a magical atmosphere for your evening event.',
         ]);
@@ -206,7 +206,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 15,
             'color'         => 'White',
             'material'      => 'Metal',
-            'image'         => 'lighting-fairy-curtain.png',
+            'image'         => 'images/products/lighting-fairy-curtain.png',
             'status'        => 'available',
             'description'   => 'Shimmering white fairy light curtain backdrop. Perfect for photo walls and head tables.',
         ]);
@@ -219,7 +219,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 10,
             'color'         => 'Gold',
             'material'      => 'Metal',
-            'image'         => 'lighting-gold-lanterns.png',
+            'image'         => 'images/products/lighting-gold-lanterns.png',
             'status'        => 'available',
             'description'   => 'Cluster of varying-height gold lanterns with warm candle-effect lights. Stunning centrepiece or aisle decor.',
         ]);
@@ -235,7 +235,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 4,
             'color'         => 'Ivory',
             'material'      => 'Fabric',
-            'image'         => 'product-lounge.png',          // existing
+            'image'         => 'images/products/product-lounge.png',
             'status'        => 'available',
             'description'   => 'Sophisticated ivory velvet sofa with two matching armchairs and a gold coffee table.',
         ]);
@@ -248,7 +248,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 12,
             'color'         => 'White',
             'material'      => 'Wood',
-            'image'         => 'furniture-farm-table.png',
+            'image'         => 'images/products/furniture-farm-table.png',
             'status'        => 'available',
             'description'   => 'Classic white farm-style rectangular table. Seats up to 8 guests. Great for outdoor receptions.',
         ]);
@@ -261,7 +261,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 5,
             'color'         => 'Gold',
             'material'      => 'Metal',
-            'image'         => 'furniture-sweetheart-table.png',
+            'image'         => 'images/products/furniture-sweetheart-table.png',
             'status'        => 'available',
             'description'   => 'Elegant gold sweetheart table for the bride and groom. Features a curved design with a draped satin cloth.',
         ]);
@@ -277,7 +277,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 6,
             'color'         => 'Ivory',
             'material'      => 'Wood',
-            'image'         => 'product-backdrop.png',        // existing
+            'image'         => 'images/products/product-backdrop.png',
             'status'        => 'available',
             'description'   => 'Beautifully aged vintage wood backdrop, perfect for photo booths or head tables.',
         ]);
@@ -290,7 +290,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 20,
             'color'         => 'Gold',
             'material'      => 'Metal',
-            'image'         => 'decor-gold-sphere.png',
+            'image'         => 'images/products/decor-gold-sphere.png',
             'status'        => 'available',
             'description'   => 'Striking gold geometric sphere centrepiece. Available in multiple sizes to suit any table layout.',
         ]);
@@ -303,7 +303,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 4,
             'color'         => 'White',
             'material'      => 'Fabric',
-            'image'         => 'decor-floral-wall.png',
+            'image'         => 'images/products/decor-floral-wall.png',
             'status'        => 'available',
             'description'   => 'Lush white artificial floral wall panel. An Instagram-worthy backdrop for any celebration.',
         ]);
@@ -316,7 +316,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 50,
             'color'         => 'Rose Gold',
             'material'      => 'Metal',
-            'image'         => 'decor-rosegold-candles.png',
+            'image'         => 'images/products/decor-rosegold-candles.png',
             'status'        => 'available',
             'description'   => 'Set of 5 rose gold pillar candle holders in varying heights. Creates a romantic, warm ambiance.',
         ]);
@@ -330,7 +330,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 10,
             'color'         => 'Ivory',
             'material'      => 'Metal',
-            'image'         => 'ceremony-unity-candle.png',
+            'image'         => 'images/products/ceremony-unity-candle.png',
             'status'        => 'available',
             'description'   => 'Elegant ivory unity candle set on silver metal stands. A meaningful and beautiful addition to any wedding ceremony.',
         ]);
@@ -343,7 +343,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 300,
             'color'         => 'Gold',
             'material'      => 'Metal',
-            'image'         => 'tableware-gold-flatware.png',
+            'image'         => 'images/products/tableware-gold-flatware.png',
             'status'        => 'available',
             'description'   => 'Gleaming gold-plated flatware set (fork, knife, spoon). Adds a regal touch to any reception table.',
         ]);
@@ -356,7 +356,7 @@ class DatabaseSeeder extends Seeder
             'total_quantity' => 16,
             'color'         => 'Black',
             'material'      => 'Plastic',
-            'image'         => 'product-lighting.png',
+            'image'         => 'images/products/product-lighting.png',
             'status'        => 'available',
             'description'   => 'Sleek black LED uplighting fixtures that wash venue walls in warm colour. Set of 4, wireless and battery-powered.',
         ]);

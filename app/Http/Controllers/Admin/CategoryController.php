@@ -35,7 +35,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:10',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -68,7 +68,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:10',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         if ($request->name !== $category->name) {

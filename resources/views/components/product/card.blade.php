@@ -18,7 +18,7 @@
 
     {{-- Image --}}
     <div class="relative overflow-hidden aspect-[4/3] flex-shrink-0">
-        <img src="{{ $image ?: asset('images/product-chairs.png') }}"
+        <img src="{{ $image ?: asset('images/products/product-chairs.png') }}"
              alt="{{ $name }}"
              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
              loading="lazy" />
