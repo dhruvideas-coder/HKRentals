@@ -139,7 +139,7 @@
                             </a>
                             {{-- Delete --}}
                             <button type="button"
-                                    @click="deleteId = '{{ $customer->id }}'; deleteName = '{{ addslashes($customer->name) }}'; deleteModalOpen = true"
+                                    @click="deleteName = '{{ addslashes($customer->name) }}'; deleteModalOpen = true; document.getElementById('deleteCustomerForm').action = '/admin/customers/{{ $customer->id }}'"
                                     class="p-2 rounded-lg bg-neutral-50 text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                                     title="Delete customer">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -191,7 +191,7 @@
 </div>
 
 {{-- ─── Delete Confirmation Modal ─── --}}
-{{-- Backdrop: own transition so backdrop-filter renders independently --}}
+{{-- Backdrop --}}
 <template x-teleport="body">
 <div x-show="deleteModalOpen"
      x-cloak
@@ -205,7 +205,7 @@
      @click="deleteModalOpen = false"></div>
 </template>
 
-{{-- Card: own scale + fade transition --}}
+{{-- Card --}}
 <template x-teleport="body">
 <div x-show="deleteModalOpen"
      x-cloak
@@ -233,7 +233,7 @@
         <p class="text-sm text-neutral-400 mb-8 px-2">Their orders will be kept but unlinked. This action cannot be undone.</p>
 
         <div class="flex flex-col gap-3">
-            <form :action="'{{ url('admin/customers') }}/' + deleteId" method="POST">
+            <form id="deleteCustomerForm" action="" method="POST">
                 @csrf
                 @method('DELETE')
                 <button type="submit"
