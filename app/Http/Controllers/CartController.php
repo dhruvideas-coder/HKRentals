@@ -51,6 +51,18 @@ class CartController extends Controller
                 'dateRange'  => 'nullable|string',
             ]);
 
+            $product = \App\Models\Product::find($validated['product_id']);
+            if ($product) {
+                $currentQty = $this->cartService->getCart()[$validated['product_id']]['quantity'] ?? 0;
+                $addQty = $validated['quantity'] ?? 1;
+                if ($currentQty + $addQty > $product->total_quantity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Only {$product->total_quantity} in stock for \"{$product->name}\". You already have {$currentQty} in your cart.",
+                    ], 422);
+                }
+            }
+
             $this->cartService->addItem($validated, $validated['quantity'] ?? 1);
 
             return $this->jsonResponse('Item added to cart');
@@ -69,6 +81,16 @@ class CartController extends Controller
                 'product_id' => 'required',
                 'quantity'   => 'required|integer|min:0',
             ]);
+
+            if ($request->quantity > 0) {
+                $product = \App\Models\Product::find($request->product_id);
+                if ($product && $request->quantity > $product->total_quantity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Only {$product->total_quantity} in stock for \"{$product->name}\".",
+                    ], 422);
+                }
+            }
 
             $this->cartService->updateItem($request->product_id, $request->quantity);
 

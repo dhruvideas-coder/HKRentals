@@ -79,6 +79,17 @@ class CheckoutController extends Controller
                 }
             }
 
+            // Stock validation before creating order
+            foreach ($this->cartService->getCart() as $item) {
+                $product = \App\Models\Product::find($item['product_id']);
+                if ($product && $item['quantity'] > $product->total_quantity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Only {$product->total_quantity} in stock for \"{$product->name}\". Please update your cart.",
+                    ], 422);
+                }
+            }
+
             $order = Order::create([
                 'customer_id'      => $customer->id,
                 'customer_name'    => $fullName,

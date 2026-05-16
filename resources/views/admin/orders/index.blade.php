@@ -8,11 +8,18 @@
         <h2 class="font-display text-3xl font-bold text-neutral-900">Orders</h2>
         <p class="text-neutral-500 mt-1">Track and manage all rental orders</p>
     </div>
-    <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}"
-       class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-neutral-200 text-neutral-700 rounded-xl font-semibold text-sm hover:bg-neutral-50 hover:border-neutral-300 transition-all shadow-sm">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Export CSV
-    </a>
+    <div class="flex items-center gap-3 w-full sm:w-auto">
+        <a href="{{ route('admin.orders.create') }}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-all shadow-sm shadow-brand-200">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Book Order
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-neutral-200 text-neutral-700 rounded-xl font-semibold text-sm hover:bg-neutral-50 hover:border-neutral-300 transition-all shadow-sm">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Export CSV
+        </a>
+    </div>
 </div>
 
 {{-- Stat chips --}}

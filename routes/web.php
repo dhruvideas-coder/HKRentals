@@ -87,6 +87,9 @@ Route::prefix('admin')
 
         // Business
         Route::get('/orders',            [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/create',     [OrderController::class, 'create'])->name('orders.create');
+        Route::post('/orders',           [OrderController::class, 'store'])->name('orders.store');
+        Route::get('/orders/products-by-category', [OrderController::class, 'productsByCategory'])->name('orders.products');
         Route::get('/orders/{order}',    [OrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
