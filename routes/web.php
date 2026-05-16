@@ -82,6 +82,8 @@ Route::prefix('admin')
 
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
         Route::get('categories-list', fn() => redirect()->route('admin.categories.index'))->name('categories'); // Alias
+        Route::get('categories/{category}/assign-products',  [\App\Http\Controllers\Admin\CategoryController::class, 'showAssignProducts'])->name('categories.assign-products.show');
+        Route::post('categories/{category}/assign-products', [\App\Http\Controllers\Admin\CategoryController::class, 'assignProducts'])->name('categories.assign-products');
 
         // Business
         Route::get('/orders',            [OrderController::class, 'index'])->name('orders.index');

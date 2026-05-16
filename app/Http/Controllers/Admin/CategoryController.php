@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
@@ -126,6 +127,62 @@ class CategoryController extends Controller
         } catch (\Throwable $e) {
             $this->logError(__FUNCTION__, $e);
             return redirect()->back()->with('error', 'Could not delete category. Please try again.');
+        }
+    }
+
+    public function showAssignProducts(Request $request, Category $category)
+    {
+        try {
+            $search    = trim($request->query('search', ''));
+            $filterCat = $request->query('filter_category', '');
+
+            $query = Product::with('category')->orderBy('id', 'desc');
+
+            if ($search !== '') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            if (is_numeric($filterCat) && (int) $filterCat > 0) {
+                $query->where('category_id', (int) $filterCat);
+            }
+
+            $products      = $query->paginate(10)->withQueryString();
+            $allCategories = \App\Models\Category::orderBy('name', 'asc')->get();
+            $total         = Product::count();
+
+            return view('admin.categories.assign-products', compact(
+                'category', 'products', 'allCategories', 'search', 'filterCat', 'total'
+            ));
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->route('admin.categories.index')
+                ->with('error', 'Could not load products for assignment.');
+        }
+    }
+
+    public function assignProducts(Request $request, Category $category)
+    {
+        try {
+            $validated = $request->validate([
+                'product_ids'   => 'required|array|min:1',
+                'product_ids.*' => 'integer|exists:products,id',
+            ]);
+
+            $count = Product::whereIn('id', $validated['product_ids'])
+                ->update(['category_id' => $category->id]);
+
+            $label = Str::plural('product', $count);
+
+            return redirect()->route('admin.categories.index')
+                ->with('success', "{$count} {$label} assigned to \"{$category->name}\" successfully.");
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e);
+            return redirect()->back()->with('error', 'Could not assign products. Please try again.');
         }
     }
 }
