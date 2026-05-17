@@ -23,9 +23,10 @@
 
             {{-- Main Content --}}
             <div class="lg:col-span-2 space-y-8">
+
                 {{-- Basic Information Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="text-lg font-bold text-neutral-800">Essential Information</h3>
                         <p class="text-sm text-neutral-400 mt-1">Provide the core details of your rental item.</p>
                     </div>
@@ -33,7 +34,7 @@
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Product Title</label>
                             <input type="text" name="name" required value="{{ old('name') }}"
-                                   class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold placeholder-neutral-300 shadow-sm" 
+                                   class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold placeholder-neutral-300 shadow-sm"
                                    placeholder="e.g. Victorian Gold Throne Chair" />
                             @error('name') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
                         </div>
@@ -41,7 +42,7 @@
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Detailed Description</label>
                             <textarea name="description" rows="6"
-                                      class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium resize-none shadow-sm" 
+                                      class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium resize-none shadow-sm"
                                       placeholder="Describe the elegance, size, and unique features of this item...">{{ old('description') }}</textarea>
                         </div>
 
@@ -49,13 +50,13 @@
                             <div>
                                 <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Primary Color</label>
                                 <input type="text" name="color" value="{{ old('color') }}"
-                                       class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium shadow-sm" 
+                                       class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium shadow-sm"
                                        placeholder="e.g. Rose Gold" />
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Material</label>
                                 <input type="text" name="material" value="{{ old('material') }}"
-                                       class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium shadow-sm" 
+                                       class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium shadow-sm"
                                        placeholder="e.g. Velvet & Steel" />
                             </div>
                         </div>
@@ -64,7 +65,7 @@
 
                 {{-- Pricing & Inventory Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="text-lg font-bold text-neutral-800">Pricing & Inventory</h3>
                         <p class="text-sm text-neutral-400 mt-1">Manage rental rates and stock levels.</p>
                     </div>
@@ -76,10 +77,9 @@
                                 <input type="number" step="0.01" name="price_per_day" inputmode="decimal" required value="{{ old('price_per_day') }}"
                                        class="block w-full pl-12 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-900 font-extrabold shadow-sm"
                                        placeholder="0.00" />
-                                 @error('price_per_day') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
+                                @error('price_per_day') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Total Units in Stock</label>
                             <input type="number" name="total_quantity" inputmode="numeric" required value="{{ old('total_quantity') }}"
@@ -89,14 +89,126 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Specifications Card --}}
+                @php
+                    $existingSpecs = [];
+                    if (old('spec_keys')) {
+                        foreach (old('spec_keys', []) as $i => $key) {
+                            $existingSpecs[] = ['key' => $key, 'val' => old('spec_values', [])[$i] ?? ''];
+                        }
+                    }
+                @endphp
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden"
+                     x-data="{
+                        specs: {{ json_encode($existingSpecs) }},
+                        addSpec() { this.specs.push({ key: '', val: '' }); }
+                     }">
+                    <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
+                        <h3 class="text-lg font-bold text-neutral-800">Specifications</h3>
+                        <p class="text-sm text-neutral-400 mt-1">Add technical details like dimensions, weight, materials, etc.</p>
+                    </div>
+                    <div class="p-6 md:p-10">
+                        <div class="grid grid-cols-[1fr_1fr_2rem] gap-3 mb-3 px-1">
+                            <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Attribute</span>
+                            <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Value</span>
+                            <span></span>
+                        </div>
+
+                        <template x-for="(spec, i) in specs" :key="i">
+                            <div class="grid grid-cols-[1fr_1fr_2rem] gap-3 mb-3 items-center">
+                                <input type="text" name="spec_keys[]" x-model="specs[i].key"
+                                       class="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium text-sm shadow-sm"
+                                       placeholder="e.g. Height" />
+                                <input type="text" name="spec_values[]" x-model="specs[i].val"
+                                       class="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium text-sm shadow-sm"
+                                       placeholder="e.g. 120 cm" />
+                                <button type="button" @click="specs.splice(i, 1)"
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all text-lg font-bold">
+                                    &times;
+                                </button>
+                            </div>
+                        </template>
+
+                        <div x-show="specs.length === 0" class="text-center py-6 text-neutral-400 text-sm">
+                            No specifications added yet.
+                        </div>
+
+                        <button type="button" @click="addSpec()"
+                                class="mt-4 w-full py-3 border-2 border-dashed border-neutral-200 rounded-2xl text-sm font-bold text-neutral-400 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50/30 transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            Add Specification
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Gallery Images Card --}}
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden"
+                     x-data="{ previews: [], add(files) { Array.from(files).forEach(f => this.previews.push({ src: URL.createObjectURL(f) })); } }">
+                    <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
+                        <div class="flex items-center justify-between flex-wrap gap-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-neutral-800">Gallery Images</h3>
+                                <p class="text-sm text-neutral-400 mt-1">Extra product photos shown as thumbnails on the product page</p>
+                            </div>
+                            <span class="text-xs font-bold text-neutral-500 bg-neutral-100 px-3 py-1.5 rounded-full">Up to 8 images</span>
+                        </div>
+                    </div>
+                    <div class="p-6 md:p-10 space-y-6">
+
+                        {{-- New images preview --}}
+                        <div x-show="previews.length > 0" x-cloak>
+                            <p class="text-[10px] font-bold text-brand-600 uppercase tracking-wider mb-4">Selected — ready to upload</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                <template x-for="(img, i) in previews" :key="i">
+                                    <div class="relative group">
+                                        <div class="aspect-square rounded-2xl overflow-hidden ring-2 ring-brand-400 shadow-sm">
+                                            <img :src="img.src" class="w-full h-full object-cover">
+                                        </div>
+                                        <span class="absolute top-2 left-2 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
+                                        <button type="button" @click="previews.splice(i, 1)"
+                                                class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full text-sm font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg">
+                                            ×
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Drop zone --}}
+                        <input type="file" name="gallery_images[]" multiple x-ref="galleryInput" class="hidden"
+                               @change="add($event.target.files)" accept="image/jpeg,image/png,image/webp">
+                        <div @click="$refs.galleryInput.click()"
+                             @dragover.prevent
+                             @drop.prevent="add($event.dataTransfer.files)"
+                             class="group cursor-pointer border-2 border-dashed border-neutral-200 rounded-2xl p-8 text-center hover:border-brand-400 hover:bg-brand-50/30 transition-all duration-200">
+                            <div class="w-14 h-14 bg-neutral-100 group-hover:bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-colors duration-200">
+                                <svg class="w-7 h-7 text-neutral-400 group-hover:text-brand-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold text-neutral-700 group-hover:text-brand-700 transition-colors">Click to upload or drag & drop</p>
+                            <p class="text-xs text-neutral-400 mt-1">JPG, PNG, WebP • Max 4MB each • Up to 8 images</p>
+                            <div class="mt-3 inline-flex items-center gap-1.5 bg-brand-50 text-brand-600 text-xs font-bold px-4 py-1.5 rounded-full"
+                                 x-show="previews.length > 0" x-cloak>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <span x-text="previews.length + ' file(s) selected'"></span>
+                            </div>
+                        </div>
+                        @error('gallery_images.*') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
+
+                    </div>
+                </div>
+
             </div>
 
-            {{-- Sidebar Content --}}
+            {{-- Sidebar --}}
             <div class="space-y-8">
-                {{-- Media Card --}}
+
+                {{-- Main Image Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
-                        <h3 class="font-bold text-neutral-800">Product Image</h3>
+                    <div class="px-6 md:px-8 pt-6 border-b border-neutral-50 bg-neutral-50/30">
+                        <h3 class="font-bold text-neutral-800">Main Image</h3>
                     </div>
                     <div class="p-6 md:p-8" x-data="{ preview: null }">
                         <input type="file" name="image" id="image_upload" class="hidden" @change="preview = URL.createObjectURL($event.target.files[0])">
@@ -111,7 +223,7 @@
                                             <svg class="w-8 h-8 text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         </div>
                                         <p class="text-sm font-bold text-neutral-700">Click to Upload</p>
-                                        <p class="text-[10px] text-neutral-400 mt-1 uppercase tracking-widest">JPG, PNG, WebP • 2MB</p>
+                                        <p class="text-[10px] text-neutral-400 mt-1 uppercase tracking-widest">JPG, PNG, WebP • 4MB</p>
                                     </div>
                                 </template>
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" x-show="preview">
@@ -125,7 +237,7 @@
 
                 {{-- Classification Card --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-8 pt-6 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="font-bold text-neutral-800">Classification</h3>
                     </div>
                     <div class="p-6 md:p-8 space-y-6">
@@ -174,6 +286,7 @@
                         </a>
                     </div>
                 </div>
+
             </div>
         </form>
     </div>

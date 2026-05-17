@@ -34,7 +34,7 @@
 
                 {{-- Personal Information --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="text-lg font-bold text-neutral-800">Personal Information</h3>
                         <p class="text-sm text-neutral-400 mt-1">Basic details to identify the customer.</p>
                     </div>
@@ -60,9 +60,10 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Phone Number</label>
-                                <input type="tel" name="phone" inputmode="tel" value="{{ old('phone') }}"
+                                <input type="tel" name="phone" id="field_phone" inputmode="tel" value="{{ old('phone') }}" maxlength="17"
                                        class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium placeholder-neutral-300 shadow-sm"
-                                       placeholder="+1 (555) 000-0000" />
+                                       placeholder="+1 (555) 000-0000"
+                                       oninput="formatUSPhone(this)" />
                                 @error('phone') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
@@ -81,7 +82,7 @@
 
                 {{-- Map Location --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="text-lg font-bold text-neutral-800">Map Location</h3>
                         <p class="text-sm text-neutral-400 mt-1">Search for an address or click anywhere on the map to drop a pin.</p>
                     </div>
@@ -165,7 +166,7 @@
 
                 {{-- Avatar Preview --}}
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-                    <div class="px-6 md:px-8 py-6 border-b border-neutral-50 bg-neutral-50/30">
+                    <div class="px-6 md:px-8 pt-6 border-b border-neutral-50 bg-neutral-50/30">
                         <h3 class="font-bold text-neutral-800">Preview</h3>
                     </div>
                     <div class="p-6 md:p-8 flex flex-col items-center text-center">
@@ -214,6 +215,24 @@
 
     {{-- ─── Scripts ─── --}}
     <script>
+    // US phone formatter: +1 (XXX) XXX-XXXX
+    function formatUSPhone(input) {
+        let digits = input.value.replace(/\D/g, '');
+        if (digits.startsWith('1')) digits = digits.slice(1);
+        digits = digits.slice(0, 10);
+        let formatted = '';
+        if (digits.length === 0) {
+            formatted = '';
+        } else if (digits.length <= 3) {
+            formatted = '+1 (' + digits;
+        } else if (digits.length <= 6) {
+            formatted = '+1 (' + digits.slice(0, 3) + ') ' + digits.slice(3);
+        } else {
+            formatted = '+1 (' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+        }
+        input.value = formatted;
+    }
+
     // Live avatar preview
     (function () {
         const nameInput   = document.getElementById('field_name');

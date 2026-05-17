@@ -12,11 +12,20 @@ class Product extends Model
     protected $fillable = [
         'category_id', 'name', 'slug', 'description',
         'price_per_day', 'deposit_percentage', 'total_quantity',
-        'image', 'color', 'material', 'status'
+        'image', 'color', 'material', 'status', 'product_specification',
+    ];
+
+    protected $casts = [
+        'product_specification' => 'array',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 }

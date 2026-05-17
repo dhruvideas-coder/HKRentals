@@ -18,6 +18,13 @@ class ProductController extends Controller
                 });
             }
 
+            if ($request->filled('search')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%')
+                      ->orWhere('description', 'like', '%' . $request->search . '%');
+                });
+            }
+
             if ($request->filled('max_price')) {
                 $query->where('price_per_day', '<=', $request->max_price);
             }
@@ -63,7 +70,7 @@ class ProductController extends Controller
     public function show(string $slug): View
     {
         try {
-            $product = \App\Models\Product::with('category')->where('slug', $slug)->firstOrFail();
+            $product = \App\Models\Product::with(['category', 'images'])->where('slug', $slug)->firstOrFail();
 
             $related = \App\Models\Product::with('category')
                 ->where('id', '!=', $product->id)

@@ -58,7 +58,19 @@
             <div class="card p-6 mb-4 lg:mb-8">
                 <form action="{{ route('products') }}" method="GET" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
-                        
+
+                        {{-- Search Products --}}
+                        <div>
+                            <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 px-1">Search Products</label>
+                            <div class="relative group">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 transition-colors group-focus-within:text-brand-500">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+                                </span>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Name or keyword..."
+                                       class="form-input text-sm h-11 pl-10" />
+                            </div>
+                        </div>
+
                         {{-- Category --}}
                         <div>
                             <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 px-1">Category</label>
@@ -68,16 +80,6 @@
                                     <option value="{{ $cat->slug }}" {{ request('category') == $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
-
-                        {{-- Max Price --}}
-                        <div>
-                            <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2 px-1">Max Price <span class="normal-case font-medium">($/day)</span></label>
-                            <div class="relative group">
-                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm transition-colors group-focus-within:text-brand-500">$</span>
-                                <input type="number" name="max_price" inputmode="decimal" value="{{ request('max_price') }}" placeholder="Max Price"
-                                       class="form-input text-sm h-11 pl-8" onchange="this.form.submit()" />
-                            </div>
                         </div>
 
                         {{-- Color --}}
@@ -120,7 +122,7 @@
                     </div>
 
                     @php
-                        $hasFilters = request()->anyFilled(['category', 'max_price', 'color', 'material']) || request('sort') != 'featured';
+                        $hasFilters = request()->anyFilled(['search', 'category', 'max_price', 'color', 'material']) || request('sort') != 'featured';
                     @endphp
 
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-neutral-50">
@@ -145,7 +147,7 @@
                 <x-product.grid :products="$products" />
 
                 {{-- Pagination --}}
-                <div class="mt-12 pt-8 border-t border-neutral-100">
+                <div class="mt-4 border-t border-neutral-100">
                     {{ $products->links() }}
                 </div>
             </div>

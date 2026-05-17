@@ -17,7 +17,7 @@
 
         {{-- Customer Selection --}}
         <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                 <h3 class="font-bold text-neutral-900 text-lg">Select Customer</h3>
                 <p class="text-xs text-neutral-500 mt-1">Choose an existing customer for this order</p>
             </div>
@@ -137,7 +137,7 @@
 
         {{-- Order Items --}}
         <div x-show="orderItems.length > 0" class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                 <h3 class="font-bold text-neutral-900 text-lg">Order Items</h3>
                 <p class="text-xs text-neutral-500 mt-1" x-text="`${orderItems.length} item(s) in this order`"></p>
             </div>
@@ -195,7 +195,7 @@
 
         {{-- Order Details --}}
         <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                 <h3 class="font-bold text-neutral-900 text-lg">Order Details</h3>
             </div>
 
@@ -336,7 +336,7 @@
 
         {{-- Payment --}}
         <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-50 bg-neutral-50/30">
+            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
                 <h3 class="font-bold text-neutral-900 text-lg">Payment</h3>
             </div>
 

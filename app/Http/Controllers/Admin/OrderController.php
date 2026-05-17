@@ -11,7 +11,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Order::with(['items', 'customer'])->latest();
+            $query = Order::with(['items.product', 'customer', 'payment'])->latest();
 
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -28,6 +28,10 @@ class OrderController extends Controller
 
             if ($request->filled('date')) {
                 $query->whereDate('created_at', $request->date);
+            }
+
+            if ($request->export === 'csv') {
+                return $this->exportCsv($query->get());
             }
 
             $orders = $query->paginate(15)->withQueryString();
@@ -48,6 +52,91 @@ class OrderController extends Controller
                 'error'  => 'Could not load orders.',
             ]);
         }
+    }
+
+    private function exportCsv($orders)
+    {
+        $filename = 'orders_' . now()->format('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Pragma'              => 'no-cache',
+            'Expires'             => '0',
+        ];
+
+        $columns = [
+            'Order ID', 'Order Date', 'Event Date', 'Status',
+            'Customer Name', 'Customer Email', 'Customer Phone', 'Customer Address',
+            'Product Name', 'Product Qty', 'Price/Day (₹)', 'Rental Start', 'Rental End', 'Rental Days', 'Line Total (₹)',
+            'Traveling Cost (₹)', 'Distance (km)',
+            'Order Total (₹)',
+            'Payment Status', 'Payment Method', 'Payment Amount (₹)', 'Payment Reference',
+        ];
+
+        $callback = function () use ($orders, $columns) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM for Excel UTF-8 compatibility
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, $columns);
+
+            foreach ($orders as $order) {
+                $payment = $order->payment;
+                $items   = $order->items;
+
+                $baseRow = [
+                    $order->formatted_id,
+                    $order->created_at->format('d/m/Y H:i'),
+                    $order->event_date ? \Carbon\Carbon::parse($order->event_date)->format('d/m/Y') : '',
+                    ucfirst($order->status),
+                    $order->customer_name,
+                    $order->customer_email,
+                    $order->customer_phone,
+                    $order->customer_address,
+                ];
+
+                $orderTail = [
+                    number_format($order->traveling_cost ?? 0, 2),
+                    number_format($order->distance_km ?? 0, 2),
+                    number_format($order->total_amount, 2),
+                    $payment ? ucfirst($payment->status) : 'Unpaid',
+                    $payment ? ucfirst($payment->payment_method ?? '') : '',
+                    $payment ? number_format($payment->amount, 2) : '',
+                    $payment ? ($payment->payment_intent_id ?? '') : '',
+                ];
+
+                if ($items->isEmpty()) {
+                    fputcsv($handle, array_merge($baseRow, ['', '', '', '', '', '', ''], $orderTail));
+                    continue;
+                }
+
+                foreach ($items as $index => $item) {
+                    $itemRow = [
+                        $item->product->name ?? 'N/A',
+                        $item->quantity,
+                        number_format($item->price_per_day, 2),
+                        $item->start_date ? $item->start_date->format('d/m/Y') : '',
+                        $item->end_date   ? $item->end_date->format('d/m/Y')   : '',
+                        $item->rental_days,
+                        number_format($item->line_total, 2),
+                    ];
+
+                    // Only repeat order-level tail on the first item row
+                    fputcsv($handle, array_merge(
+                        $baseRow,
+                        $itemRow,
+                        $index === 0 ? $orderTail : ['', '', '', '', '', '', '']
+                    ));
+                }
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function show(Order $order)

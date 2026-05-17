@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -38,10 +39,10 @@ class ProductController extends Controller
                 $query->where('status', $request->status);
             }
 
-            $products  = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
+            $products   = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
             $categories = Category::all();
-            $colors    = Product::whereNotNull('color')->distinct()->pluck('color');
-            $materials = Product::whereNotNull('material')->distinct()->pluck('material');
+            $colors     = Product::whereNotNull('color')->distinct()->pluck('color');
+            $materials  = Product::whereNotNull('material')->distinct()->pluck('material');
 
             return view('admin.products.index', compact('products', 'categories', 'colors', 'materials'));
         } catch (\Throwable $e) {
@@ -71,6 +72,7 @@ class ProductController extends Controller
     {
         try {
             $categories = Category::all();
+            $product->load('images');
             return view('admin.products.edit', compact('product', 'categories'));
         } catch (\Throwable $e) {
             $this->logError(__FUNCTION__, $e);
@@ -82,36 +84,43 @@ class ProductController extends Controller
     {
         try {
             $validated = $request->validate([
-                'category_id'    => 'required|exists:categories,id',
-                'name'           => 'required|string|max:255',
-                'description'    => 'nullable|string',
-                'price_per_day'  => 'required|numeric|min:0',
-                'total_quantity' => 'required|integer|min:0',
-                'color'          => 'nullable|string|max:100',
-                'material'       => 'nullable|string|max:100',
-                'status'         => 'required|string|in:available,unavailable',
-                'image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+                'category_id'      => 'required|exists:categories,id',
+                'name'             => 'required|string|max:255',
+                'description'      => 'nullable|string',
+                'price_per_day'    => 'required|numeric|min:0',
+                'total_quantity'   => 'required|integer|min:0',
+                'color'            => 'nullable|string|max:100',
+                'material'         => 'nullable|string|max:100',
+                'status'           => 'required|string|in:available,unavailable',
+                'image'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+                'spec_keys'        => 'nullable|array|max:20',
+                'spec_keys.*'      => 'nullable|string|max:100',
+                'spec_values'      => 'nullable|array|max:20',
+                'spec_values.*'    => 'nullable|string|max:500',
+                'gallery_images'   => 'nullable|array|max:8',
+                'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
             ]);
 
-            if (!$request->has('slug')) {
-                $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
+            $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
+            $validated['product_specification'] = $this->buildSpecs($request);
+
+            unset($validated['spec_keys'], $validated['spec_values'], $validated['gallery_images']);
+
+            $path = public_path('images/products');
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
             }
 
             if ($request->hasFile('image')) {
                 $file     = $request->file('image');
                 $filename = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
-                $path     = public_path('images/products');
-
-                if (!File::exists($path)) {
-                    File::makeDirectory($path, 0755, true);
-                }
-
                 Image::read($file)->scaleDown(width: 800)->toWebp(75)->save($path . '/' . $filename);
-
                 $validated['image'] = 'images/products/' . $filename;
             }
 
-            Product::create($validated);
+            $product = Product::create($validated);
+
+            $this->storeGalleryImages($request, $product, $path);
 
             return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -126,40 +135,63 @@ class ProductController extends Controller
     {
         try {
             $validated = $request->validate([
-                'category_id'    => 'required|exists:categories,id',
-                'name'           => 'required|string|max:255',
-                'description'    => 'nullable|string',
-                'price_per_day'  => 'required|numeric|min:0',
-                'total_quantity' => 'required|integer|min:0',
-                'color'          => 'nullable|string|max:100',
-                'material'       => 'nullable|string|max:100',
-                'status'         => 'required|string|in:available,unavailable',
-                'image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+                'category_id'        => 'required|exists:categories,id',
+                'name'               => 'required|string|max:255',
+                'description'        => 'nullable|string',
+                'price_per_day'      => 'required|numeric|min:0',
+                'total_quantity'     => 'required|integer|min:0',
+                'color'              => 'nullable|string|max:100',
+                'material'           => 'nullable|string|max:100',
+                'status'             => 'required|string|in:available,unavailable',
+                'image'              => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+                'spec_keys'          => 'nullable|array|max:20',
+                'spec_keys.*'        => 'nullable|string|max:100',
+                'spec_values'        => 'nullable|array|max:20',
+                'spec_values.*'      => 'nullable|string|max:500',
+                'gallery_images'     => 'nullable|array|max:8',
+                'gallery_images.*'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+                'delete_image_ids'   => 'nullable|array',
+                'delete_image_ids.*' => 'nullable|integer',
             ]);
 
             if ($request->name !== $product->name) {
                 $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
             }
 
+            $validated['product_specification'] = $this->buildSpecs($request);
+            unset($validated['spec_keys'], $validated['spec_values'], $validated['gallery_images'], $validated['delete_image_ids']);
+
+            $path = public_path('images/products');
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
+
             if ($request->hasFile('image')) {
                 if ($product->image && File::exists(public_path($product->image))) {
                     File::delete(public_path($product->image));
                 }
-
                 $file     = $request->file('image');
                 $filename = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
-                $path     = public_path('images/products');
-
-                if (!File::exists($path)) {
-                    File::makeDirectory($path, 0755, true);
-                }
-
                 Image::read($file)->scaleDown(width: 800)->toWebp(75)->save($path . '/' . $filename);
-
                 $validated['image'] = 'images/products/' . $filename;
             }
 
+            // Delete gallery images marked for removal
+            if ($request->filled('delete_image_ids')) {
+                $toDelete = ProductImage::whereIn('id', $request->delete_image_ids)
+                    ->where('product_id', $product->id)
+                    ->get();
+                foreach ($toDelete as $img) {
+                    if (File::exists(public_path($img->image))) {
+                        File::delete(public_path($img->image));
+                    }
+                    $img->delete();
+                }
+            }
+
             $product->update($validated);
+
+            $this->storeGalleryImages($request, $product, $path, $product->images()->count());
 
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -177,12 +209,50 @@ class ProductController extends Controller
                 File::delete(public_path($product->image));
             }
 
+            foreach ($product->images as $img) {
+                if (File::exists(public_path($img->image))) {
+                    File::delete(public_path($img->image));
+                }
+            }
+
             $product->delete();
 
             return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
         } catch (\Throwable $e) {
             $this->logError(__FUNCTION__, $e);
             return redirect()->back()->with('error', 'Could not delete product. Please try again.');
+        }
+    }
+
+    private function buildSpecs(Request $request): ?array
+    {
+        $keys   = $request->input('spec_keys', []);
+        $values = $request->input('spec_values', []);
+        $specs  = [];
+
+        foreach ($keys as $i => $key) {
+            $key = trim((string) $key);
+            if ($key !== '') {
+                $specs[$key] = trim((string) ($values[$i] ?? ''));
+            }
+        }
+
+        return !empty($specs) ? $specs : null;
+    }
+
+    private function storeGalleryImages(Request $request, Product $product, string $path, int $offset = 0): void
+    {
+        if (!$request->hasFile('gallery_images')) {
+            return;
+        }
+
+        foreach ($request->file('gallery_images') as $i => $file) {
+            $filename = time() . '_g' . ($offset + $i) . '_' . Str::random(6) . '.webp';
+            Image::read($file)->scaleDown(width: 800)->toWebp(75)->save($path . '/' . $filename);
+            $product->images()->create([
+                'image'      => 'images/products/' . $filename,
+                'sort_order' => $offset + $i,
+            ]);
         }
     }
 }
