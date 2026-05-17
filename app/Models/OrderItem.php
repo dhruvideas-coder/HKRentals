@@ -11,14 +11,16 @@ class OrderItem extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date'   => 'date',
+        'start_date' => 'datetime',
+        'end_date'   => 'datetime',
     ];
 
     public function getRentalDaysAttribute(): int
     {
         if ($this->start_date && $this->end_date) {
-            return max(1, $this->start_date->diffInDays($this->end_date) + 1);
+            $start = $this->start_date->copy()->startOfDay();
+            $end   = $this->end_date->copy()->startOfDay();
+            return max(1, $start->diffInDays($end) + 1);
         }
         return 1;
     }

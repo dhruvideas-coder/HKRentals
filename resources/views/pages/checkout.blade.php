@@ -10,7 +10,7 @@
     step: 1,
     form: {
         firstName:'', lastName:'', email:'', phone:'',
-        eventDate:'',
+        rentalStartDate:'', rentalEndDate:'',
         address:'', city:'', state:'', zip:'',
         notes:'', paymentMethod:'card', mapLocation: null
     },
@@ -68,7 +68,9 @@
         if (!this.form.email)     this.errors.email     = 'Email is required';
         else if (!/^\S+@\S+\.\S+$/.test(this.form.email)) this.errors.email = 'Invalid email format';
         if (!this.form.phone)     this.errors.phone     = 'Phone is required';
-        if (!this.form.eventDate) this.errors.eventDate = 'Event date is required';
+        if (!this.form.rentalStartDate) this.errors.rentalStartDate = 'Rental start date & time is required';
+        if (!this.form.rentalEndDate)   this.errors.rentalEndDate   = 'Rental end date & time is required';
+        else if (this.form.rentalEndDate < this.form.rentalStartDate) this.errors.rentalEndDate = 'End must be after start';
         if (!this.form.address)   this.errors.address   = 'Address is required';
         if (!this.form.city)    this.errors.city    = 'City is required';
         if (!this.form.state)   this.errors.state   = 'State is required';
@@ -375,12 +377,19 @@
                         <x-input label="Phone" type="tel" inputmode="tel" x-model="form.phone" placeholder="+1 9312152756" :required="true" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.phone" x-text="errors.phone"></p>
                     </div>
-                    <div class="sm:col-span-2">
-                        <label class="form-label">Event Date <span class="text-red-400">*</span></label>
-                        <input type="date" x-model="form.eventDate"
-                               :min="new Date().toISOString().split('T')[0]"
-                               class="form-input w-full sm:w-64" required />
-                        <p class="text-red-500 text-xs mt-1" x-show="errors.eventDate" x-text="errors.eventDate"></p>
+                    <div>
+                        <label class="form-label">Rental Start Date &amp; Time <span class="text-red-400">*</span></label>
+                        <input type="datetime-local" x-model="form.rentalStartDate"
+                               :min="(() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T00:00`; })()"
+                               class="form-input w-full" required />
+                        <p class="text-red-500 text-xs mt-1" x-show="errors.rentalStartDate" x-text="errors.rentalStartDate"></p>
+                    </div>
+                    <div>
+                        <label class="form-label">Rental End Date &amp; Time <span class="text-red-400">*</span></label>
+                        <input type="datetime-local" x-model="form.rentalEndDate"
+                               :min="form.rentalStartDate || (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T00:00`; })()"
+                               class="form-input w-full" required />
+                        <p class="text-red-500 text-xs mt-1" x-show="errors.rentalEndDate" x-text="errors.rentalEndDate"></p>
                     </div>
 
                     {{-- Delivery Address with Map Pin --}}
@@ -483,11 +492,17 @@
                             Location pinned on map
                         </p>
                     </template>
-                    <template x-if="form.eventDate">
-                        <p class="text-xs text-brand-600 mt-2 flex items-center gap-1 font-medium">
-                            <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            Event: <span x-text="new Date(form.eventDate + 'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})"></span>
-                        </p>
+                    <template x-if="form.rentalStartDate">
+                        <div class="mt-2 space-y-0.5">
+                            <p class="text-xs text-brand-600 flex items-center gap-1 font-medium">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                From: <span x-text="new Date(form.rentalStartDate).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})"></span>
+                            </p>
+                            <p class="text-xs text-brand-600 flex items-center gap-1 font-medium" x-show="form.rentalEndDate">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                To: <span x-text="new Date(form.rentalEndDate).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})"></span>
+                            </p>
+                        </div>
                     </template>
                 </div>
 

@@ -33,16 +33,17 @@ class CheckoutController extends Controller
     {
         try {
             $request->validate([
-                'firstName'    => 'required',
-                'lastName'     => 'required',
-                'email'        => 'required|email',
-                'phone'        => 'required',
-                'eventDate'    => 'required|date',
-                'address'      => 'required',
-                'city'         => 'required',
-                'state'        => 'required',
-                'zip'          => 'required',
-                'total_amount' => 'required|numeric',
+                'firstName'       => 'required',
+                'lastName'        => 'required',
+                'email'           => 'required|email',
+                'phone'           => 'required',
+                'rentalStartDate' => 'required|date',
+                'rentalEndDate'   => 'required|date|after_or_equal:rentalStartDate',
+                'address'         => 'required',
+                'city'            => 'required',
+                'state'           => 'required',
+                'zip'             => 'required',
+                'total_amount'    => 'required|numeric',
             ]);
 
             $fullName    = $request->firstName . ' ' . $request->lastName;
@@ -91,37 +92,38 @@ class CheckoutController extends Controller
             }
 
             $order = Order::create([
-                'customer_id'      => $customer->id,
-                'customer_name'    => $fullName,
-                'customer_email'   => $request->email,
-                'customer_phone'   => $request->phone,
-                'customer_address' => $fullAddress,
-                'event_date'       => $request->eventDate,
-                'total_amount'     => $request->total_amount,
-                'traveling_cost'   => $travelingCost,
-                'distance_km'      => $distanceKm,
-                'status'           => 'pending',
+                'customer_id'        => $customer->id,
+                'customer_name'      => $fullName,
+                'customer_email'     => $request->email,
+                'customer_phone'     => $request->phone,
+                'customer_address'   => $fullAddress,
+                'rental_start_date'  => Carbon::parse($request->rentalStartDate),
+                'rental_end_date'    => Carbon::parse($request->rentalEndDate),
+                'total_amount'       => $request->total_amount,
+                'traveling_cost'     => $travelingCost,
+                'distance_km'        => $distanceKm,
+                'status'             => 'pending',
             ]);
 
             foreach ($this->cartService->getCart() as $item) {
-                $startDate = null;
-                $endDate   = null;
+                $startDate = $order->rental_start_date;
+                $endDate   = $order->rental_end_date;
 
                 if (!empty($item['dateRange'])) {
                     $parts = explode(' → ', $item['dateRange']);
                     if (count($parts) === 2) {
-                        $startDate = Carbon::parse($parts[0])->format('Y-m-d');
-                        $endDate   = Carbon::parse($parts[1])->format('Y-m-d');
+                        $startDate = Carbon::parse($parts[0]);
+                        $endDate   = Carbon::parse($parts[1]);
                     }
                 }
 
                 OrderItem::create([
-                    'order_id'     => $order->id,
-                    'product_id'   => $item['product_id'],
-                    'quantity'     => $item['quantity'],
+                    'order_id'      => $order->id,
+                    'product_id'    => $item['product_id'],
+                    'quantity'      => $item['quantity'],
                     'price_per_day' => $item['price'],
-                    'start_date'   => $startDate,
-                    'end_date'     => $endDate,
+                    'start_date'    => $startDate,
+                    'end_date'      => $endDate,
                 ]);
             }
 

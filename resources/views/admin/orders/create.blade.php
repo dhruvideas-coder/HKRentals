@@ -137,54 +137,70 @@
 
         {{-- Order Items --}}
         <div x-show="orderItems.length > 0" class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
-                <h3 class="font-bold text-neutral-900 text-lg">Order Items</h3>
-                <p class="text-xs text-neutral-500 mt-1" x-text="`${orderItems.length} item(s) in this order`"></p>
+            <div class="px-6 md:px-10 pt-6 md:pt-8 pb-4 border-b border-neutral-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-neutral-900 text-lg">Order Items</h3>
+                    <p class="text-xs text-neutral-500 mt-0.5" x-text="`${orderItems.length} product(s) · ${orderItems.reduce((s,i)=>s+i.quantity,0)} unit(s) total`"></p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-700 bg-brand-50 border border-brand-100 px-3 py-1.5 rounded-full">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    <span x-text="`$${subtotal.toFixed(2)}`"></span>
+                </span>
             </div>
 
-            <div class="divide-y divide-neutral-50">
+            <div class="divide-y divide-neutral-50/80">
                 <template x-for="(item, index) in orderItems" :key="index">
-                    <div class="px-6 md:px-10 py-6 space-y-4">
-                        {{-- Hidden product_id input --}}
-                        <input type="hidden" :value="item.product.id" :name="`items[${index}][product_id]`" />
+                    <div class="px-6 md:px-10 py-4">
+                        {{-- Hidden inputs — dates inherit from order-level rental dates --}}
+                        <input type="hidden" :value="item.product.id"   :name="`items[${index}][product_id]`" />
+                        <input type="hidden" :value="item.quantity"     :name="`items[${index}][quantity]`" />
+                        <input type="hidden" :value="rentalStartDate"   :name="`items[${index}][start_date]`" />
+                        <input type="hidden" :value="rentalEndDate"     :name="`items[${index}][end_date]`" />
 
-                        <div class="flex items-start gap-4">
-                            <div class="w-16 h-16 rounded-xl overflow-hidden ring-1 ring-neutral-100 flex-shrink-0 bg-neutral-50">
-                                <img :src="`{{ asset('') }}${item.product.image}`" :alt="item.product.name" class="w-full h-full object-cover" x-show="item.product.image" />
+                        <div class="flex items-center gap-4">
+
+                            {{-- Thumbnail --}}
+                            <div class="w-14 h-14 rounded-2xl overflow-hidden ring-1 ring-neutral-100 flex-shrink-0 bg-neutral-50">
+                                <img :src="`{{ asset('') }}${item.product.image}`" :alt="item.product.name"
+                                     class="w-full h-full object-cover" x-show="item.product.image" />
                                 <div x-show="!item.product.image" class="w-full h-full flex items-center justify-center">
                                     <svg class="w-6 h-6 text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 </div>
                             </div>
+
+                            {{-- Name + rate + qty stepper --}}
                             <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-neutral-800 text-sm" x-text="item.product.name"></p>
-                                <div class="mt-3 space-y-2">
-                                    <div class="flex items-center gap-2">
-                                        <label class="text-[11px] font-bold text-neutral-500 uppercase w-24">Quantity</label>
-                                        <input type="number" x-model.number="item.quantity" min="1" :max="item.product.total_quantity" @change="updateItemDates(index)"
-                                               :name="`items[${index}][quantity]`"
-                                               class="w-20 px-3 py-1.5 bg-neutral-50 border border-neutral-100 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20" />
-                                        <span class="text-[10px] text-neutral-400" x-text="`/ ${item.product.total_quantity} in stock`"></span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <label class="text-[11px] font-bold text-neutral-500 uppercase w-24">From</label>
-                                        <input type="date" x-model="item.startDate" @change="updateItemDates(index)"
-                                               :name="`items[${index}][start_date]`"
-                                               class="flex-1 px-3 py-1.5 bg-neutral-50 border border-neutral-100 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20" />
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <label class="text-[11px] font-bold text-neutral-500 uppercase w-24">To</label>
-                                        <input type="date" x-model="item.endDate" @change="updateItemDates(index)"
-                                               :name="`items[${index}][end_date]`"
-                                               class="flex-1 px-3 py-1.5 bg-neutral-50 border border-neutral-100 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20" />
-                                    </div>
+                                <p class="font-semibold text-neutral-800 text-sm leading-tight truncate" x-text="item.product.name"></p>
+                                <p class="text-[11px] text-neutral-400 mt-0.5" x-text="`$${item.product.price_per_day.toFixed(2)}/day · ${item.rentalDays} day${item.rentalDays !== 1 ? 's' : ''}`"></p>
+
+                                {{-- Quantity stepper --}}
+                                <div class="flex items-center gap-1 mt-2.5">
+                                    <button type="button" @click="decrementProduct(item.product.id)"
+                                            class="w-7 h-7 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-bold text-base flex items-center justify-center transition-all leading-none flex-shrink-0">
+                                        −
+                                    </button>
+                                    <span class="w-8 text-center text-sm font-bold text-neutral-800" x-text="item.quantity"></span>
+                                    <button type="button" @click="incrementProduct(item.product.id)"
+                                            :disabled="item.quantity >= item.product.total_quantity"
+                                            :class="item.quantity >= item.product.total_quantity ? 'opacity-30 cursor-not-allowed' : 'hover:bg-brand-100'"
+                                            class="w-7 h-7 rounded-lg bg-brand-50 text-brand-700 font-bold text-base flex items-center justify-center transition-all leading-none flex-shrink-0">
+                                        +
+                                    </button>
+                                    <span class="text-[10px] text-neutral-400 ml-1" x-text="`of ${item.product.total_quantity}`"></span>
                                 </div>
+                                <p x-show="item.quantity >= item.product.total_quantity"
+                                   class="text-[10px] text-red-500 mt-1 font-semibold">Max stock reached</p>
                             </div>
-                            <div class="text-right flex-shrink-0">
-                                <p class="font-bold text-neutral-900 text-lg" x-text="`$${item.lineTotal.toFixed(2)}`"></p>
-                                <p class="text-[10px] text-neutral-400 mt-1" x-text="`${item.rentalDays}d × $${(item.product.price_per_day * item.quantity).toFixed(2)}`"></p>
+
+                            {{-- Line total + remove --}}
+                            <div class="text-right flex-shrink-0 flex flex-col items-end gap-2">
+                                <div>
+                                    <p class="font-bold text-neutral-900 text-base" x-text="`$${item.lineTotal.toFixed(2)}`"></p>
+                                    <p class="text-[10px] text-neutral-400" x-text="`${item.quantity} × ${item.rentalDays}d × $${item.product.price_per_day.toFixed(2)}`"></p>
+                                </div>
                                 <button type="button" @click="removeItem(index)"
-                                        class="mt-2 p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-all">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        class="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -193,246 +209,214 @@
             </div>
         </div>
 
-        {{-- Order Details --}}
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
-                <h3 class="font-bold text-neutral-900 text-lg">Order Details</h3>
-            </div>
+    </div>
 
-            <div class="px-6 md:px-10 py-6 md:py-8 space-y-6">
+    {{-- Sidebar: Order Details + Payment + Summary + Actions --}}
+    <div class="lg:col-span-1 lg:self-start">
+        <div class="sticky top-6 space-y-4">
 
-                {{-- Event Date --}}
-                <div>
-                    <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Event Date</label>
-                    <input type="date" x-model="eventDate" name="event_date" required
-                           class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold" />
-                    @error('event_date')
-                        <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p>
-                    @enderror
+            {{-- Order Details Card --}}
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
+                <div class="px-5 pt-5 pb-4 border-b border-neutral-100">
+                    <h3 class="font-bold text-neutral-900">Order Details</h3>
                 </div>
+                <div class="px-5 py-5 space-y-4">
 
-                {{-- Event / Delivery Location (Map Picker) --}}
-                @if($mapsKey)
-                <div>
-                    <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Event / Delivery Location</label>
-
-                    {{-- Not pinned — CTA button --}}
-                    <div x-show="!locationPinned">
-                        <button type="button" @click="openMapModal()"
-                                class="w-full flex items-center gap-4 px-5 py-4 bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-2xl hover:border-brand-300 hover:bg-brand-50/40 transition-all group">
-                            <div class="w-11 h-11 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-200 transition-all">
-                                <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                            </div>
-                            <div class="text-left flex-1">
-                                <p class="font-bold text-neutral-800 text-sm group-hover:text-brand-700 transition-colors">Pin Delivery Location on Map</p>
-                                <p class="text-[11px] text-neutral-400 mt-0.5">Calculates exact traveling charges automatically</p>
-                            </div>
-                            <svg class="w-4 h-4 text-neutral-300 group-hover:text-brand-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
-                        <p x-show="selectedCustomer && !selectedCustomer.map_location" class="text-[11px] text-amber-600 mt-2 ml-1 flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Customer has no saved location — pin the delivery spot above for accurate charges.
-                        </p>
+                    {{-- Rental Start + End --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Rental Start</label>
+                            <input type="datetime-local" x-model="rentalStartDate" name="rental_start_date" required
+                                   @change="updateAllItemDates()"
+                                   class="block w-full px-3 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
+                            @error('rental_start_date')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Rental End</label>
+                            <input type="datetime-local" x-model="rentalEndDate" name="rental_end_date" required
+                                   :min="rentalStartDate"
+                                   @change="updateAllItemDates()"
+                                   class="block w-full px-3 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
+                            @error('rental_end_date')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
-                    {{-- Pinned — confirmed location card --}}
-                    <div x-show="locationPinned && eventLocation" class="rounded-2xl overflow-hidden border border-green-200 shadow-sm">
-                        {{-- Green header bar --}}
-                        <div class="flex items-center justify-between px-4 py-2.5 bg-green-500">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span class="text-xs font-bold text-white uppercase tracking-wider">Location Confirmed</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <button type="button" @click="openMapModal()"
-                                        class="inline-flex items-center gap-1 text-[11px] font-bold text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full transition-all">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                    Change
-                                </button>
-                                <button type="button" @click="clearEventLocation()"
-                                        class="text-[11px] font-bold text-white/70 hover:text-white bg-white/10 hover:bg-red-400/30 px-2.5 py-1 rounded-full transition-all">
-                                    Clear
-                                </button>
-                            </div>
-                        </div>
+                    {{-- Rental duration chip --}}
+                    <div x-show="rentalStartDate && rentalEndDate"
+                         class="flex items-center gap-2 bg-brand-50 border border-brand-100 rounded-xl px-3 py-2">
+                        <svg class="w-3.5 h-3.5 text-brand-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="text-xs font-bold text-brand-700"
+                              x-text="(() => { const d = _calcDays(rentalStartDate, rentalEndDate); return d + ' day' + (d !== 1 ? 's' : '') + ' rental'; })()"></span>
+                    </div>
 
-                        {{-- Address + stats --}}
-                        <div class="bg-green-50 px-4 py-4 space-y-3">
-                            <div class="flex items-start gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4.5 h-4.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    {{-- Delivery Location (Map Picker) --}}
+                    @if($mapsKey)
+                    <div>
+                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Delivery Location</label>
+
+                        <div x-show="!locationPinned">
+                            <button type="button" @click="openMapModal()"
+                                    class="w-full flex items-center gap-3 px-4 py-3 bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-2xl hover:border-brand-300 hover:bg-brand-50/40 transition-all group">
+                                <div class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-200 transition-all">
+                                    <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-green-900 leading-snug" x-text="eventLocation?.formatted_address || '—'"></p>
-                                    <p class="text-[11px] text-green-600 font-mono mt-0.5"
-                                       x-text="eventLocation ? `${eventLocation.lat.toFixed(5)}, ${eventLocation.lng.toFixed(5)}` : ''"></p>
+                                <div class="text-left flex-1 min-w-0">
+                                    <p class="font-bold text-neutral-800 text-xs group-hover:text-brand-700 transition-colors">Pin on Map</p>
+                                    <p class="text-[10px] text-neutral-400">Auto-calculates travel cost</p>
+                                </div>
+                                <svg class="w-3.5 h-3.5 text-neutral-300 group-hover:text-brand-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <p x-show="selectedCustomer && !selectedCustomer.map_location" class="text-[10px] text-amber-600 mt-1.5 flex items-center gap-1">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                No saved location for this customer.
+                            </p>
+                        </div>
+
+                        <div x-show="locationPinned && eventLocation" class="rounded-2xl overflow-hidden border border-green-200">
+                            <div class="flex items-center justify-between px-3 py-2 bg-green-500">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-3 h-3 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    <span class="text-[11px] font-bold text-white uppercase tracking-wider">Location Set</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button type="button" @click="openMapModal()" class="text-[10px] font-bold text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full transition-all">Change</button>
+                                    <button type="button" @click="clearEventLocation()" class="text-[10px] font-bold text-white/70 hover:text-white bg-white/10 hover:bg-red-400/30 px-2 py-0.5 rounded-full transition-all">Clear</button>
                                 </div>
                             </div>
-
-                            {{-- Distance + cost chips --}}
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="bg-white rounded-xl p-3 border border-green-100">
-                                    <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Distance</p>
-                                    <p class="font-bold text-neutral-900 text-xl leading-none" x-text="distanceKm > 0 ? `${distanceKm.toFixed(1)} km` : '—'"></p>
-                                    <p class="text-[10px] text-neutral-400 mt-1">from godown</p>
-                                </div>
-                                <div class="bg-white rounded-xl p-3 border border-green-100">
-                                    <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Travel Cost</p>
-                                    <p class="font-bold text-xl leading-none"
-                                       :class="travelingCost > 0 ? 'text-brand-600' : 'text-green-600'"
-                                       x-text="`$${travelingCost.toFixed(2)}`"></p>
-                                    <p x-show="travelingCost === 0 && distanceKm > 0" class="text-[10px] text-green-600 mt-1 font-semibold">Free delivery zone</p>
-                                    <p x-show="travelingCost > 0" class="text-[10px] text-neutral-400 mt-1"
-                                       x-text="`${distanceKm.toFixed(1)} km × ${{ $settings?->charge_per_km ?: 1 }}/km`"></p>
+                            <div class="bg-green-50 px-3 py-3 space-y-2">
+                                <p class="text-xs font-semibold text-green-900 leading-snug" x-text="eventLocation?.formatted_address || '—'"></p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="bg-white rounded-lg p-2 border border-green-100">
+                                        <p class="text-[9px] font-bold text-neutral-400 uppercase mb-0.5">Distance</p>
+                                        <p class="font-bold text-neutral-900 text-sm" x-text="distanceKm > 0 ? `${distanceKm.toFixed(1)} km` : '—'"></p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-2 border border-green-100">
+                                        <p class="text-[9px] font-bold text-neutral-400 uppercase mb-0.5">Travel Cost</p>
+                                        <p class="font-bold text-sm" :class="travelingCost > 0 ? 'text-brand-600' : 'text-green-600'" x-text="`$${travelingCost.toFixed(2)}`"></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                @endif
+                    @endif
 
-                {{-- Traveling Cost (manual override) --}}
-                <div>
-                    <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">
-                        Traveling Cost
-                        @if($mapsKey)
-                        <span class="ml-1 text-neutral-400 font-normal normal-case tracking-normal">(auto-calculated · override if needed)</span>
-                        @else
-                        <span class="ml-1 text-neutral-400 font-normal normal-case tracking-normal">(override)</span>
-                        @endif
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                            <span class="text-neutral-500 font-bold text-lg">$</span>
-                        </div>
-                        <input type="number" x-model.number="travelingCost" name="traveling_cost" step="0.01" min="0"
-                               class="block w-full pl-10 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-lg" />
-                    </div>
-                    <input type="hidden" name="distance_km" :value="distanceKm" />
-                    <p class="text-[11px] text-neutral-400 mt-1 ml-1">
-                        @if($mapsKey)
-                        Pin a location above for auto-calculation, or type a custom amount here.
-                        @else
-                        Auto-calculated from customer location if available; enter a custom amount to override.
-                        @endif
-                    </p>
-                    @error('traveling_cost')
-                        <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-            </div>
-        </div>
-
-        {{-- Payment --}}
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
-                <h3 class="font-bold text-neutral-900 text-lg">Payment</h3>
-            </div>
-
-            <div class="px-6 md:px-10 py-6 md:py-8 space-y-6" x-data="{ showPaymentMethod: false }">
-                <div>
-                    <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Payment Status</label>
-                    <select x-model="paymentStatus" @change="showPaymentMethod = paymentStatus === 'paid'" name="payment_status" required
-                            class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium appearance-none cursor-pointer"
-                            style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23737373%22 stroke-width=%222%22><path d=%22M6 9l6 6 6-6%22/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
-                        <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="waived">Waived</option>
-                    </select>
-                    @error('payment_status')
-                        <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div x-show="paymentStatus === 'paid'" class="space-y-4">
+                    {{-- Traveling Cost --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Payment Method</label>
-                        <select x-model="paymentMethod" name="payment_method"
-                                class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium appearance-none cursor-pointer"
-                                style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23737373%22 stroke-width=%222%22><path d=%22M6 9l6 6 6-6%22/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
-                            <option value="">-- Select Method --</option>
-                            <option value="cash">Cash</option>
-                            <option value="bank_transfer">Bank Transfer</option>
-                            <option value="card">Card</option>
-                            <option value="other">Other</option>
+                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                            Traveling Cost
+                            <span class="font-normal normal-case tracking-normal text-neutral-400">@if($mapsKey)(override)@else(manual)@endif</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-neutral-500 font-bold pointer-events-none">$</span>
+                            <input type="number" x-model.number="travelingCost" name="traveling_cost" step="0.01" min="0"
+                                   class="block w-full pl-8 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
+                        </div>
+                        <input type="hidden" name="distance_km" :value="distanceKm" />
+                    </div>
+
+                </div>
+            </div>
+
+            {{-- Payment Card --}}
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
+                <div class="px-5 pt-5 pb-4 border-b border-neutral-100">
+                    <h3 class="font-bold text-neutral-900">Payment</h3>
+                </div>
+                <div class="px-5 py-5 space-y-4" x-data="{ showPaymentMethod: false }">
+                    <div>
+                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Payment Status</label>
+                        <select x-model="paymentStatus" @change="showPaymentMethod = paymentStatus === 'paid'" name="payment_status" required
+                                class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium text-sm appearance-none cursor-pointer"
+                                style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23737373%22 stroke-width=%222%22><path d=%22M6 9l6 6 6-6%22/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em; padding-right: 2.5rem;">
+                            <option value="pending">Pending</option>
+                            <option value="paid">Paid</option>
+                            <option value="waived">Waived</option>
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Payment Amount</label>
-                        <input type="number" x-model.number="paymentAmount" name="payment_amount" step="0.01" min="0"
-                               :placeholder="`$${grandTotal.toFixed(2)}`"
-                               class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold" />
-                        <p class="text-[11px] text-neutral-400 mt-1 ml-1">Defaults to total amount if left blank</p>
+                    <div x-show="paymentStatus === 'paid'" class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Method</label>
+                            <select x-model="paymentMethod" name="payment_method"
+                                    class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium text-sm appearance-none cursor-pointer"
+                                    style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23737373%22 stroke-width=%222%22><path d=%22M6 9l6 6 6-6%22/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em; padding-right: 2.5rem;">
+                                <option value="">-- Select --</option>
+                                <option value="cash">Cash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="card">Card</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Amount</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-neutral-500 font-bold pointer-events-none text-sm">$</span>
+                                <input type="number" x-model.number="paymentAmount" name="payment_amount" step="0.01" min="0"
+                                       :placeholder="grandTotal.toFixed(2)"
+                                       class="block w-full pl-8 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
+                            </div>
+                            <p class="text-[10px] text-neutral-400 mt-1">Defaults to total if blank</p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Reference / TX ID</label>
+                            <input type="text" name="payment_reference" placeholder="TXN-12345 or check #"
+                                   class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm placeholder-neutral-300" />
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Reference / Transaction ID</label>
-                        <input type="text" name="payment_reference" placeholder="e.g., TXN-12345 or check #"
-                               class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold placeholder-neutral-300" />
+            {{-- Summary + Actions --}}
+            <div class="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[2.5rem] p-5 space-y-4">
+
+                {{-- Totals --}}
+                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 space-y-2.5">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-neutral-300">Items</span>
+                        <span class="font-bold text-white" x-text="orderItems.length"></span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-neutral-300">Subtotal</span>
+                        <span class="font-bold text-white" x-text="`$${subtotal.toFixed(2)}`"></span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-neutral-300">Delivery</span>
+                        <span class="font-bold text-white" x-text="`$${travelingCost.toFixed(2)}`"></span>
+                    </div>
+                    <div class="border-t border-white/20 pt-2.5 flex items-center justify-between">
+                        <span class="text-white font-semibold">Total</span>
+                        <span class="text-2xl font-bold text-brand-400" x-text="`$${grandTotal.toFixed(2)}`"></span>
                     </div>
                 </div>
-            </div>
-        </div>
 
-    </div>
-
-    {{-- Sidebar: Summary + Actions --}}
-    <div class="lg:col-span-1 lg:self-start">
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[2.5rem] p-6 md:p-8 sticky top-6 space-y-6">
-
-            {{-- Summary Card --}}
-            <div class="bg-white/10 backdrop-blur rounded-2xl p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-neutral-300 text-sm">Items</span>
-                    <span class="font-bold text-white" x-text="`${orderItems.length}`"></span>
+                {{-- Warnings --}}
+                <div x-show="!selectedCustomer" class="bg-amber-500/20 rounded-xl px-3 py-2.5 border border-amber-500/30">
+                    <p class="text-xs text-amber-100">Select a customer to begin booking</p>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-neutral-300 text-sm">Subtotal</span>
-                    <span class="font-bold text-white" x-text="`$${subtotal.toFixed(2)}`"></span>
+                <div x-show="selectedCustomer && orderItems.length === 0" class="bg-amber-500/20 rounded-xl px-3 py-2.5 border border-amber-500/30">
+                    <p class="text-xs text-amber-100">Add at least 1 product to proceed</p>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-neutral-300 text-sm">Delivery</span>
-                    <span class="font-bold text-white" x-text="`$${travelingCost.toFixed(2)}`"></span>
+
+                {{-- Actions --}}
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{{ route('admin.orders.index') }}"
+                       class="flex items-center justify-center px-4 py-3.5 bg-white/10 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all text-sm">
+                        Cancel
+                    </a>
+                    <button type="submit" :disabled="!selectedCustomer || orderItems.length === 0"
+                            class="px-4 py-3.5 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 disabled:bg-neutral-600 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm">
+                        Book Order
+                    </button>
                 </div>
-                <div class="border-t border-white/20 pt-3 flex items-center justify-between">
-                    <span class="text-white font-semibold">Total</span>
-                    <span class="text-2xl font-bold text-brand-400" x-text="`$${grandTotal.toFixed(2)}`"></span>
-                </div>
+
             </div>
-
-            {{-- Status Badge --}}
-            <div x-show="!selectedCustomer" class="bg-amber-500/20 rounded-xl p-3 border border-amber-500/30">
-                <p class="text-xs text-amber-100">Select a customer to begin booking</p>
-            </div>
-
-            <div x-show="selectedCustomer && orderItems.length === 0" class="bg-amber-500/20 rounded-xl p-3 border border-amber-500/30">
-                <p class="text-xs text-amber-100">Add at least 1 product to proceed</p>
-            </div>
-
-            {{-- Submit Button --}}
-            <button type="submit" :disabled="!selectedCustomer || orderItems.length === 0"
-                    class="w-full px-6 py-4 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 disabled:bg-neutral-600 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all tracking-wide">
-                Book Order
-            </button>
-
-            {{-- Cancel Link --}}
-            <a href="{{ route('admin.orders.index') }}"
-               class="block text-center px-6 py-3 bg-white/10 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all">
-                Cancel
-            </a>
-
         </div>
     </div>
 
@@ -585,7 +569,8 @@
             categories: @json($categoriesForJS),
             allProducts: @json($allProducts),
             orderItems: [],
-            eventDate: new Date().toISOString().split('T')[0],
+            rentalStartDate: (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T08:00`; })(),
+            rentalEndDate:   (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T17:00`; })(),
             travelingCost: 0,
             distanceKm: 0,
             paymentStatus: 'pending',
@@ -819,14 +804,12 @@
 
             addProduct(product) {
                 if (this.isProductInOrder(product.id)) return;
-
+                const days = this._calcDays(this.rentalStartDate, this.rentalEndDate);
                 this.orderItems.push({
-                    product: product,
-                    quantity: 1,
-                    startDate: this.eventDate,
-                    endDate: this.eventDate,
-                    rentalDays: 1,
-                    lineTotal: product.price_per_day
+                    product:    product,
+                    quantity:   1,
+                    rentalDays: days,
+                    lineTotal:  product.price_per_day * days,
                 });
             },
 
@@ -853,10 +836,7 @@
             incrementProduct(productId) {
                 const item = this.orderItems.find(item => item.product.id === productId);
                 if (item) {
-                    if (item.quantity >= item.product.total_quantity) {
-                        alert(`Only ${item.product.total_quantity} in stock for "${item.product.name}"`);
-                        return;
-                    }
+                    if (item.quantity >= item.product.total_quantity) return;
                     item.quantity++;
                     this.updateItemDates(this.orderItems.indexOf(item));
                 }
@@ -876,29 +856,31 @@
 
             setProductQty(productId, value) {
                 const qty = parseInt(value);
-                if (isNaN(qty) || qty <= 0) {
-                    this.removeItemByProductId(productId);
-                    return;
-                }
+                if (isNaN(qty) || qty <= 0) { this.removeItemByProductId(productId); return; }
                 const item = this.orderItems.find(item => item.product.id === productId);
                 if (item) {
-                    if (qty > item.product.total_quantity) {
-                        alert(`Only ${item.product.total_quantity} in stock for "${item.product.name}"`);
-                        item.quantity = item.product.total_quantity;
-                    } else {
-                        item.quantity = qty;
-                    }
+                    item.quantity = Math.min(qty, item.product.total_quantity);
                     this.updateItemDates(this.orderItems.indexOf(item));
                 }
             },
 
+            _calcDays(start, end) {
+                if (!start || !end) return 1;
+                const s = new Date(start), e = new Date(end);
+                const sd = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+                const ed = new Date(e.getFullYear(), e.getMonth(), e.getDate());
+                return Math.max(1, Math.floor((ed - sd) / 86400000) + 1);
+            },
+
             updateItemDates(index) {
                 const item = this.orderItems[index];
-                const startDate = new Date(item.startDate);
-                const endDate = new Date(item.endDate);
-                const rentalDays = Math.max(1, Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1);
-                item.rentalDays = rentalDays;
-                item.lineTotal = item.quantity * item.product.price_per_day * rentalDays;
+                const days = this._calcDays(this.rentalStartDate, this.rentalEndDate);
+                item.rentalDays = days;
+                item.lineTotal  = item.quantity * item.product.price_per_day * days;
+            },
+
+            updateAllItemDates() {
+                this.orderItems.forEach((_, i) => this.updateItemDates(i));
             },
 
             submitForm() {
@@ -906,8 +888,12 @@
                     alert('Please select a customer');
                     return;
                 }
-                if (!this.eventDate) {
-                    alert('Please select an event date');
+                if (!this.rentalStartDate || !this.rentalEndDate) {
+                    alert('Please select rental start and end dates');
+                    return;
+                }
+                if (this.rentalEndDate < this.rentalStartDate) {
+                    alert('Rental end date must be on or after the start date');
                     return;
                 }
                 if (this.orderItems.length === 0) {
@@ -916,10 +902,6 @@
                 }
                 for (let i = 0; i < this.orderItems.length; i++) {
                     const item = this.orderItems[i];
-                    if (!item.startDate || !item.endDate) {
-                        alert(`Item ${i + 1}: Please set rental dates`);
-                        return;
-                    }
                     if (item.quantity < 1) {
                         alert(`Item ${i + 1}: Quantity must be at least 1`);
                         return;

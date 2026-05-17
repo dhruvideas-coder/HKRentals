@@ -229,7 +229,8 @@ class OrderController extends Controller
 
             $request->validate([
                 'customer_id' => 'required|exists:customers,id',
-                'event_date' => 'required|date',
+                'rental_start_date' => 'required|date',
+                'rental_end_date' => 'required|date|after_or_equal:rental_start_date',
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
                 'items.*.quantity' => 'required|integer|min:1',
@@ -282,8 +283,8 @@ class OrderController extends Controller
             $totalAmount = 0;
             foreach ($request->items as $item) {
                 $product = \App\Models\Product::findOrFail($item['product_id']);
-                $startDate = \Carbon\Carbon::parse($item['start_date']);
-                $endDate = \Carbon\Carbon::parse($item['end_date']);
+                $startDate = \Carbon\Carbon::parse($item['start_date'])->startOfDay();
+                $endDate   = \Carbon\Carbon::parse($item['end_date'])->startOfDay();
                 $rentalDays = max(1, $startDate->diffInDays($endDate) + 1);
                 $lineTotal = $item['quantity'] * $product->price_per_day * $rentalDays;
                 $totalAmount += $lineTotal;
@@ -297,7 +298,8 @@ class OrderController extends Controller
                 'customer_email' => $customer->email,
                 'customer_phone' => $customer->phone ?? '',
                 'customer_address' => $customer->address ?? '',
-                'event_date' => $request->event_date,
+                'rental_start_date' => $request->rental_start_date,
+                'rental_end_date' => $request->rental_end_date,
                 'total_amount' => $totalAmount,
                 'traveling_cost' => $travelingCost,
                 'distance_km' => $distanceKm,

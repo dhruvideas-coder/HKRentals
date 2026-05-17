@@ -84,6 +84,7 @@
                     <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] whitespace-nowrap">Order</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em]">Customer</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] hidden md:table-cell whitespace-nowrap">Placed On</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] whitespace-nowrap">Rental Period</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] whitespace-nowrap">Items</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] whitespace-nowrap">Total</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] whitespace-nowrap">Status</th>
@@ -104,6 +105,22 @@
                     </td>
                     <td class="px-6 py-4 hidden md:table-cell text-sm text-neutral-600 whitespace-nowrap">
                         {{ $order->created_at->format('M d, Y') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if($order->rental_start_date && $order->rental_end_date)
+                        <div class="inline-flex items-center gap-2 text-[13px] font-medium
+                            @if(now()->between($order->rental_start_date, $order->rental_end_date))
+                                text-amber-600
+                            @else
+                                text-neutral-700
+                            @endif">
+                            <span>{{ $order->rental_start_date->format('m-d-Y h:i A') }}</span>
+                            <svg class="w-3.5 h-3.5 flex-shrink-0 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                            <span>{{ $order->rental_end_date->format('m-d-Y h:i A') }}</span>
+                        </div>
+                        @else
+                        <span class="text-sm text-neutral-400">—</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="text-sm font-medium text-neutral-700">
@@ -145,7 +162,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-20 text-center">
+                    <td colspan="8" class="px-6 py-20 text-center">
                         <div class="flex flex-col items-center">
                             <div class="w-16 h-16 bg-neutral-50 rounded-2xl flex items-center justify-center mb-4">
                                 <svg class="w-8 h-8 text-neutral-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>

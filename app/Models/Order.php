@@ -8,8 +8,13 @@ class Order extends Model
 {
     protected $fillable = [
         'customer_id', 'customer_name', 'customer_email', 'customer_phone',
-        'customer_address', 'event_date', 'total_amount', 'traveling_cost',
+        'customer_address', 'rental_start_date', 'rental_end_date', 'total_amount', 'traveling_cost',
         'distance_km', 'status'
+    ];
+
+    protected $casts = [
+        'rental_start_date' => 'datetime',
+        'rental_end_date'   => 'datetime',
     ];
 
     public function customer()
