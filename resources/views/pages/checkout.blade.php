@@ -18,11 +18,13 @@
     paymentState: 'idle',
     paymentError: '',
 
-    /* ── Settings for Distance ── */
+    /* ── Settings ── */
     settings: {
-        godownLat: {{ $settings?->godown_lat ?: 'null' }},
-        godownLng: {{ $settings?->godown_lng ?: 'null' }},
-        chargePerMile: {{ $settings?->charge_per_mile ?: 1 }}
+        godownLat:          {{ $settings?->godown_lat ?: 'null' }},
+        godownLng:          {{ $settings?->godown_lng ?: 'null' }},
+        chargePerMile:      {{ $settings?->charge_per_mile ?? 1 }},
+        maxDeliveryDist:    {{ $settings?->max_delivery_distance ?? 20 }},
+        taxRate:            {{ $settings?->tax_rate ?? 9.25 }}
     },
     travelingCost: 0,
     distanceMiles: 0,
@@ -35,7 +37,8 @@
     locatingMe: false,
 
     get totalAmount() {
-        return parseFloat(Alpine.store('cart').subtotal()) + parseFloat(Alpine.store('cart').subtotal()) * 0.085 + this.travelingCost;
+        const sub = parseFloat(Alpine.store('cart').subtotal());
+        return sub + sub * (this.settings.taxRate / 100) + this.travelingCost;
     },
     getDays(dateRange) { return Alpine.store('cart').calculateDays(dateRange); },
 
@@ -53,7 +56,13 @@
         let distMeters = google.maps.geometry.spherical.computeDistanceBetween(godown, eventLoc);
         this.distanceMiles = distMeters / 1609.344;
 
-        this.travelingCost = this.distanceMiles * this.settings.chargePerMile;
+        const cpm     = this.settings.chargePerMile;
+        const maxDist = this.settings.maxDeliveryDist;
+        if (this.distanceMiles <= maxDist) {
+            this.travelingCost = cpm * maxDist;
+        } else {
+            this.travelingCost = cpm * maxDist + cpm * this.distanceMiles;
+        }
     },
 
     validateStep1() {
@@ -529,7 +538,7 @@
                             <span class="text-green-600 font-medium">Free</span>
                         </template>
                     </div>
-                    <div class="flex justify-between text-sm text-neutral-600"><span>Tax (8.5%)</span><span x-text="'$'+($store.cart.subtotal()*0.085).toFixed(2)"></span></div>
+                    <div class="flex justify-between text-sm text-neutral-600"><span x-text="`Tax (${settings.taxRate}%)`"></span><span x-text="'$'+($store.cart.subtotal()*(settings.taxRate/100)).toFixed(2)"></span></div>
                     <div class="flex justify-between font-bold text-neutral-900 text-lg pt-2 border-t border-neutral-200"><span>Total</span><span x-text="'$'+totalAmount.toFixed(2)"></span></div>
                 </div>
             </div>

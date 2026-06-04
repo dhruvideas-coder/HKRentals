@@ -59,25 +59,39 @@
 
 ## 3. Distance & Delivery Charge
 
-**Rule: Distance in miles. Charge = distance × charge_per_mile.**
+**Rule: Distance in miles. Flat fee within threshold, flat fee + actual miles beyond it.**
+
 
 - No free delivery distance — every order pays travel cost based on actual distance
 - Distance calculated using **Haversine formula** with Earth radius **3958.8 miles**
 - Godown (warehouse) coordinates stored in Settings
 
-**PHP formula (both CheckoutController and Admin OrderController):**
+**Formula:**
 ```
-distanceMiles = haversine(godownLat, godownLng, customerLat, customerLng)
-travelingCost = distanceMiles × settings.charge_per_mile
+if distanceMiles ≤ max_delivery_distance:
+    travelingCost = charge_per_mile × max_delivery_distance   ← flat fee for everyone within threshold
+
+if distanceMiles > max_delivery_distance:
+    travelingCost = charge_per_mile × max_delivery_distance
+                  + charge_per_mile × distanceMiles            ← flat fee + actual mileage on top
 ```
 
-**JS frontend (checkout + admin create):**
-- Checkout (`checkout.blade.php`): uses Google Maps `computeDistanceBetween()` → converts meters ÷ 1609.344 to miles
-- Admin create (`create.blade.php`): uses `haversine()` JS function with R = 3958.8
+**Example** (charge_per_mile = $1, max_delivery_distance = 40 mi):
+| Actual distance | Calculation | Charge |
+|----------------|-------------|--------|
+| 20 mi | $1 × 40 | $40.00 |
+| 40 mi | $1 × 40 | $40.00 |
+| 60 mi | $1 × 40 + $1 × 60 | $100.00 |
+
+**JS helper:** `calcTravelCost(distanceMiles)` method on the admin Alpine component; same logic inline in `checkout.blade.php calculateCost()`
+
+**JS frontend:**
+- Checkout: Google Maps `computeDistanceBetween()` → meters ÷ 1609.344 → miles
+- Admin create: `haversine()` JS function with R = 3958.8
 
 **Customer map location** stored on the `Customer` model as `map_location` JSON `{lat, lng, formatted_address}`.
 
-**Settings fields:** `godown_address`, `godown_lat`, `godown_lng`, `charge_per_mile`
+**Settings fields:** `godown_address`, `godown_lat`, `godown_lng`, `charge_per_mile`, `max_delivery_distance`
 
 ---
 
@@ -85,13 +99,14 @@ travelingCost = distanceMiles × settings.charge_per_mile
 
 ```
 subtotal     = Σ (quantity × price_per_day × multiplier)  per item
-tax          = subtotal × 8.5%   (frontend display only, Knoxville TN rate)
-travelCost   = distanceMiles × charge_per_mile
-─────────────────────────────────────────────
+tax          = subtotal × (tax_rate / 100)   ← configurable in Settings
+travelCost   = see Distance formula (Section 3)
+──────────────────────────────────────────────
 orderTotal   = subtotal + tax + travelCost
 ```
 
-> Tax (8.5%) is shown on the customer checkout frontend. `total_amount` stored in DB includes travel cost but **not** tax (tax is informational).
+> Tax applies to **subtotal only** — not to the delivery charge.
+> `total_amount` stored in DB **includes tax** for both customer and admin-created orders.
 
 ---
 
@@ -158,6 +173,8 @@ orderTotal   = subtotal + tax + travelCost
 | `godown_lat` | — | Warehouse latitude for distance calc |
 | `godown_lng` | — | Warehouse longitude for distance calc |
 | `charge_per_mile` | 1.00 | $ per mile delivery charge |
+| `max_delivery_distance` | 20.00 | Flat-rate threshold in miles (see Section 3) |
+| `tax_rate` | 9.25 | % applied to order subtotal (not delivery) |
 
 Admin: Settings → System Configuration page.
 

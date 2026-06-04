@@ -70,12 +70,20 @@ class CheckoutController extends Controller
 
             $settings = \App\Models\Setting::first();
             if ($settings && $settings->godown_lat && $settings->godown_lng && $mapLocation && isset($mapLocation['lat'], $mapLocation['lng'])) {
-                $distanceMiles = $this->calculateDistance(
+                $distanceMiles   = $this->calculateDistance(
                     (float) $settings->godown_lat, (float) $settings->godown_lng,
                     (float) $mapLocation['lat'], (float) $mapLocation['lng']
                 );
 
-                $travelingCost = $distanceMiles * ($settings->charge_per_mile ?? 1);
+                // Count delivery charges based on distance
+                $chargePerMile  = (float) ($settings->charge_per_mile ?? 1);
+                $maxDist        = (float) ($settings->max_delivery_distance ?? 50);
+
+                if ($distanceMiles <= $maxDist) {
+                    $travelingCost = $chargePerMile * $maxDist;
+                } else {
+                    $travelingCost = $chargePerMile * $maxDist + $chargePerMile * $distanceMiles;
+                }
             }
 
             // Stock validation before creating order

@@ -16,6 +16,8 @@ class SettingController extends Controller
                 'godown_lat'             => '',
                 'godown_lng'             => '',
                 'charge_per_mile'        => 1.00,
+                'max_delivery_distance'  => 50.00,
+                'tax_rate'               => 9.25,
             ]);
 
             return view('admin.settings.index', compact('settings'));
@@ -33,6 +35,8 @@ class SettingController extends Controller
                 'godown_lat'             => 'nullable|string',
                 'godown_lng'             => 'nullable|string',
                 'charge_per_mile'        => 'required|numeric|min:0',
+                'max_delivery_distance'  => 'required|numeric|min:0',
+                'tax_rate'               => 'required|numeric|min:0|max:100',
             ]);
 
             $settings = Setting::first() ?? new Setting();

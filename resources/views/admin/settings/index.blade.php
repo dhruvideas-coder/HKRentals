@@ -27,83 +27,172 @@
             </div>
         @endif
 
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <form action="{{ route('admin.settings.update') }}" method="POST">
-                @csrf
-                @method('PUT')
+        <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+            @csrf
+            @method('PUT')
 
-                <div class="p-6 md:p-10 space-y-8 md:space-y-10">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                        
-                        {{-- Godown Address --}}
-                        <div class="md:col-span-2">
-                            <label for="godown_address" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">
-                                Godown Address
-                                @if($mapsKey)
-                                    <span class="ml-2 inline-flex items-center gap-1 text-brand-600 font-semibold normal-case tracking-normal text-[10px] bg-brand-50 border border-brand-100 px-2 py-0.5 rounded-full">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                        Google search enabled
-                                    </span>
-                                @endif
-                            </label>
-                            <div class="relative">
-                                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                <input type="text" name="godown_address" id="godown_address"
-                                       value="{{ old('godown_address', $settings->godown_address) }}"
-                                       placeholder="Search for godown address..."
-                                       autocomplete="off"
-                                       class="block w-full pl-12 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold shadow-sm" required>
-                            </div>
-                            @error('godown_address') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
+            {{-- ── Section 1: Warehouse Location ── --}}
+            <div class="bg-white rounded-[2rem] shadow-sm border border-neutral-100 overflow-hidden">
+                <div class="px-6 md:px-10 pt-8 pb-2 border-b border-neutral-50">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
                         </div>
-
-                        {{-- Hidden Coordinates --}}
-                        <input type="hidden" name="godown_lat" id="godown_lat" value="{{ old('godown_lat', $settings->godown_lat) }}">
-                        <input type="hidden" name="godown_lng" id="godown_lng" value="{{ old('godown_lng', $settings->godown_lng) }}">
-
-                        {{-- Godown Map --}}
-                        <div class="md:col-span-2 mt-2">
-                            <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Pin Exact Location</label>
-                            <div class="relative w-full h-[300px] rounded-2xl overflow-hidden border border-neutral-200 shadow-inner bg-neutral-50">
-                                @if($mapsKey)
-                                    <div id="adminMapCanvas" class="w-full h-full"></div>
-                                @else
-                                    <div class="flex items-center justify-center w-full h-full text-neutral-400 p-6 text-center">
-                                        Google Maps key is missing. Please add it to your .env file to enable the map.
-                                    </div>
-                                @endif
-                            </div>
-                            <p class="text-[10px] text-neutral-400 font-medium mt-2 ml-1">Search above or drag the pin on the map to set the precise godown location.</p>
+                        <div>
+                            <h3 class="text-base font-bold text-neutral-900">Warehouse Location</h3>
+                            <p class="text-xs text-neutral-400">Used to calculate delivery distance for every order.</p>
                         </div>
+                    </div>
+                </div>
+                <div class="p-6 md:p-10 space-y-6">
+                    {{-- Godown Address --}}
+                    <div>
+                        <label for="godown_address" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">
+                            Warehouse Address
+                            @if($mapsKey)
+                                <span class="ml-2 inline-flex items-center gap-1 text-brand-600 font-semibold normal-case tracking-normal text-[10px] bg-brand-50 border border-brand-100 px-2 py-0.5 rounded-full">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    Google search enabled
+                                </span>
+                            @endif
+                        </label>
+                        <div class="relative">
+                            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <input type="text" name="godown_address" id="godown_address"
+                                   value="{{ old('godown_address', $settings->godown_address) }}"
+                                   placeholder="Search for warehouse address..."
+                                   autocomplete="off"
+                                   class="block w-full pl-12 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold shadow-sm" required>
+                        </div>
+                        @error('godown_address') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Hidden Coordinates --}}
+                    <input type="hidden" name="godown_lat" id="godown_lat" value="{{ old('godown_lat', $settings->godown_lat) }}">
+                    <input type="hidden" name="godown_lng" id="godown_lng" value="{{ old('godown_lng', $settings->godown_lng) }}">
+
+                    {{-- Godown Map --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Pin Exact Location</label>
+                        <div class="relative w-full h-[280px] rounded-2xl overflow-hidden border border-neutral-200 shadow-inner bg-neutral-50">
+                            @if($mapsKey)
+                                <div id="adminMapCanvas" class="w-full h-full"></div>
+                            @else
+                                <div class="flex items-center justify-center w-full h-full text-neutral-400 p-6 text-center text-sm">
+                                    Google Maps key is missing. Add it to your .env file to enable the map.
+                                </div>
+                            @endif
+                        </div>
+                        <p class="text-[10px] text-neutral-400 font-medium mt-2 ml-1">Search above or drag the pin to set the precise warehouse location.</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── Section 2: Pricing & Tax ── --}}
+            <div class="bg-white rounded-[2rem] shadow-sm border border-neutral-100 overflow-hidden">
+                <div class="px-6 md:px-10 pt-8 pb-2 border-b border-neutral-50">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-neutral-900">Pricing & Tax</h3>
+                            <p class="text-xs text-neutral-400">Delivery charge rules and tax applied to every order.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 md:p-10">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                         {{-- Delivery Charge Per Mile --}}
-                        <div class="pt-6 border-t border-neutral-100">
-                            <label for="charge_per_mile" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1"> Delivery Charge Per Mile</label>
+                        <div>
+                            <label for="charge_per_mile" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 ml-1">Charge Per Mile</label>
+                            <p class="text-[11px] text-neutral-400 mb-3 ml-1">Base rate applied to every delivery.</p>
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                     <span class="text-neutral-500 font-bold">$</span>
                                 </div>
-                                <input type="number" step="0.01" name="charge_per_mile" id="charge_per_mile" inputmode="decimal" value="{{ old('charge_per_mile', $settings->charge_per_mile) }}"
-                                       class="block w-full pl-10 pr-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold shadow-sm text-lg" required>
+                                <input type="number" step="0.01" min="0" name="charge_per_mile" id="charge_per_mile" inputmode="decimal"
+                                       value="{{ old('charge_per_mile', $settings->charge_per_mile) }}"
+                                       class="block w-full pl-9 pr-5 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-bold shadow-sm text-lg" required>
                             </div>
                             @error('charge_per_mile') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
                         </div>
 
+                        {{-- Max Delivery Distance --}}
+                        <div>
+                            <label for="max_delivery_distance" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 ml-1">Max Distance (Flat Rate)</label>
+                            <p class="text-[11px] text-neutral-400 mb-3 ml-1">Orders within this range pay a flat fee. Beyond it: flat fee + actual miles.</p>
+                            <div class="relative">
+                                <input type="number" step="0.01" min="0" name="max_delivery_distance" id="max_delivery_distance" inputmode="decimal"
+                                       value="{{ old('max_delivery_distance', $settings->max_delivery_distance) }}"
+                                       class="block w-full pl-5 pr-14 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-bold shadow-sm text-lg" required>
+                                <div class="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none">
+                                    <span class="text-neutral-400 font-semibold text-sm">mi</span>
+                                </div>
+                            </div>
+                            @error('max_delivery_distance') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Tax Rate --}}
+                        <div>
+                            <label for="tax_rate" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 ml-1">Tax Rate</label>
+                            <p class="text-[11px] text-neutral-400 mb-3 ml-1">Applied to order subtotal only, not delivery charge.</p>
+                            <div class="relative">
+                                <input type="number" step="0.01" min="0" max="100" name="tax_rate" id="tax_rate" inputmode="decimal"
+                                       value="{{ old('tax_rate', $settings->tax_rate) }}"
+                                       class="block w-full pl-5 pr-10 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-bold shadow-sm text-lg" required>
+                                <div class="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none">
+                                    <span class="text-neutral-400 font-semibold">%</span>
+                                </div>
+                            </div>
+                            @error('tax_rate') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
+                        </div>
+
+                    </div>
+
+                    {{-- Delivery logic visual example --}}
+                    <div class="mt-6 rounded-2xl bg-neutral-50 border border-neutral-100 p-4">
+                        <p class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-3">How delivery charge is calculated</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="flex items-start gap-2.5 bg-white rounded-xl p-3 border border-neutral-100">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0">≤</span>
+                                <div>
+                                    <p class="font-semibold text-neutral-700">Within max distance</p>
+                                    <p class="text-neutral-400 mt-0.5">charge = <span class="font-mono text-neutral-600">$ per mile × max distance</span></p>
+                                    <p class="text-neutral-400 mt-0.5 italic">Everyone within range pays the same flat fee.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2.5 bg-white rounded-xl p-3 border border-neutral-100">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0">&gt;</span>
+                                <div>
+                                    <p class="font-semibold text-neutral-700">Beyond max distance</p>
+                                    <p class="text-neutral-400 mt-0.5">charge = <span class="font-mono text-neutral-600">flat fee + $ per mile × actual miles</span></p>
+                                    <p class="text-neutral-400 mt-0.5 italic">Flat fee plus the actual distance on top.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="px-6 md:px-10 py-6 md:py-8 bg-neutral-50/50 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p class="text-xs text-neutral-400 font-medium italic text-center sm:text-left">These settings apply immediately to new orders.</p>
-                    <button type="submit" class="w-full sm:w-auto justify-center px-8 py-3 bg-brand-600 text-white rounded-xl font-bold shadow-lg shadow-brand-200 hover:bg-brand-700 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        Save Settings
-                    </button>
-                </div>
-            </form>
-        </div>
+            {{-- ── Save Button ── --}}
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+                <p class="text-xs text-neutral-400 font-medium italic text-center sm:text-left">Changes apply immediately to all new orders.</p>
+                <button type="submit" class="w-full sm:w-auto justify-center px-10 py-3.5 bg-brand-600 text-white rounded-2xl font-bold shadow-lg shadow-brand-200 hover:bg-brand-700 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Save Settings
+                </button>
+            </div>
+        </form>
     </div>
 
 @if($mapsKey)

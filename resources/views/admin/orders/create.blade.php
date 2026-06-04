@@ -390,6 +390,10 @@
                         <span class="text-neutral-300">Delivery</span>
                         <span class="font-bold text-white" x-text="`$${travelingCost.toFixed(2)}`"></span>
                     </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-neutral-300" x-text="`Tax (${settings?.tax_rate ?? 9.25}%)`"></span>
+                        <span class="font-bold text-white" x-text="`$${tax.toFixed(2)}`"></span>
+                    </div>
                     <div class="border-t border-white/20 pt-2.5 flex items-center justify-between">
                         <span class="text-white font-semibold">Total</span>
                         <span class="text-2xl font-bold text-brand-400" x-text="`$${grandTotal.toFixed(2)}`"></span>
@@ -522,7 +526,7 @@
                     <div class="bg-brand-50 rounded-xl border border-brand-100 p-3 flex flex-col justify-center">
                         <p class="text-[10px] font-bold text-brand-500 uppercase tracking-wider">Est. Travel Cost</p>
                         <p class="font-bold text-brand-700 text-xl mt-0.5"
-                           x-text="selectedLocation && mapCfg.godownLat ? '$' + (haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng) * mapCfg.chargeMile).toFixed(2) : '—'"></p>
+                           x-text="selectedLocation && mapCfg.godownLat ? '$' + calcTravelCost(haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng)).toFixed(2) : '—'"></p>
                         <p class="text-[10px] text-brand-400 mt-0.5"
                            x-text="selectedLocation && mapCfg.godownLat ? haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng).toFixed(1)+' mi from warehouse' : ''"></p>
                     </div>
@@ -604,8 +608,22 @@
                 return this.orderItems.reduce((sum, item) => sum + item.lineTotal, 0);
             },
 
+            get tax() {
+                const rate = (this.settings?.tax_rate ?? 9.25) / 100;
+                return this.subtotal * rate;
+            },
+
             get grandTotal() {
-                return this.subtotal + this.travelingCost;
+                return this.subtotal + this.tax + this.travelingCost;
+            },
+
+            calcTravelCost(distanceMiles) {
+                const cpm     = parseFloat(this.settings?.charge_per_mile ?? 1);
+                const maxDist = parseFloat(this.settings?.max_delivery_distance ?? 20);
+                if (distanceMiles <= maxDist) {
+                    return Math.round(cpm * maxDist * 100) / 100;
+                }
+                return Math.round((cpm * maxDist + cpm * distanceMiles) * 100) / 100;
             },
 
             onCustomerChange() {
@@ -632,9 +650,7 @@
                     const lon2 = parseFloat(this.selectedCustomer.map_location.lng);
 
                     this.distanceMiles = this.haversine(lat1, lon1, lat2, lon2);
-
-                    const chargePerMile = parseFloat(this.settings.charge_per_mile || 1);
-                    this.travelingCost = Math.round(this.distanceMiles * chargePerMile * 100) / 100;
+                    this.travelingCost = this.calcTravelCost(this.distanceMiles);
                 }
             },
 
@@ -768,7 +784,7 @@
             recalcFromMap() {
                 if (!this.eventLocation || !this.mapCfg.godownLat || !this.mapCfg.godownLng) return;
                 this.distanceMiles = this.haversine(this.mapCfg.godownLat, this.mapCfg.godownLng, this.eventLocation.lat, this.eventLocation.lng);
-                this.travelingCost = Math.round(this.distanceMiles * this.mapCfg.chargeMile * 100) / 100;
+                this.travelingCost = this.calcTravelCost(this.distanceMiles);
             },
 
             clearEventLocation() {

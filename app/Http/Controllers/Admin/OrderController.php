@@ -258,12 +258,16 @@ class OrderController extends Controller
 
             $customer = \App\Models\Customer::findOrFail($request->customer_id);
 
+            $settings      = \App\Models\Setting::first();
+            $chargePerMile = (float) ($settings?->charge_per_mile ?? 1);
+            $maxDist       = (float) ($settings?->max_delivery_distance ?? 20);
+            $taxRate       = (float) ($settings?->tax_rate ?? 8.5) / 100;
+
             $distanceMiles = (float) ($request->distance_miles ?? 0);
             $travelingCost = (float) ($request->traveling_cost ?? 0);
 
             // Fall back to server-side calculation when the form didn't supply a distance
             if ($distanceMiles <= 0) {
-                $settings = \App\Models\Setting::first();
                 $customerLocation = $customer->map_location;
 
                 if ($settings && $settings->godown_lat && $settings->godown_lng && $customerLocation && isset($customerLocation['lat'], $customerLocation['lng'])) {
@@ -273,14 +277,18 @@ class OrderController extends Controller
                         (float) $customerLocation['lat'],
                         (float) $customerLocation['lng']
                     );
-
-                    if (!$travelingCost) {
-                        $travelingCost = $distanceMiles * ($settings->charge_per_mile ?? 1);
-                    }
                 }
             }
 
-            $totalAmount = 0;
+            if (!$travelingCost && $distanceMiles > 0) {
+                if ($distanceMiles <= $maxDist) {
+                    $travelingCost = $chargePerMile * $maxDist;
+                } else {
+                    $travelingCost = $chargePerMile * $maxDist + $chargePerMile * $distanceMiles;
+                }
+            }
+
+            $subtotal = 0;
             foreach ($request->items as $item) {
                 $product    = \App\Models\Product::findOrFail($item['product_id']);
                 $rentalDays = \App\Helpers\RentalHelper::calculateDays(
@@ -289,10 +297,10 @@ class OrderController extends Controller
                 );
                 $multiplier = max(1, $rentalDays / 2);
                 $lineTotal  = $item['quantity'] * $product->price_per_day * $multiplier;
-                $totalAmount += $lineTotal;
+                $subtotal  += $lineTotal;
             }
 
-            $totalAmount += $travelingCost;
+            $totalAmount = $subtotal + ($subtotal * $taxRate) + $travelingCost;
 
             $order = Order::create([
                 'customer_id' => $customer->id,

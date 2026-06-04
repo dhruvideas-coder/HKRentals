@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('godown_lat')->nullable();
             $table->string('godown_lng')->nullable();
             $table->decimal('charge_per_mile', 8, 2)->default(1.00); // $1 / mile
+            $table->decimal('max_delivery_distance', 8, 2)->default(20.00); // flat-rate threshold in miles
+            $table->decimal('tax_rate', 5, 2)->default(9.25); // % applied to subtotal
             $table->timestamps();
         });
     }
