@@ -65,19 +65,17 @@ class CheckoutController extends Controller
                 ], fn($v) => $v !== null)
             );
 
-            $distanceKm   = 0;
+            $distanceMiles = 0;
             $travelingCost = 0;
 
             $settings = \App\Models\Setting::first();
             if ($settings && $settings->godown_lat && $settings->godown_lng && $mapLocation && isset($mapLocation['lat'], $mapLocation['lng'])) {
-                $distanceKm = $this->calculateDistance(
+                $distanceMiles = $this->calculateDistance(
                     (float) $settings->godown_lat, (float) $settings->godown_lng,
                     (float) $mapLocation['lat'], (float) $mapLocation['lng']
                 );
 
-                if ($distanceKm > ($settings->free_delivery_distance ?? 5)) {
-                    $travelingCost = $distanceKm * ($settings->charge_per_km ?? 1);
-                }
+                $travelingCost = $distanceMiles * ($settings->charge_per_mile ?? 1);
             }
 
             // Stock validation before creating order
@@ -101,7 +99,7 @@ class CheckoutController extends Controller
                 'rental_end_date'    => Carbon::parse($request->rentalEndDate),
                 'total_amount'       => $request->total_amount,
                 'traveling_cost'     => $travelingCost,
-                'distance_km'        => $distanceKm,
+                'distance_miles'     => $distanceMiles,
                 'status'             => 'pending',
             ]);
 
@@ -138,7 +136,7 @@ class CheckoutController extends Controller
 
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
-        $earthRadius = 6371;
+        $earthRadius = 3958.8;
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);
 

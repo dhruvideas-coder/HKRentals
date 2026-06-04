@@ -9,7 +9,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id', 'customer_name', 'customer_email', 'customer_phone',
         'customer_address', 'rental_start_date', 'rental_end_date', 'total_amount', 'traveling_cost',
-        'distance_km', 'status'
+        'distance_miles', 'status'
     ];
 
     protected $casts = [

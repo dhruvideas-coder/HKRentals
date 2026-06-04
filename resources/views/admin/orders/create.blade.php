@@ -295,7 +295,7 @@
                                 <div class="grid grid-cols-2 gap-2">
                                     <div class="bg-white rounded-lg p-2 border border-green-100">
                                         <p class="text-[9px] font-bold text-neutral-400 uppercase mb-0.5">Distance</p>
-                                        <p class="font-bold text-neutral-900 text-sm" x-text="distanceKm > 0 ? `${distanceKm.toFixed(1)} km` : '—'"></p>
+                                        <p class="font-bold text-neutral-900 text-sm" x-text="distanceMiles > 0 ? `${distanceMiles.toFixed(1)} mi` : '—'"></p>
                                     </div>
                                     <div class="bg-white rounded-lg p-2 border border-green-100">
                                         <p class="text-[9px] font-bold text-neutral-400 uppercase mb-0.5">Travel Cost</p>
@@ -318,7 +318,7 @@
                             <input type="number" x-model.number="travelingCost" name="traveling_cost" step="0.01" min="0"
                                    class="block w-full pl-8 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
                         </div>
-                        <input type="hidden" name="distance_km" :value="distanceKm" />
+                        <input type="hidden" name="distance_miles" :value="distanceMiles" />
                     </div>
 
                 </div>
@@ -522,9 +522,9 @@
                     <div class="bg-brand-50 rounded-xl border border-brand-100 p-3 flex flex-col justify-center">
                         <p class="text-[10px] font-bold text-brand-500 uppercase tracking-wider">Est. Travel Cost</p>
                         <p class="font-bold text-brand-700 text-xl mt-0.5"
-                           x-text="selectedLocation && mapCfg.godownLat ? '$' + (Math.max(0, haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng) - mapCfg.freeDist) * mapCfg.chargeKm).toFixed(2) : '—'"></p>
+                           x-text="selectedLocation && mapCfg.godownLat ? '$' + (haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng) * mapCfg.chargeMile).toFixed(2) : '—'"></p>
                         <p class="text-[10px] text-brand-400 mt-0.5"
-                           x-text="selectedLocation && mapCfg.godownLat ? haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng).toFixed(1)+' km from godown' : ''"></p>
+                           x-text="selectedLocation && mapCfg.godownLat ? haversine(mapCfg.godownLat,mapCfg.godownLng,selectedLocation.lat,selectedLocation.lng).toFixed(1)+' mi from warehouse' : ''"></p>
                     </div>
                 </div>
 
@@ -572,7 +572,7 @@
             rentalStartDate: (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T08:00`; })(),
             rentalEndDate:   (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T17:00`; })(),
             travelingCost: 0,
-            distanceKm: 0,
+            distanceMiles: 0,
             paymentStatus: 'pending',
             paymentMethod: '',
             paymentAmount: 0,
@@ -586,10 +586,9 @@
             eventLocation: null,
             locationPinned: false,
             mapCfg: {
-                godownLat: {{ $settings?->godown_lat ?: 'null' }},
-                godownLng: {{ $settings?->godown_lng ?: 'null' }},
-                freeDist:  {{ $settings?->free_delivery_distance ?: 5 }},
-                chargeKm:  {{ $settings?->charge_per_km ?: 1 }},
+                godownLat:  {{ $settings?->godown_lat ?: 'null' }},
+                godownLng:  {{ $settings?->godown_lng ?: 'null' }},
+                chargeMile: {{ $settings?->charge_per_mile ?: 1 }},
             },
 
             init() {},
@@ -612,7 +611,7 @@
             onCustomerChange() {
                 if (!this.selectedCustomerId) {
                     this.selectedCustomer = null;
-                    if (!this.locationPinned) { this.travelingCost = 0; this.distanceKm = 0; }
+                    if (!this.locationPinned) { this.travelingCost = 0; this.distanceMiles = 0; }
                     return;
                 }
 
@@ -621,7 +620,7 @@
                 // If admin already pinned a delivery location, keep it — don't override
                 if (this.locationPinned) return;
 
-                this.distanceKm = 0;
+                this.distanceMiles = 0;
                 this.travelingCost = 0;
 
                 if (this.selectedCustomer && this.selectedCustomer.map_location &&
@@ -632,14 +631,10 @@
                     const lat2 = parseFloat(this.selectedCustomer.map_location.lat);
                     const lon2 = parseFloat(this.selectedCustomer.map_location.lng);
 
-                    this.distanceKm = this.haversine(lat1, lon1, lat2, lon2);
+                    this.distanceMiles = this.haversine(lat1, lon1, lat2, lon2);
 
-                    const freeDistance = parseFloat(this.settings.free_delivery_distance || 5);
-                    const chargePerKm  = parseFloat(this.settings.charge_per_km || 1);
-
-                    if (this.distanceKm > freeDistance) {
-                        this.travelingCost = Math.round((this.distanceKm - freeDistance) * chargePerKm * 100) / 100;
-                    }
+                    const chargePerMile = parseFloat(this.settings.charge_per_mile || 1);
+                    this.travelingCost = Math.round(this.distanceMiles * chargePerMile * 100) / 100;
                 }
             },
 
@@ -772,9 +767,8 @@
 
             recalcFromMap() {
                 if (!this.eventLocation || !this.mapCfg.godownLat || !this.mapCfg.godownLng) return;
-                this.distanceKm   = this.haversine(this.mapCfg.godownLat, this.mapCfg.godownLng, this.eventLocation.lat, this.eventLocation.lng);
-                const extra       = Math.max(0, this.distanceKm - this.mapCfg.freeDist);
-                this.travelingCost = Math.round(extra * this.mapCfg.chargeKm * 100) / 100;
+                this.distanceMiles = this.haversine(this.mapCfg.godownLat, this.mapCfg.godownLng, this.eventLocation.lat, this.eventLocation.lng);
+                this.travelingCost = Math.round(this.distanceMiles * this.mapCfg.chargeMile * 100) / 100;
             },
 
             clearEventLocation() {
@@ -805,11 +799,12 @@
             addProduct(product) {
                 if (this.isProductInOrder(product.id)) return;
                 const days = this._calcDays(this.rentalStartDate, this.rentalEndDate);
+                const multiplier = Math.max(1, days / 2);
                 this.orderItems.push({
                     product:    product,
                     quantity:   1,
                     rentalDays: days,
-                    lineTotal:  product.price_per_day * days,
+                    lineTotal:  product.price_per_day * multiplier,
                 });
             },
 
@@ -875,8 +870,9 @@
             updateItemDates(index) {
                 const item = this.orderItems[index];
                 const days = this._calcDays(this.rentalStartDate, this.rentalEndDate);
+                const multiplier = Math.max(1, days / 2);
                 item.rentalDays = days;
-                item.lineTotal  = item.quantity * item.product.price_per_day * days;
+                item.lineTotal  = item.quantity * item.product.price_per_day * multiplier;
             },
 
             updateAllItemDates() {
@@ -952,7 +948,7 @@
             },
 
             haversine(lat1, lon1, lat2, lon2) {
-                const R = 6371; // Earth radius in km
+                const R = 3958.8; // Earth radius in miles
                 const dLat = (lat2 - lat1) * Math.PI / 180;
                 const dLon = (lon2 - lon1) * Math.PI / 180;
                 const a = Math.sin(dLat/2) * Math.sin(dLat/2) +

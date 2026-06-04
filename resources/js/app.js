@@ -4,7 +4,7 @@ import Alpine from 'alpinejs';
 // ── Cart Store ─────────────────────────────────────────────────
 Alpine.store('cart', {
     items: [],
-    
+
     init() {
         this.fetchCart();
     },
@@ -98,7 +98,8 @@ Alpine.store('cart', {
     subtotal() {
         return this.items.reduce((sum, i) => {
             const days = this.calculateDays(i.dateRange);
-            return sum + (parseFloat(i.price) * parseInt(i.quantity) * days);
+            const multiplier = Math.max(1, days / 2);
+            return sum + (parseFloat(i.price) * parseInt(i.quantity) * multiplier);
         }, 0).toFixed(2);
     },
 

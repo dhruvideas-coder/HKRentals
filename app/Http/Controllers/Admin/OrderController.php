@@ -70,7 +70,7 @@ class OrderController extends Controller
             'Order ID', 'Order Date', 'Event Date', 'Status',
             'Customer Name', 'Customer Email', 'Customer Phone', 'Customer Address',
             'Product Name', 'Product Qty', 'Price/Day (₹)', 'Rental Start', 'Rental End', 'Rental Days', 'Line Total (₹)',
-            'Traveling Cost (₹)', 'Distance (km)',
+            'Traveling Cost ($)', 'Distance (mi)',
             'Order Total (₹)',
             'Payment Status', 'Payment Method', 'Payment Amount (₹)', 'Payment Reference',
         ];
@@ -100,7 +100,7 @@ class OrderController extends Controller
 
                 $orderTail = [
                     number_format($order->traveling_cost ?? 0, 2),
-                    number_format($order->distance_km ?? 0, 2),
+                    number_format($order->distance_miles ?? 0, 2),
                     number_format($order->total_amount, 2),
                     $payment ? ucfirst($payment->status) : 'Unpaid',
                     $payment ? ucfirst($payment->payment_method ?? '') : '',
@@ -241,7 +241,7 @@ class OrderController extends Controller
                 'payment_amount' => 'nullable|numeric|min:0',
                 'payment_reference' => 'nullable|string',
                 'traveling_cost' => 'nullable|numeric|min:0',
-                'distance_km'   => 'nullable|numeric|min:0',
+                'distance_miles' => 'nullable|numeric|min:0',
             ]);
 
             \Log::info('BookOrder - Validation passed');
@@ -258,24 +258,24 @@ class OrderController extends Controller
 
             $customer = \App\Models\Customer::findOrFail($request->customer_id);
 
-            $distanceKm    = (float) ($request->distance_km ?? 0);
+            $distanceMiles = (float) ($request->distance_miles ?? 0);
             $travelingCost = (float) ($request->traveling_cost ?? 0);
 
             // Fall back to server-side calculation when the form didn't supply a distance
-            if ($distanceKm <= 0) {
+            if ($distanceMiles <= 0) {
                 $settings = \App\Models\Setting::first();
                 $customerLocation = $customer->map_location;
 
                 if ($settings && $settings->godown_lat && $settings->godown_lng && $customerLocation && isset($customerLocation['lat'], $customerLocation['lng'])) {
-                    $distanceKm = $this->calculateDistance(
+                    $distanceMiles = $this->calculateDistance(
                         (float) $settings->godown_lat,
                         (float) $settings->godown_lng,
                         (float) $customerLocation['lat'],
                         (float) $customerLocation['lng']
                     );
 
-                    if (!$travelingCost && $distanceKm > ($settings->free_delivery_distance ?? 5)) {
-                        $travelingCost = $distanceKm * ($settings->charge_per_km ?? 1);
+                    if (!$travelingCost) {
+                        $travelingCost = $distanceMiles * ($settings->charge_per_mile ?? 1);
                     }
                 }
             }
@@ -286,7 +286,8 @@ class OrderController extends Controller
                 $startDate = \Carbon\Carbon::parse($item['start_date'])->startOfDay();
                 $endDate   = \Carbon\Carbon::parse($item['end_date'])->startOfDay();
                 $rentalDays = max(1, $startDate->diffInDays($endDate) + 1);
-                $lineTotal = $item['quantity'] * $product->price_per_day * $rentalDays;
+                $multiplier = max(1, $rentalDays / 2);
+                $lineTotal = $item['quantity'] * $product->price_per_day * $multiplier;
                 $totalAmount += $lineTotal;
             }
 
@@ -302,7 +303,7 @@ class OrderController extends Controller
                 'rental_end_date' => $request->rental_end_date,
                 'total_amount' => $totalAmount,
                 'traveling_cost' => $travelingCost,
-                'distance_km' => $distanceKm,
+                'distance_miles' => $distanceMiles,
                 'status' => 'pending',
             ]);
 
@@ -359,7 +360,7 @@ class OrderController extends Controller
 
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
-        $earthRadius = 6371;
+        $earthRadius = 3958.8;
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);
 

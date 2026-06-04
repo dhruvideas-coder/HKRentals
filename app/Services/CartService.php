@@ -86,7 +86,8 @@ class CartService
         $total = 0;
         foreach ($this->getCart() as $item) {
             $days = $this->calculateDays($item['dateRange'] ?? null);
-            $total += $item['price'] * $item['quantity'] * $days;
+            $multiplier = max(1, $days / 2);
+            $total += $item['price'] * $item['quantity'] * $multiplier;
         }
         return (float) $total;
     }

@@ -186,7 +186,7 @@
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-neutral-500">Distance</dt>
-                    <dd class="font-semibold text-neutral-700">{{ $order->distance_km ? number_format($order->distance_km, 1) . ' km' : 'N/A' }}</dd>
+                    <dd class="font-semibold text-neutral-700">{{ $order->distance_miles ? number_format($order->distance_miles, 1) . ' mi' : 'N/A' }}</dd>
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-neutral-500">Traveling Cost</dt>

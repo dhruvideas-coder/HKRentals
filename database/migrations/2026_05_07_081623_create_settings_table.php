@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('godown_address')->nullable();
             $table->string('godown_lat')->nullable();
             $table->string('godown_lng')->nullable();
-            $table->decimal('free_delivery_distance', 8, 2)->default(5.00); // 5 km
-            $table->decimal('charge_per_km', 8, 2)->default(1.00); // $1 / km
+            $table->decimal('charge_per_mile', 8, 2)->default(1.00); // $1 / mile
             $table->timestamps();
         });
     }

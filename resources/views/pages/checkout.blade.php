@@ -22,11 +22,10 @@
     settings: {
         godownLat: {{ $settings?->godown_lat ?: 'null' }},
         godownLng: {{ $settings?->godown_lng ?: 'null' }},
-        freeDist: {{ $settings?->free_delivery_distance ?: 5 }},
-        chargePerKm: {{ $settings?->charge_per_km ?: 1 }}
+        chargePerMile: {{ $settings?->charge_per_mile ?: 1 }}
     },
     travelingCost: 0,
-    distanceKm: 0,
+    distanceMiles: 0,
 
     /* ── Map state ── */
     mapModalOpen: false,
@@ -43,22 +42,18 @@
     calculateCost() {
         if (!this.form.mapLocation || !this.settings.godownLat || !this.settings.godownLng) {
             this.travelingCost = 0;
-            this.distanceKm = 0;
+            this.distanceMiles = 0;
             return;
         }
         if (!window.google?.maps?.geometry) return;
-        
+
         let godown = new google.maps.LatLng(this.settings.godownLat, this.settings.godownLng);
         let eventLoc = new google.maps.LatLng(this.form.mapLocation.lat, this.form.mapLocation.lng);
-        
+
         let distMeters = google.maps.geometry.spherical.computeDistanceBetween(godown, eventLoc);
-        this.distanceKm = distMeters / 1000;
-        
-        if (this.distanceKm <= this.settings.freeDist) {
-            this.travelingCost = 0;
-        } else {
-            this.travelingCost = this.distanceKm * this.settings.chargePerKm;
-        }
+        this.distanceMiles = distMeters / 1609.344;
+
+        this.travelingCost = this.distanceMiles * this.settings.chargePerMile;
     },
 
     validateStep1() {
@@ -523,8 +518,8 @@
                     <div class="flex justify-between text-sm text-neutral-600">
                         <span class="flex items-center gap-1">
                             Delivery &amp; Setup 
-                            <template x-if="distanceKm > 0">
-                                <span class="text-[10px] bg-neutral-200 px-1.5 py-0.5 rounded text-neutral-600" x-text="distanceKm.toFixed(1) + ' km'"></span>
+                            <template x-if="distanceMiles > 0">
+                                <span class="text-[10px] bg-neutral-200 px-1.5 py-0.5 rounded text-neutral-600" x-text="distanceMiles.toFixed(1) + ' mi'"></span>
                             </template>
                         </span>
                         <template x-if="travelingCost > 0">
