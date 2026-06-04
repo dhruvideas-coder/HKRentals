@@ -282,12 +282,13 @@ class OrderController extends Controller
 
             $totalAmount = 0;
             foreach ($request->items as $item) {
-                $product = \App\Models\Product::findOrFail($item['product_id']);
-                $startDate = \Carbon\Carbon::parse($item['start_date'])->startOfDay();
-                $endDate   = \Carbon\Carbon::parse($item['end_date'])->startOfDay();
-                $rentalDays = max(1, $startDate->diffInDays($endDate) + 1);
+                $product    = \App\Models\Product::findOrFail($item['product_id']);
+                $rentalDays = \App\Helpers\RentalHelper::calculateDays(
+                    \Carbon\Carbon::parse($item['start_date']),
+                    \Carbon\Carbon::parse($item['end_date'])
+                );
                 $multiplier = max(1, $rentalDays / 2);
-                $lineTotal = $item['quantity'] * $product->price_per_day * $multiplier;
+                $lineTotal  = $item['quantity'] * $product->price_per_day * $multiplier;
                 $totalAmount += $lineTotal;
             }
 

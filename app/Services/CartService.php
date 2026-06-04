@@ -92,25 +92,19 @@ class CartService
         return (float) $total;
     }
 
-    /**
-     * Calculate days from dateRange.
-     */
     private function calculateDays(?string $dateRange): int
     {
-        if (!$dateRange) return 1;
-        
+        if (!$dateRange) return 2;
+
         $parts = explode(' → ', $dateRange);
-        if (count($parts) !== 2) return 1;
+        if (count($parts) !== 2) return 2;
 
         $start = strtotime($parts[0]);
-        $end = strtotime($parts[1]);
+        $end   = strtotime($parts[1]);
 
-        if (!$start || !$end) return 1;
+        if (!$start || !$end) return 2;
 
-        $diff = $end - $start;
-        $days = (int) ceil($diff / (60 * 60 * 24));
-        
-        return $days > 0 ? $days : 1;
+        return \App\Helpers\RentalHelper::calculateDays($start, $end);
     }
 
     /**

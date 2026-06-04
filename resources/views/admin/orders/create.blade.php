@@ -860,11 +860,7 @@
             },
 
             _calcDays(start, end) {
-                if (!start || !end) return 1;
-                const s = new Date(start), e = new Date(end);
-                const sd = new Date(s.getFullYear(), s.getMonth(), s.getDate());
-                const ed = new Date(e.getFullYear(), e.getMonth(), e.getDate());
-                return Math.max(1, Math.floor((ed - sd) / 86400000) + 1);
+                return window.calcRentalDays(start, end);
             },
 
             updateItemDates(index) {

@@ -1,6 +1,17 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 
+// ── Shared rental day helper (mirrors App\Helpers\RentalHelper::calculateDays) ─
+// 24 hours = 1 day. Minimum 2 days. Any period < 48 h still charges 2 days.
+window.calcRentalDays = function (start, end) {
+    if (!start || !end) return 2;
+    const s = new Date(start);
+    const e = new Date(end);
+    if (isNaN(s) || isNaN(e)) return 2;
+    const diffSeconds = Math.max(0, (e - s) / 1000);
+    return Math.max(2, Math.ceil(diffSeconds / 86400));
+};
+
 // ── Cart Store ─────────────────────────────────────────────────
 Alpine.store('cart', {
     items: [],
@@ -104,19 +115,13 @@ Alpine.store('cart', {
     },
 
     calculateDays(dateRange) {
-        if (!dateRange) return 1;
+        if (!dateRange) return 2;
         const parts = dateRange.split(' → ');
-        if (parts.length !== 2) return 1;
-        const start = new Date(parts[0]);
-        const end = new Date(parts[1]);
-        if (isNaN(start) || isNaN(end)) return 1;
-        const diffTime = end - start;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays > 0 ? diffDays : 1;
+        if (parts.length !== 2) return 2;
+        return window.calcRentalDays(parts[0], parts[1]);
     }
 });
 
 // ── Initialize Alpine.js globally ──────────────────────────────
 window.Alpine = Alpine;
 Alpine.start();
-
