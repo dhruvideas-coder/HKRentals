@@ -36,13 +36,17 @@
     locationPinned: false,
     locatingMe: false,
 
+    get isPickup() { return Alpine.store('cart').isPickup; },
+
     get totalAmount() {
         const sub = parseFloat(Alpine.store('cart').subtotal());
+        if (this.isPickup) return sub + sub * (this.settings.taxRate / 100);
         return sub + sub * (this.settings.taxRate / 100) + this.travelingCost;
     },
     getDays(dateRange) { return Alpine.store('cart').calculateDays(dateRange); },
 
     calculateCost() {
+        if (this.isPickup) { this.travelingCost = 0; this.distanceMiles = 0; return; }
         if (!this.form.mapLocation || !this.settings.godownLat || !this.settings.godownLng) {
             this.travelingCost = 0;
             this.distanceMiles = 0;
@@ -75,10 +79,12 @@
         if (!this.form.rentalStartDate) this.errors.rentalStartDate = 'Rental start date & time is required';
         if (!this.form.rentalEndDate)   this.errors.rentalEndDate   = 'Rental end date & time is required';
         else if (this.form.rentalEndDate < this.form.rentalStartDate) this.errors.rentalEndDate = 'End must be after start';
-        if (!this.form.address)   this.errors.address   = 'Address is required';
-        if (!this.form.city)    this.errors.city    = 'City is required';
-        if (!this.form.state)   this.errors.state   = 'State is required';
-        if (!this.form.zip)     this.errors.zip     = 'ZIP is required';
+        if (!this.isPickup) {
+            if (!this.form.address) this.errors.address = 'Delivery address is required';
+            if (!this.form.city)    this.errors.city    = 'City is required';
+            if (!this.form.state)   this.errors.state   = 'State is required';
+            if (!this.form.zip)     this.errors.zip     = 'ZIP is required';
+        }
         return Object.keys(this.errors).length === 0;
     },
     next() {
@@ -97,7 +103,7 @@
             let orderResponse = await fetch('{{ route('checkout.process') }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify({ ...this.form, total_amount: this.totalAmount })
+                body: JSON.stringify({ ...this.form, total_amount: this.totalAmount, is_pickup: this.isPickup ? 1 : 0 })
             });
             let orderData = await orderResponse.json();
             if (!orderData.success) throw new Error('Order creation failed');
@@ -124,7 +130,7 @@
 
             this.paymentState = 'success';
             Alpine.store('cart').clear();
-            setTimeout(() => { window.location.href = '{{ route('order.success') }}'; }, 1500);
+            setTimeout(() => { window.location.href = '{{ url('/order-success') }}/' + orderData.order_id; }, 1500);
         } catch (error) {
             console.error(error);
             this.paymentState = 'error';
@@ -366,24 +372,36 @@
 
                 <div class="grid sm:grid-cols-2 gap-5">
                     <div>
-                        <x-input label="First Name" x-model="form.firstName" placeholder="Sarah" :required="true" />
+                        <x-input label="First Name" x-model="form.firstName" x-on:input="delete errors.firstName" placeholder="Sarah" :required="true" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.firstName" x-text="errors.firstName"></p>
                     </div>
                     <div>
-                        <x-input label="Last Name" x-model="form.lastName" placeholder="Johnson" :required="true" />
+                        <x-input label="Last Name" x-model="form.lastName" x-on:input="delete errors.lastName" placeholder="Johnson" :required="true" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.lastName" x-text="errors.lastName"></p>
                     </div>
                     <div>
-                        <x-input label="Email" type="email" x-model="form.email" placeholder="sarah@email.com" :required="true" />
+                        <x-input label="Email" type="email" x-model="form.email" x-on:input="delete errors.email" placeholder="sarah@email.com" :required="true" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.email" x-text="errors.email"></p>
                     </div>
                     <div>
-                        <x-input label="Phone" type="tel" inputmode="tel" x-model="form.phone" placeholder="+1 9312152756" :required="true" />
+                        <label class="form-label">Phone <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 gap-1.5 pointer-events-none select-none">
+                                <img src="{{ asset('images/us-flag.svg') }}" alt="US" class="w-5 h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0" />
+                                <span class="text-neutral-500 font-semibold text-xs">+1</span>
+                            </span>
+                            <input type="tel" inputmode="tel"
+                                   :value="form.phone"
+                                   x-on:input="form.phone = window.formatUSPhone($event.target.value); $event.target.value = form.phone; delete errors.phone"
+                                   placeholder="(931) 215-2756" maxlength="14"
+                                   class="form-input pl-14 w-full" />
+                        </div>
                         <p class="text-red-500 text-xs mt-1" x-show="errors.phone" x-text="errors.phone"></p>
                     </div>
                     <div>
                         <label class="form-label">Rental Start Date &amp; Time <span class="text-red-400">*</span></label>
                         <input type="datetime-local" x-model="form.rentalStartDate"
+                               x-on:change="delete errors.rentalStartDate"
                                :min="(() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T00:00`; })()"
                                class="form-input w-full" required />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.rentalStartDate" x-text="errors.rentalStartDate"></p>
@@ -391,13 +409,26 @@
                     <div>
                         <label class="form-label">Rental End Date &amp; Time <span class="text-red-400">*</span></label>
                         <input type="datetime-local" x-model="form.rentalEndDate"
+                               x-on:change="delete errors.rentalEndDate"
                                :min="form.rentalStartDate || (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T00:00`; })()"
                                class="form-input w-full" required />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.rentalEndDate" x-text="errors.rentalEndDate"></p>
                     </div>
 
-                    {{-- Delivery Address with Map Pin --}}
-                    <div class="sm:col-span-2">
+                    {{-- Pickup warehouse card (shown when pickup selected) --}}
+                    <div class="sm:col-span-2" x-show="isPickup" x-transition>
+                        <div class="flex items-start gap-3 p-4 bg-sky-50 border border-sky-200 rounded-2xl">
+                            <svg class="w-5 h-5 text-sky-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <div>
+                                <p class="text-sm font-bold text-sky-700">Pickup from Our Warehouse — No Delivery Charge</p>
+                                <p class="text-sm text-sky-600 font-medium mt-0.5">{{ $settings?->godown_address ?? 'Knoxville, Tennessee, USA' }}</p>
+                                <p class="text-xs text-neutral-500 mt-1.5">Please collect your items from our warehouse on or after your rental start date. Bring this confirmation.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Delivery Address — hidden when pickup --}}
+                    <div class="sm:col-span-2" x-show="!isPickup" x-transition>
                         <div class="flex items-end justify-between mb-1">
                             <label class="form-label mb-0">Delivery Address <span class="text-red-400">*</span></label>
                             @if($mapsKey)
@@ -413,8 +444,9 @@
                             @endif
                         </div>
                         <input type="text" x-model="form.address" placeholder="123 Main Street"
+                               x-on:input="delete errors.address"
                                id="deliveryAddressInput"
-                               class="form-input w-full" autocomplete="off" required />
+                               class="form-input w-full" autocomplete="off" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.address" x-text="errors.address"></p>
 
                         {{-- Location pinned badge --}}
@@ -458,17 +490,18 @@
                         @endif
                     </div>
 
-                    <div>
-                        <x-input label="City" x-model="form.city" placeholder="Knoxville" :required="true" />
+                    {{-- City / State / ZIP — hidden when pickup --}}
+                    <div x-show="!isPickup" x-transition>
+                        <x-input label="City" x-model="form.city" placeholder="Knoxville" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.city" x-text="errors.city"></p>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-3" x-show="!isPickup" x-transition>
                         <div>
-                            <x-input label="State" x-model="form.state" placeholder="TN" maxlength="2" :required="true" />
+                            <x-input label="State" x-model="form.state" placeholder="TN" maxlength="2" />
                             <p class="text-red-500 text-xs mt-1" x-show="errors.state" x-text="errors.state"></p>
                         </div>
                         <div>
-                            <x-input label="ZIP" inputmode="numeric" x-model="form.zip" placeholder="37901" :required="true" />
+                            <x-input label="ZIP" inputmode="numeric" x-model="form.zip" placeholder="37901" />
                             <p class="text-red-500 text-xs mt-1" x-show="errors.zip" x-text="errors.zip"></p>
                         </div>
                     </div>
@@ -486,11 +519,19 @@
                  x-transition:enter-end="opacity-100 translate-x-0">
                 <h2 class="font-display text-xl font-semibold text-neutral-900 mb-6">Order Summary</h2>
 
-                <div class="bg-neutral-50 rounded-xl p-4 mb-5 border border-neutral-100">
-                    <p class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Delivery To</p>
+                <div class="bg-neutral-50 rounded-xl p-4 mb-5 border border-neutral-100"
+                     :class="isPickup ? 'bg-sky-50 border-sky-200' : 'bg-neutral-50 border-neutral-100'">
+                    <p class="text-xs font-semibold uppercase tracking-wider mb-1"
+                       :class="isPickup ? 'text-sky-500' : 'text-neutral-400'"
+                       x-text="isPickup ? 'Pickup from Warehouse' : 'Delivery To'"></p>
                     <p class="font-semibold text-neutral-800" x-text="form.firstName + ' ' + form.lastName"></p>
-                    <p class="text-sm text-neutral-500" x-text="form.address + ', ' + form.city + ' ' + form.zip"></p>
-                    <template x-if="form.mapLocation">
+                    <template x-if="isPickup">
+                        <p class="text-sm text-sky-600 font-medium">{{ $settings?->godown_address ?? 'Knoxville, Tennessee, USA' }}</p>
+                    </template>
+                    <template x-if="!isPickup">
+                        <p class="text-sm text-neutral-500" x-text="form.address + ', ' + form.city + ' ' + form.zip"></p>
+                    </template>
+                    <template x-if="!isPickup && form.mapLocation">
                         <p class="text-xs text-green-600 mt-1 flex items-center gap-1">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             Location pinned on map
@@ -525,17 +566,25 @@
                 <div class="bg-neutral-50 rounded-xl p-5 space-y-2">
                     <div class="flex justify-between text-sm text-neutral-600"><span>Subtotal</span><span x-text="'$'+$store.cart.subtotal()"></span></div>
                     <div class="flex justify-between text-sm text-neutral-600">
-                        <span class="flex items-center gap-1">
-                            Delivery &amp; Setup 
-                            <template x-if="distanceMiles > 0">
-                                <span class="text-[10px] bg-neutral-200 px-1.5 py-0.5 rounded text-neutral-600" x-text="distanceMiles.toFixed(1) + ' mi'"></span>
-                            </template>
-                        </span>
-                        <template x-if="travelingCost > 0">
+                        <template x-if="isPickup">
+                            <span class="flex items-center gap-1 text-sky-600 font-medium">🏢 Pickup (no delivery charge)</span>
+                        </template>
+                        <template x-if="!isPickup">
+                            <span class="flex items-center gap-1">
+                                Delivery &amp; Setup
+                                <template x-if="distanceMiles > 0">
+                                    <span class="text-[10px] bg-neutral-200 px-1.5 py-0.5 rounded text-neutral-600" x-text="distanceMiles.toFixed(1) + ' mi'"></span>
+                                </template>
+                            </span>
+                        </template>
+                        <template x-if="isPickup">
+                            <span class="text-sky-600 font-bold">Free</span>
+                        </template>
+                        <template x-if="!isPickup && travelingCost > 0">
                             <span class="text-brand-600 font-medium" x-text="'+$'+travelingCost.toFixed(2)"></span>
                         </template>
-                        <template x-if="travelingCost === 0">
-                            <span class="text-green-600 font-medium">Free</span>
+                        <template x-if="!isPickup && travelingCost === 0">
+                            <span class="text-green-600 font-medium">TBD</span>
                         </template>
                     </div>
                     <div class="flex justify-between text-sm text-neutral-600"><span x-text="`Tax (${settings.taxRate}%)`"></span><span x-text="'$'+($store.cart.subtotal()*(settings.taxRate/100)).toFixed(2)"></span></div>

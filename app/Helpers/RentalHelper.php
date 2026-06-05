@@ -10,7 +10,7 @@ class RentalHelper
      * Rules:
      *  - 24 hours = 1 rental day
      *  - Minimum is always 2 days (the 2-day base charge applies to anything < 48 h)
-     *  - Beyond 48 h: ceil(total_seconds / 86400)
+     *  - Beyond 48 h: round(total_seconds / 86400) — extra half-day or more counts as the next full day
      *
      * @param  \DateTimeInterface|int|string  $start  Carbon, timestamp, or parseable string
      * @param  \DateTimeInterface|int|string  $end
@@ -22,7 +22,7 @@ class RentalHelper
 
         $diffSeconds = max(0, $endTs - $startTs);
 
-        return max(2, (int) ceil($diffSeconds / 86400));
+        return max(2, (int) round($diffSeconds / 86400));
     }
 
     private static function toTimestamp(mixed $value): int

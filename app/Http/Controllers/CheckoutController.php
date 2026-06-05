@@ -65,11 +65,12 @@ class CheckoutController extends Controller
                 ], fn($v) => $v !== null)
             );
 
+            $isPickup      = (bool) ($request->is_pickup ?? false);
             $distanceMiles = 0;
             $travelingCost = 0;
 
             $settings = \App\Models\Setting::first();
-            if ($settings && $settings->godown_lat && $settings->godown_lng && $mapLocation && isset($mapLocation['lat'], $mapLocation['lng'])) {
+            if (!$isPickup && $settings && $settings->godown_lat && $settings->godown_lng && $mapLocation && isset($mapLocation['lat'], $mapLocation['lng'])) {
                 $distanceMiles   = $this->calculateDistance(
                     (float) $settings->godown_lat, (float) $settings->godown_lng,
                     (float) $mapLocation['lat'], (float) $mapLocation['lng']
@@ -108,6 +109,7 @@ class CheckoutController extends Controller
                 'total_amount'       => $request->total_amount,
                 'traveling_cost'     => $travelingCost,
                 'distance_miles'     => $distanceMiles,
+                'is_pickup'          => $isPickup,
                 'status'             => 'pending',
             ]);
 

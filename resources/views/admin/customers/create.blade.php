@@ -60,10 +60,16 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Phone Number</label>
-                                <input type="tel" name="phone" id="field_phone" inputmode="tel" value="{{ old('phone') }}" maxlength="17"
-                                       class="block w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium placeholder-neutral-300 shadow-sm"
-                                       placeholder="+1 (555) 000-0000"
-                                       oninput="formatUSPhone(this)" />
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 gap-1.5 pointer-events-none select-none">
+                                        <img src="{{ asset('images/us-flag.svg') }}" alt="US" class="w-5 h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0" />
+                                        <span class="text-neutral-500 font-semibold text-xs">+1</span>
+                                    </span>
+                                    <input type="tel" name="phone" id="field_phone" inputmode="tel" value="{{ old('phone') }}" maxlength="17"
+                                           class="block w-full pr-6 pl-16 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium placeholder-neutral-300 shadow-sm"
+                                           placeholder="(555) 000-0000"
+                                           oninput="formatUSPhone(this)" />
+                                </div>
                                 @error('phone') <p class="text-xs text-red-500 mt-2 ml-1">{{ $message }}</p> @enderror
                             </div>
                         </div>

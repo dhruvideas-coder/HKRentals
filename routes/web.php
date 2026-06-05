@@ -37,7 +37,8 @@ Route::post('/cart/clear',   [\App\Http\Controllers\CartController::class, 'clea
 
 Route::get('/checkout',      [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
-Route::get('/order-success', fn () => view('pages.order-success'))->name('order.success');
+Route::get('/order-success/{order}', [\App\Http\Controllers\OrderReceiptController::class, 'show'])->name('order.success');
+Route::get('/receipt/{order}',       [\App\Http\Controllers\OrderReceiptController::class, 'download'])->name('order.receipt');
 
 // Mock Payment Routes
 Route::post('/payment/create-intent', [\App\Http\Controllers\PaymentController::class, 'createIntent'])->name('payment.create-intent');
@@ -90,8 +91,9 @@ Route::prefix('admin')
         Route::get('/orders/create',     [OrderController::class, 'create'])->name('orders.create');
         Route::post('/orders',           [OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/products-by-category', [OrderController::class, 'productsByCategory'])->name('orders.products');
-        Route::get('/orders/{order}',    [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}',         [OrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+        Route::get('/orders/{order}/receipt',  [OrderController::class, 'receipt'])->name('orders.receipt');
 
         Route::get('/customers',                       [CustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/create',              [CustomerController::class, 'create'])->name('customers.create');

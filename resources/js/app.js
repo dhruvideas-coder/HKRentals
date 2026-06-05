@@ -1,6 +1,20 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 
+// ── US phone formatter: formats to (XXX) XXX-XXXX, max 10 digits ──────────────
+window.formatUSPhone = function (input) {
+    let digits = (typeof input === 'string' ? input : input.value).replace(/\D/g, '');
+    if (digits.startsWith('1')) digits = digits.slice(1);
+    digits = digits.slice(0, 10);
+    let formatted = '';
+    if (digits.length === 0)       formatted = '';
+    else if (digits.length <= 3)   formatted = '(' + digits;
+    else if (digits.length <= 6)   formatted = '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+    else                           formatted = '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+    if (typeof input !== 'string') input.value = formatted;
+    return formatted;
+};
+
 // ── Shared rental day helper (mirrors App\Helpers\RentalHelper::calculateDays) ─
 // 24 hours = 1 day. Minimum 2 days. Any period < 48 h still charges 2 days.
 window.calcRentalDays = function (start, end) {
@@ -9,14 +23,28 @@ window.calcRentalDays = function (start, end) {
     const e = new Date(end);
     if (isNaN(s) || isNaN(e)) return 2;
     const diffSeconds = Math.max(0, (e - s) / 1000);
-    return Math.max(2, Math.ceil(diffSeconds / 86400));
+    return Math.max(2, Math.round(diffSeconds / 86400));
 };
 
 // ── Cart Store ─────────────────────────────────────────────────
+const PICKUP_KEY = 'skr_cart_is_pickup';
+
 Alpine.store('cart', {
     items: [],
+    isPickup: false,
 
     init() {
+        // Restore pickup preference across page reloads
+        const saved = localStorage.getItem(PICKUP_KEY);
+        if (saved !== null) {
+            this.isPickup = saved === 'true';
+        }
+
+        // Persist any future changes to localStorage
+        Alpine.effect(() => {
+            localStorage.setItem(PICKUP_KEY, this.isPickup);
+        });
+
         this.fetchCart();
     },
 
@@ -97,6 +125,7 @@ Alpine.store('cart', {
         try {
             const response = await axios.post('/cart/clear');
             this.items = [];
+            this.isPickup = false;
         } catch (error) {
             console.error('Error clearing cart:', error);
         }

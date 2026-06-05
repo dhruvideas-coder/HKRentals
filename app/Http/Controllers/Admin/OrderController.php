@@ -150,6 +150,20 @@ class OrderController extends Controller
         }
     }
 
+    public function receipt(Order $order)
+    {
+        try {
+            $order->load(['items.product', 'payment', 'customer']);
+            $settings = \App\Models\Setting::first();
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.order-receipt', compact('order', 'settings'));
+            $pdf->setPaper('A4', 'portrait');
+            return $pdf->download('Receipt-' . $order->formatted_id . '.pdf');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
+            return back()->with('error', 'Could not generate receipt. Please try again.');
+        }
+    }
+
     public function updateStatus(Request $request, Order $order)
     {
         try {
@@ -263,28 +277,34 @@ class OrderController extends Controller
             $maxDist       = (float) ($settings?->max_delivery_distance ?? 20);
             $taxRate       = (float) ($settings?->tax_rate ?? 8.5) / 100;
 
-            $distanceMiles = (float) ($request->distance_miles ?? 0);
-            $travelingCost = (float) ($request->traveling_cost ?? 0);
+            $isPickup      = (bool) ($request->is_pickup ?? false);
+            $distanceMiles = 0;
+            $travelingCost = 0;
 
-            // Fall back to server-side calculation when the form didn't supply a distance
-            if ($distanceMiles <= 0) {
-                $customerLocation = $customer->map_location;
+            if (!$isPickup) {
+                $distanceMiles = (float) ($request->distance_miles ?? 0);
+                $travelingCost = (float) ($request->traveling_cost ?? 0);
 
-                if ($settings && $settings->godown_lat && $settings->godown_lng && $customerLocation && isset($customerLocation['lat'], $customerLocation['lng'])) {
-                    $distanceMiles = $this->calculateDistance(
-                        (float) $settings->godown_lat,
-                        (float) $settings->godown_lng,
-                        (float) $customerLocation['lat'],
-                        (float) $customerLocation['lng']
-                    );
+                // Fall back to server-side calculation when the form didn't supply a distance
+                if ($distanceMiles <= 0) {
+                    $customerLocation = $customer->map_location;
+
+                    if ($settings && $settings->godown_lat && $settings->godown_lng && $customerLocation && isset($customerLocation['lat'], $customerLocation['lng'])) {
+                        $distanceMiles = $this->calculateDistance(
+                            (float) $settings->godown_lat,
+                            (float) $settings->godown_lng,
+                            (float) $customerLocation['lat'],
+                            (float) $customerLocation['lng']
+                        );
+                    }
                 }
-            }
 
-            if (!$travelingCost && $distanceMiles > 0) {
-                if ($distanceMiles <= $maxDist) {
-                    $travelingCost = $chargePerMile * $maxDist;
-                } else {
-                    $travelingCost = $chargePerMile * $maxDist + $chargePerMile * $distanceMiles;
+                if (!$travelingCost && $distanceMiles > 0) {
+                    if ($distanceMiles <= $maxDist) {
+                        $travelingCost = $chargePerMile * $maxDist;
+                    } else {
+                        $travelingCost = $chargePerMile * $maxDist + $chargePerMile * $distanceMiles;
+                    }
                 }
             }
 
@@ -303,17 +323,18 @@ class OrderController extends Controller
             $totalAmount = $subtotal + ($subtotal * $taxRate) + $travelingCost;
 
             $order = Order::create([
-                'customer_id' => $customer->id,
-                'customer_name' => $customer->name,
-                'customer_email' => $customer->email,
-                'customer_phone' => $customer->phone ?? '',
+                'customer_id'      => $customer->id,
+                'customer_name'    => $customer->name,
+                'customer_email'   => $customer->email,
+                'customer_phone'   => $customer->phone ?? '',
                 'customer_address' => $customer->address ?? '',
                 'rental_start_date' => $request->rental_start_date,
-                'rental_end_date' => $request->rental_end_date,
-                'total_amount' => $totalAmount,
-                'traveling_cost' => $travelingCost,
-                'distance_miles' => $distanceMiles,
-                'status' => 'pending',
+                'rental_end_date'   => $request->rental_end_date,
+                'total_amount'     => $totalAmount,
+                'traveling_cost'   => $travelingCost,
+                'distance_miles'   => $distanceMiles,
+                'is_pickup'        => $isPickup,
+                'status'           => 'pending',
             ]);
 
             foreach ($request->items as $item) {

@@ -18,11 +18,9 @@ class OrderItem extends Model
     public function getRentalDaysAttribute(): int
     {
         if ($this->start_date && $this->end_date) {
-            $start = $this->start_date->copy()->startOfDay();
-            $end   = $this->end_date->copy()->startOfDay();
-            return max(1, $start->diffInDays($end) + 1);
+            return \App\Helpers\RentalHelper::calculateDays($this->start_date, $this->end_date);
         }
-        return 1;
+        return 2;
     }
 
     public function getLineTotalAttribute(): float

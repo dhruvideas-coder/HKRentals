@@ -170,13 +170,19 @@
                                     Phone Number
                                     <span class="text-neutral-400 font-normal">(Optional)</span>
                                 </label>
-                                <input type="tel"
-                                       id="contact_phone"
-                                       name="phone"
-                                       inputmode="tel"
-                                       value="{{ old('phone') }}"
-                                       class="form-input"
-                                       placeholder="+1 9312152756" />
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 gap-1.5 pointer-events-none select-none">
+                                        <img src="{{ asset('images/us-flag.svg') }}" alt="US" class="w-5 h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0" />
+                                        <span class="text-neutral-500 font-semibold text-xs">+1</span>
+                                    </span>
+                                    <input type="tel"
+                                           id="contact_phone"
+                                           name="phone"
+                                           inputmode="tel"
+                                           value="{{ old('phone') }}"
+                                           class="form-input pl-14"
+                                           placeholder="(931) 215-2756" />
+                                </div>
                             </div>
 
                             {{-- Event Type --}}

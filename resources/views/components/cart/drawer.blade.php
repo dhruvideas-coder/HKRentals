@@ -89,20 +89,26 @@
             </div>
 
             <div x-show="$store.cart.items.length > 0">
-                {{-- Delivery Progress (Now only on Step 2 as requested) --}}
+                {{-- Pickup / Delivery toggle (Step 2 only) --}}
                 <div class="px-5 pt-5" x-show="step === 2" x-transition>
-                    <div class="bg-white p-4 rounded-2xl border border-neutral-100 shadow-sm">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-sm font-semibold text-neutral-900 flex items-center gap-2">
-                                <span class="text-lg">🚚</span> Delivery Progress
-                            </span>
-                            <span x-show="$store.cart.subtotal() < 200" class="text-[11px] font-bold text-brand-600" x-text="'$' + (200 - $store.cart.subtotal()).toFixed(2) + ' to go'"></span>
-                            <span x-show="$store.cart.subtotal() >= 200" class="text-[11px] font-bold text-green-600">Free Delivery Unlocked!</span>
+                    <label class="flex items-start gap-3 cursor-pointer select-none bg-white border border-neutral-100 rounded-2xl p-4 shadow-sm"
+                           :class="$store.cart.isPickup ? 'border-sky-200 bg-sky-50/50' : 'border-neutral-100 bg-white'">
+                        <div class="relative flex-shrink-0 mt-0.5">
+                            <input type="checkbox" x-model="$store.cart.isPickup" class="sr-only peer"/>
+                            <div class="w-10 h-5 rounded-full bg-neutral-200 peer-checked:bg-sky-500 transition-colors duration-200"></div>
+                            <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-5"></div>
                         </div>
-                        <div class="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-brand-500 transition-all duration-700" :style="`width: ${Math.min(($store.cart.subtotal() / 200) * 100, 100)}%`"></div>
+                        <div class="flex-1">
+                            <p class="text-sm font-bold text-neutral-900"
+                               :class="$store.cart.isPickup ? 'text-sky-700' : 'text-neutral-900'">
+                                🏢 Pick Up from Our Warehouse
+                            </p>
+                            <p class="text-[11px] text-neutral-500 mt-1 leading-relaxed">
+                                Save on delivery by collecting your items directly from our Knoxville warehouse.
+                                <strong x-show="$store.cart.isPickup" class="text-sky-600 block mt-0.5">No delivery charge applied.</strong>
+                            </p>
                         </div>
-                    </div>
+                    </label>
                 </div>
 
                 {{-- Step 1: Items List --}}
@@ -169,25 +175,36 @@
                                     <span class="text-neutral-900 font-bold" x-text="'$' + $store.cart.subtotal()"></span>
                                 </div>
                                 <div class="flex justify-between items-center text-xs">
-                                    <span class="text-neutral-500 font-medium">Delivery & Setup</span>
-                                    <div class="text-right">
-                                        <span class="text-green-600 font-bold" x-show="$store.cart.subtotal() >= 200">FREE</span>
-                                        <span class="text-neutral-900 font-bold" x-show="$store.cart.subtotal() < 200">$25.00</span>
-                                    </div>
+                                    <template x-if="$store.cart.isPickup">
+                                        <span class="text-sky-600 font-medium flex items-center gap-1">
+                                            🏢 Pickup — no charge
+                                        </span>
+                                    </template>
+                                    <template x-if="!$store.cart.isPickup">
+                                        <span class="text-neutral-500 font-medium">Delivery & Setup</span>
+                                    </template>
+                                    <template x-if="$store.cart.isPickup">
+                                        <span class="text-sky-600 font-bold">FREE</span>
+                                    </template>
+                                    <template x-if="!$store.cart.isPickup">
+                                        <span class="text-neutral-400 font-medium italic text-[10px]">calc. at checkout</span>
+                                    </template>
                                 </div>
                                 <div class="flex justify-between items-center text-xs">
-                                    <span class="text-neutral-500 font-medium">Service Fee (5%)</span>
-                                    <span class="text-neutral-900 font-bold" x-text="'$' + ($store.cart.subtotal() * 0.05).toFixed(2)"></span>
+                                    <span class="text-neutral-500 font-medium">Tax</span>
+                                    <span class="text-neutral-400 font-medium italic text-[10px]">calc. at checkout</span>
                                 </div>
                             </div>
                         </div>
                         <div class="p-4 bg-brand-50/30">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <span class="text-[9px] font-bold text-brand-600 uppercase tracking-widest">Total Amount</span>
-                                    <p class="text-2xl font-display font-black text-neutral-900 mt-0.5" 
-                                       x-text="'$' + (parseFloat($store.cart.subtotal()) + ($store.cart.subtotal() >= 200 ? 0 : 25) + (parseFloat($store.cart.subtotal()) * 0.05)).toFixed(2)">
+                                    <span class="text-[9px] font-bold text-brand-600 uppercase tracking-widest">Subtotal</span>
+                                    <p class="text-2xl font-display font-black text-neutral-900 mt-0.5"
+                                       x-text="'$' + parseFloat($store.cart.subtotal()).toFixed(2)">
                                     </p>
+                                    <p class="text-[10px] text-neutral-400 mt-0.5"
+                                       x-text="$store.cart.isPickup ? 'Pickup — final total at checkout' : 'Delivery + tax added at checkout'"></p>
                                 </div>
                                 <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shadow-inner">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -235,10 +252,6 @@
 
             {{-- Step 2 Footer: Row Buttons --}}
             <div x-show="step === 2" class="space-y-4">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-medium text-neutral-500 uppercase tracking-wider">Total Booking</span>
-                    <span class="font-display font-bold text-lg text-brand-600" x-text="'$' + (parseFloat($store.cart.subtotal()) + ($store.cart.subtotal() >= 200 ? 0 : 25) + (parseFloat($store.cart.subtotal()) * 0.05)).toFixed(2)"></span>
-                </div>
                 <div class="flex gap-3">
                     <button @click="step = 1" 
                             class="flex-1 h-11 bg-neutral-50 hover:bg-neutral-100 text-neutral-600 rounded-xl font-bold text-sm flex items-center justify-center transition-all duration-300 active:scale-95 border border-neutral-100">

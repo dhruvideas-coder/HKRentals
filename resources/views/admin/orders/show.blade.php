@@ -2,11 +2,20 @@
     <x-slot:title>Order #{{ $order->formatted_id }}</x-slot>
     <x-slot:pageTitle>Order Detail</x-slot>
 
-{{-- Breadcrumb --}}
-<div class="flex items-center gap-2 text-sm text-neutral-400 mb-6">
-    <a href="{{ route('admin.orders.index') }}" class="hover:text-brand-600 transition-colors font-medium">Orders</a>
-    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-    <span class="text-neutral-600 font-semibold">#{{ $order->formatted_id }}</span>
+{{-- Breadcrumb + Actions --}}
+<div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
+    <div class="flex items-center gap-2 text-sm text-neutral-400">
+        <a href="{{ route('admin.orders.index') }}" class="hover:text-brand-600 transition-colors font-medium">Orders</a>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-neutral-600 font-semibold">#{{ $order->formatted_id }}</span>
+    </div>
+    <a href="{{ route('admin.orders.receipt', $order) }}" target="_blank"
+       class="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-neutral-700 transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Download Receipt
+    </a>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -109,7 +118,7 @@
         {{-- Status Update Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
             <h3 class="font-bold text-neutral-900 mb-4">Order Status</h3>
-            <div class="mb-4">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider {{ $order->status_color }}">
                     <span class="w-2 h-2 rounded-full mr-2
                         @if($order->status === 'pending') bg-amber-500
@@ -120,6 +129,17 @@
                         @endif"></span>
                     {{ ucfirst($order->status) }}
                 </span>
+                @if($order->is_pickup)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-sky-100 text-sky-700">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        Customer Pickup
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h10l2-2zm0 0h2l3-7H13v7z"/></svg>
+                        Delivery
+                    </span>
+                @endif
             </div>
             <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="space-y-3">
                 @csrf @method('PATCH')
@@ -171,6 +191,12 @@
         {{-- Order Summary Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
             <h3 class="font-bold text-neutral-900 mb-4">Summary</h3>
+            @php
+                $subtotal  = $order->items->sum('line_total');
+                $settings  = \App\Models\Setting::first();
+                $taxRate   = $settings?->tax_rate ?? 9.25;
+                $tax       = $order->total_amount - $subtotal - $order->traveling_cost;
+            @endphp
             <dl class="space-y-2.5 text-sm">
                 <div class="flex justify-between">
                     <dt class="text-neutral-500">Order ID</dt>
@@ -180,22 +206,57 @@
                     <dt class="text-neutral-500">Placed</dt>
                     <dd class="font-semibold text-neutral-700">{{ $order->created_at->format('M d, Y') }}</dd>
                 </div>
+                @if($order->rental_start_date && $order->rental_end_date)
+                <div class="flex justify-between">
+                    <dt class="text-neutral-500">Rental Start</dt>
+                    <dd class="font-semibold text-neutral-700">{{ $order->rental_start_date->format('M d, Y g:i A') }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-neutral-500">Rental End</dt>
+                    <dd class="font-semibold text-neutral-700">{{ $order->rental_end_date->format('M d, Y g:i A') }}</dd>
+                </div>
+                @endif
+                <div class="flex justify-between">
+                    <dt class="text-neutral-500">Fulfillment</dt>
+                    <dd class="font-semibold {{ $order->is_pickup ? 'text-sky-700' : 'text-brand-600' }}">
+                        {{ $order->is_pickup ? 'Customer Pickup' : 'Delivery' }}
+                    </dd>
+                </div>
                 <div class="flex justify-between">
                     <dt class="text-neutral-500">Items</dt>
                     <dd class="font-semibold text-neutral-700">{{ $order->items->count() }}</dd>
                 </div>
-                <div class="flex justify-between">
-                    <dt class="text-neutral-500">Distance</dt>
-                    <dd class="font-semibold text-neutral-700">{{ $order->distance_miles ? number_format($order->distance_miles, 1) . ' mi' : 'N/A' }}</dd>
+                <div class="border-t border-neutral-100 pt-2.5 flex justify-between">
+                    <dt class="text-neutral-500">Subtotal</dt>
+                    <dd class="font-semibold text-neutral-700">${{ number_format($subtotal, 2) }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt class="text-neutral-500">Traveling Cost</dt>
-                    <dd class="font-semibold {{ $order->traveling_cost > 0 ? 'text-brand-600' : 'text-green-600' }}">{{ $order->traveling_cost > 0 ? '$' . number_format($order->traveling_cost, 2) : 'Free' }}</dd>
+                    <dt class="text-neutral-500">Delivery
+                        @if($order->distance_miles)
+                            <span class="text-neutral-400">({{ number_format($order->distance_miles, 1) }} mi)</span>
+                        @endif
+                    </dt>
+                    <dd class="font-semibold {{ $order->traveling_cost > 0 ? 'text-brand-600' : 'text-green-600' }}">
+                        {{ $order->traveling_cost > 0 ? '$' . number_format($order->traveling_cost, 2) : '$0.00' }}
+                    </dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-neutral-500">Tax ({{ $taxRate }}%)</dt>
+                    <dd class="font-semibold text-neutral-700">${{ number_format(max(0, $tax), 2) }}</dd>
                 </div>
                 <div class="border-t border-neutral-100 pt-2.5 flex justify-between">
                     <dt class="font-bold text-neutral-700">Total</dt>
                     <dd class="font-bold text-lg text-neutral-900">${{ number_format($order->total_amount, 2) }}</dd>
                 </div>
+                @if($order->payment && $order->payment->status === 'succeeded')
+                <div class="border-t border-neutral-100 pt-2.5 flex justify-between">
+                    <dt class="text-neutral-500">Payment</dt>
+                    <dd>
+                        <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Paid</span>
+                        <span class="text-neutral-400 ml-1">{{ ucfirst(str_replace('_', ' ', $order->payment->payment_method ?? '')) }}</span>
+                    </dd>
+                </div>
+                @endif
             </dl>
         </div>
 

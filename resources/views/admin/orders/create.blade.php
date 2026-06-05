@@ -253,9 +253,26 @@
                               x-text="(() => { const d = _calcDays(rentalStartDate, rentalEndDate); return d + ' day' + (d !== 1 ? 's' : '') + ' rental'; })()"></span>
                     </div>
 
-                    {{-- Delivery Location (Map Picker) --}}
+                    {{-- Pickup / Delivery toggle --}}
+                    <div class="rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3">
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <div class="relative flex-shrink-0">
+                                <input type="checkbox" x-model="isPickup" name="is_pickup" value="1"
+                                       @change="if(isPickup){ travelingCost=0; distanceMiles=0; locationPinned=false; eventLocation=null; }"
+                                       class="sr-only peer"/>
+                                <div class="w-10 h-5 rounded-full bg-neutral-200 peer-checked:bg-brand-600 transition-colors duration-200"></div>
+                                <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-5"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-neutral-800">Customer Pickup from Warehouse</p>
+                                <p class="text-[11px] text-neutral-400 mt-0.5" x-text="isPickup ? 'No delivery charge — customer collects from our warehouse.' : 'Delivery to customer\'s location — travel cost applies.'"></p>
+                            </div>
+                        </label>
+                    </div>
+
+                    {{-- Delivery Location (Map Picker) — hidden when pickup --}}
                     @if($mapsKey)
-                    <div>
+                    <div x-show="!isPickup" x-transition>
                         <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Delivery Location</label>
 
                         <div x-show="!locationPinned">
@@ -307,8 +324,8 @@
                     </div>
                     @endif
 
-                    {{-- Traveling Cost --}}
-                    <div>
+                    {{-- Traveling Cost — hidden when pickup --}}
+                    <div x-show="!isPickup" x-transition>
                         <label class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
                             Traveling Cost
                             <span class="font-normal normal-case tracking-normal text-neutral-400">@if($mapsKey)(override)@else(manual)@endif</span>
@@ -318,8 +335,9 @@
                             <input type="number" x-model.number="travelingCost" name="traveling_cost" step="0.01" min="0"
                                    class="block w-full pl-8 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
                         </div>
-                        <input type="hidden" name="distance_miles" :value="distanceMiles" />
                     </div>
+                    <input type="hidden" name="distance_miles" :value="distanceMiles" />
+                    <input type="hidden" name="is_pickup" :value="isPickup ? 1 : 0" />
 
                 </div>
             </div>
@@ -387,8 +405,8 @@
                         <span class="font-bold text-white" x-text="`$${subtotal.toFixed(2)}`"></span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-neutral-300">Delivery</span>
-                        <span class="font-bold text-white" x-text="`$${travelingCost.toFixed(2)}`"></span>
+                        <span class="text-neutral-300" x-text="isPickup ? 'Pickup' : 'Delivery'"></span>
+                        <span class="font-bold" :class="isPickup ? 'text-green-300' : 'text-white'" x-text="isPickup ? 'Free (Pickup)' : `$${travelingCost.toFixed(2)}`"></span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-neutral-300" x-text="`Tax (${settings?.tax_rate ?? 9.25}%)`"></span>
@@ -577,6 +595,7 @@
             rentalEndDate:   (() => { const d = new Date(); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T17:00`; })(),
             travelingCost: 0,
             distanceMiles: 0,
+            isPickup: false,
             paymentStatus: 'pending',
             paymentMethod: '',
             paymentAmount: 0,
