@@ -69,48 +69,40 @@
 <body>
 <div class="wrapper">
 
-    {{-- Header --}}
+    {{-- Compact header: brand (logo + name) on the left, order status on the right --}}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;">
         <tr>
-            <td align="center" style="padding:36px 40px 34px;">
-                <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;color:#c8a96e;letter-spacing:1.5px;line-height:1;">
-                    {{ config('app.name', 'SK Rentals') }}
-                </div>
-                <div style="font-size:11px;color:#9a9a9a;letter-spacing:2px;text-transform:uppercase;margin-top:8px;">
-                    Premium Wedding &amp; Event Rentals
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Hero --}}
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdf8f0;border-bottom:1px solid #efe4cd;">
-        <tr>
-            <td align="center" style="padding:40px 40px 38px;">
-                {{-- Check badge --}}
-                <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto 18px;">
+            <td style="padding:22px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                        <td align="center" valign="middle" width="68" height="68"
-                            style="width:68px;height:68px;background:#22c55e;border-radius:50%;text-align:center;
-                                   box-shadow:0 6px 18px rgba(34,197,94,0.35);">
-                            <span style="font-size:34px;line-height:68px;color:#ffffff;">&#10004;</span>
+                        {{-- Brand --}}
+                        <td valign="middle" align="left">
+                            <table role="presentation" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td valign="middle" style="background:#ffffff;border-radius:10px;padding:7px 11px;">
+                                        <img src="{{ $message->embed(public_path('images/logo.webp')) }}" alt="{{ config('app.name', 'SK Rentals') }}" width="60" style="display:block;height:auto;max-width:60px;">
+                                    </td>
+                                    <td valign="middle" style="padding-left:13px;">
+                                        <div style="font-family:Georgia,'Times New Roman',serif;font-size:19px;font-weight:700;color:#c8a96e;letter-spacing:1px;line-height:1.1;">
+                                            {{ config('app.name', 'SK Rentals') }}
+                                        </div>
+                                        <div style="font-size:9px;color:#9a9a9a;letter-spacing:1.5px;text-transform:uppercase;margin-top:5px;">
+                                            Premium Wedding &amp; Event Rentals
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
-                    </tr>
-                </table>
-
-                {{-- Title --}}
-                <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1a1a1a;margin-bottom:6px;">
-                    Order Confirmed!
-                </div>
-                <div style="font-size:13px;color:#8a7a5c;margin-bottom:16px;">
-                    Thank you for booking with us
-                </div>
-
-                {{-- Order ID pill --}}
-                <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto;">
-                    <tr>
-                        <td style="background:#1a1a1a;border-radius:24px;padding:9px 22px;">
-                            <span style="font-size:13px;font-weight:700;color:#c8a96e;letter-spacing:1.5px;">{{ $order->formatted_id }}</span>
+                        {{-- Order status --}}
+                        <td valign="middle" align="right">
+                            <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:7px;white-space:nowrap;">&#10004;&nbsp;Order Confirmed</div>
+                            <table role="presentation" cellpadding="0" cellspacing="0" align="right">
+                                <tr>
+                                    <td style="background:#c8a96e;border-radius:20px;padding:5px 15px;">
+                                        <span style="font-size:12px;font-weight:700;color:#1a1a1a;letter-spacing:1px;">{{ $order->formatted_id }}</span>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
                 </table>

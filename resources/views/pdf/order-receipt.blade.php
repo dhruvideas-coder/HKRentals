@@ -13,8 +13,10 @@
 
     /* ── Header ── */
     .header { display: table; width: 100%; border-bottom: 2px solid #c8a96e; padding-bottom: 20px; margin-bottom: 24px; }
-    .header-left { display: table-cell; vertical-align: middle; width: 60%; }
-    .header-right { display: table-cell; vertical-align: middle; text-align: right; width: 40%; }
+    .header-logo { display: table-cell; vertical-align: middle; width: 84px; padding-right: 16px; }
+    .header-logo img { height: 64px; width: auto; }
+    .header-left { display: table-cell; vertical-align: middle; width: auto; }
+    .header-right { display: table-cell; vertical-align: middle; text-align: right; width: 36%; padding-left: 16px; }
     .company-name { font-size: 22px; font-weight: 700; color: #c8a96e; letter-spacing: 0.5px; }
     .company-tagline { font-size: 10px; color: #888; margin-top: 2px; letter-spacing: 0.3px; }
     .company-contact { font-size: 10px; color: #555; margin-top: 8px; line-height: 1.6; }
@@ -93,6 +95,9 @@
 
     {{-- ── HEADER ── --}}
     <div class="header">
+        <div class="header-logo">
+            <img src="{{ public_path('images/logo.webp') }}" alt="{{ config('app.name', 'SK Rentals') }}">
+        </div>
         <div class="header-left">
             <div class="company-name">{{ config('app.name', 'SK Rentals') }}</div>
             <div class="company-tagline">Premium Wedding & Event Rentals — Knoxville, TN</div>

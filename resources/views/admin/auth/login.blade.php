@@ -97,12 +97,11 @@
 
         .login-logo {
             display: inline-flex;
-            width: 56px; height: 56px;
-            background: linear-gradient(135deg, #c8903a, #8b5e1c);
-            border-radius: 16px;
             align-items: center; justify-content: center;
             margin-bottom: 1.25rem;
-            box-shadow: 0 10px 25px rgba(200, 144, 58, 0.3);
+        }
+        .login-logo img {
+            height: 64px; width: auto;
         }
 
         .login-heading {
@@ -225,7 +224,7 @@
 
         <div class="login-header">
             <div class="login-logo">
-                <span style="font-family:'Playfair Display',serif; font-weight:700; color:#fff; font-size:1.5rem;">SK</span>
+                <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name', 'SK Rentals') }}">
             </div>
             <h1 class="login-heading">Admin Portal</h1>
             <p class="login-subheading">Secure access for HK Rentals authorized personnel.</p>

@@ -11,13 +11,8 @@
         <div class="flex items-center justify-between h-16">
 
             {{-- ── Logo ── --}}
-            <a href="{{ route('home') }}" class="flex items-center gap-2.5 flex-shrink-0" aria-label="HK Rentals home">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-                    <span class="text-white font-display font-bold text-sm leading-none">HK</span>
-                </div>
-                <span class="font-display text-xl font-semibold text-neutral-900">
-                    HK <span class="text-gradient-gold">Rentals</span>
-                </span>
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5 flex-shrink-0" aria-label="{{ config('app.name', 'SK Rentals') }} home">
+                <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name', 'SK Rentals') }}" class="h-10 w-auto">
             </a>
 
             {{-- ── Desktop Nav Links ── --}}
