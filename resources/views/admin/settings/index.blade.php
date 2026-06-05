@@ -184,6 +184,76 @@
                 </div>
             </div>
 
+            {{-- ── Section 3: Order Confirmation Email ── --}}
+            @php $ec = old('email_content', $settings->email_content ?? []); @endphp
+            <div class="bg-white rounded-[2rem] shadow-sm border border-neutral-100 overflow-hidden"
+                 x-data="{ open: true }">
+                <div class="px-6 md:px-10 pt-8 pb-2 border-b border-neutral-50">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 mb-1">
+                            <div class="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-neutral-900">Order Confirmation Email</h3>
+                                <p class="text-xs text-neutral-400">Customize the email sent to customers when an order is confirmed.</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="open = !open" class="text-neutral-400 hover:text-neutral-600 transition-colors flex-shrink-0">
+                            <svg class="w-5 h-5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div x-show="open" x-transition class="p-6 md:p-10">
+
+                    {{-- Placeholder hint --}}
+                    <div class="mb-6 rounded-2xl bg-purple-50/60 border border-purple-100 p-4">
+                        <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wider mb-2">Available Tags</p>
+                        <p class="text-xs text-neutral-500 mb-2.5">Type these anywhere in the subject or message — they fill in automatically for each order:</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach([
+                                '{customer_name}' => 'Customer name',
+                                '{order_id}'      => 'Order number',
+                                '{total}'         => 'Order total',
+                                '{company}'       => 'Business name',
+                            ] as $tag => $desc)
+                            <span class="inline-flex items-center gap-1.5 bg-white border border-purple-100 rounded-lg px-2.5 py-1 text-[11px]">
+                                <code class="font-mono font-bold text-purple-600">{{ $tag }}</code>
+                                <span class="text-neutral-400">{{ $desc }}</span>
+                            </span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+
+                        {{-- Email Subject --}}
+                        <div>
+                            <label for="email_subject" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 ml-1">Subject</label>
+                            <p class="text-[11px] text-neutral-400 mb-2 ml-1">The line the customer sees in their inbox.</p>
+                            <input type="text" name="email_content[subject]" id="email_subject"
+                                   value="{{ $ec['subject'] ?? $emailDefaults['subject'] }}"
+                                   class="block w-full px-5 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold shadow-sm" required>
+                            @error('email_content.subject') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Main Content --}}
+                        <div>
+                            <label for="email_body" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 ml-1">Main Content</label>
+                            <p class="text-[11px] text-neutral-400 mb-2 ml-1">The message body. Write it like a normal email — line breaks are kept. The order summary &amp; PDF invoice are added automatically below your message.</p>
+                            <textarea name="email_content[body]" id="email_body" rows="10"
+                                      class="block w-full px-5 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium shadow-sm leading-relaxed resize-y"
+                                      required>{{ $ec['body'] ?? $emailDefaults['body'] }}</textarea>
+                            @error('email_content.body') <p class="mt-2 text-xs font-semibold text-red-600 ml-1">{{ $message }}</p> @enderror
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
             {{-- ── Save Button ── --}}
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
                 <p class="text-xs text-neutral-400 font-medium italic text-center sm:text-left">Changes apply immediately to all new orders.</p>

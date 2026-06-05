@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderConfirmation;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -161,6 +163,18 @@ class OrderController extends Controller
         } catch (\Throwable $e) {
             $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
             return back()->with('error', 'Could not generate receipt. Please try again.');
+        }
+    }
+
+    public function sendEmail(Order $order)
+    {
+        try {
+            $order->load(['items.product', 'payment', 'customer']);
+            Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+            return back()->with('success', 'Confirmation email sent to ' . $order->customer_email . '.');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
+            return back()->with('error', 'Could not send email. Please try again.');
         }
     }
 
@@ -363,6 +377,14 @@ class OrderController extends Controller
                 ]);
 
                 $order->update(['status' => 'confirmed']);
+
+                // Send confirmation email to customer
+                try {
+                    $order->load(['items.product', 'payment', 'customer']);
+                    Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+                } catch (\Throwable $e) {
+                    \Log::warning('Admin order email failed: ' . $e->getMessage(), ['order_id' => $order->id]);
+                }
             }
 
             \Log::info('BookOrder - Order created successfully:', [

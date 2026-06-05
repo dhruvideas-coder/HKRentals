@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmation;
 use App\Services\PaymentService;
 use App\Models\Payment;
 use App\Models\Order;
@@ -59,9 +61,18 @@ class PaymentController extends Controller
                     'payment_method'     => 'mock_card',
                 ]);
 
-                Order::find($request->order_id)->update(['status' => 'paid']);
+                $order = Order::find($request->order_id);
+                $order->update(['status' => 'confirmed']);
 
                 $this->cartService->clearCart();
+
+                // Send confirmation email with PDF receipt
+                try {
+                    $order->load(['items.product', 'payment', 'customer']);
+                    Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+                } catch (\Throwable $e) {
+                    \Log::warning('Order confirmation email failed: ' . $e->getMessage(), ['order_id' => $order->id]);
+                }
 
                 return response()->json(['success' => true, 'message' => 'Payment successful', 'payment' => $payment]);
             }

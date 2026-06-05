@@ -93,7 +93,8 @@ Route::prefix('admin')
         Route::get('/orders/products-by-category', [OrderController::class, 'productsByCategory'])->name('orders.products');
         Route::get('/orders/{order}',         [OrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
-        Route::get('/orders/{order}/receipt',  [OrderController::class, 'receipt'])->name('orders.receipt');
+        Route::get('/orders/{order}/receipt',   [OrderController::class, 'receipt'])->name('orders.receipt');
+        Route::post('/orders/{order}/send-email', [OrderController::class, 'sendEmail'])->name('orders.send-email');
 
         Route::get('/customers',                       [CustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/create',              [CustomerController::class, 'create'])->name('customers.create');
