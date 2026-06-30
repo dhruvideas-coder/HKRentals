@@ -167,12 +167,44 @@ class OrderController extends Controller
         }
     }
 
-    public function sendEmail(Order $order)
+    /**
+     * Show the compose/preview screen for the order confirmation email.
+     * The subject & body are pre-filled with the order's resolved content
+     * (placeholders already replaced) so the admin can review/edit before sending.
+     */
+    public function composeEmail(Order $order)
     {
         try {
             $order->load(['items.product', 'payment', 'customer']);
-            Mail::to($order->customer_email)->send(new OrderConfirmation($order));
-            return back()->with('success', 'Confirmation email sent to ' . $order->customer_email . '.');
+
+            $email       = (new OrderConfirmation($order))->email;
+            $fromAddress = config('mail.from.address', 'hello@skrentals.com');
+            $fromName    = config('mail.from.name', config('app.name', 'SK Rentals'));
+
+            return view('admin.orders.email', compact('order', 'email', 'fromAddress', 'fromName'));
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
+            return redirect()->route('admin.orders.show', $order)->with('error', 'Could not load the email composer.');
+        }
+    }
+
+    public function sendEmail(Request $request, Order $order)
+    {
+        try {
+            $request->validate([
+                'subject' => 'required|string|max:255',
+                'body'    => 'required|string',
+            ]);
+
+            $order->load(['items.product', 'payment', 'customer']);
+
+            Mail::to($order->customer_email)->send(new OrderConfirmation($order, [
+                'subject' => $request->subject,
+                'body'    => $request->body,
+            ]));
+
+            return redirect()->route('admin.orders.show', $order)
+                ->with('success', 'Confirmation email sent to ' . $order->customer_email . '.');
         } catch (\Throwable $e) {
             $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
             return back()->with('error', 'Could not send email. Please try again.');

@@ -21,18 +21,27 @@
 </div>
 @endif
 
-<form action="{{ $editing ? route('admin.orders.update', $order) : route('admin.orders.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" x-data="orderForm()" x-init="init()" @submit.prevent="submitForm()">
+<form action="{{ $editing ? route('admin.orders.update', $order) : route('admin.orders.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start" x-data="orderForm()" x-init="init()" @submit.prevent="submitForm()">
     @csrf
     @if($editing) @method('PUT') @endif
     <input type="hidden" name="save_as_draft" x-ref="draftFlag" value="0" />
 
-    <div class="lg:col-span-2 space-y-6">
+    <div class="lg:col-span-1 space-y-6">
 
         {{-- Customer Selection --}}
         <div class="bg-white rounded-[2.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-            <div class="px-6 md:px-10 pt-6 md:pt-8 border-b border-neutral-50 bg-neutral-50/30">
-                <h3 class="font-bold text-neutral-900 text-lg">Select Customer</h3>
-                <p class="text-xs text-neutral-500 mt-1">Choose an existing customer for this order</p>
+            <div class="px-6 md:px-10 pt-6 md:pt-8 pb-4 border-b border-neutral-50 bg-neutral-50/30">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 class="font-bold text-neutral-900 text-lg">Select Customer</h3>
+                        <p class="text-xs text-neutral-500 mt-1">Choose an existing customer for this order</p>
+                    </div>
+                    <a href="{{ route('admin.customers.create') }}"
+                       class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 bg-brand-600 text-white rounded-xl font-bold text-xs hover:bg-brand-700 shadow-sm hover:shadow transition-all whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        <span>Create Customer</span>
+                    </a>
+                </div>
             </div>
 
             <div class="px-6 md:px-10 py-6 md:py-8 space-y-6">
@@ -162,6 +171,7 @@
                             </template>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
 
@@ -365,6 +375,19 @@
                             <input type="number" x-model.number="travelingCost" name="traveling_cost" step="0.01" min="0"
                                    class="block w-full pl-8 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-semibold text-sm" />
                         </div>
+
+                        {{-- Source hint: cost estimated from the selected customer's saved location.
+                             Hidden once a delivery location is pinned (the green "Location Set" card takes over). --}}
+                        <template x-if="!locationPinned && selectedCustomer && selectedCustomer.map_location && distanceMiles > 0">
+                            <div class="mt-2 flex items-start gap-2 rounded-xl bg-blue-50 border border-blue-100 px-3 py-2">
+                                <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-[11px] leading-snug text-blue-700 min-w-0">
+                                    Estimated from <span class="font-bold" x-text="selectedCustomer.name"></span>'s saved location
+                                    (<span class="font-bold" x-text="distanceMiles.toFixed(1) + ' mi'"></span> from your warehouse).
+                                    @if($mapsKey)<span class="block mt-0.5 text-blue-500">Pin a delivery location above to recalculate for a different address.</span>@endif
+                                </p>
+                            </div>
+                        </template>
                     </div>
                     <input type="hidden" name="distance_miles" :value="distanceMiles" />
                     <input type="hidden" name="is_pickup" :value="isPickup ? 1 : 0" />
@@ -458,26 +481,30 @@
 
                 {{-- Actions --}}
                 <div class="space-y-3">
-                    {{-- Save as Draft — only needs a customer selected --}}
-                    <button type="button" @click="submitForm(true)"
-                            :disabled="!selectedCustomer || submitting"
-                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-white rounded-2xl font-bold hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm border border-white/15">
-                        <svg x-show="!(submitting && saveAsDraft)" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                        <svg x-show="submitting && saveAsDraft" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        <span x-text="(submitting && saveAsDraft) ? 'Saving…' : '{{ $editing ? 'Save Draft' : 'Save as Draft' }}'"></span>
-                    </button>
-
+                    {{-- Save as Draft + Cancel — half / half on every screen --}}
                     <div class="grid grid-cols-2 gap-3">
+                        {{-- Save as Draft — only needs a customer selected --}}
+                        <button type="button" @click="submitForm(true)"
+                                :disabled="!selectedCustomer || submitting"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-white/10 text-white rounded-2xl font-bold hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm border border-white/15">
+                            <svg x-show="!(submitting && saveAsDraft)" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <svg x-show="submitting && saveAsDraft" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span x-text="(submitting && saveAsDraft) ? 'Saving…' : '{{ $editing ? 'Save Draft' : 'Save as Draft' }}'"></span>
+                        </button>
+
+                        {{-- Cancel --}}
                         <a href="{{ $editing ? route('admin.orders.show', $order) : route('admin.orders.index') }}"
                            class="flex items-center justify-center px-4 py-3.5 bg-white/5 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all text-sm">
                             Cancel
                         </a>
-                        <button type="submit" :disabled="!selectedCustomer || orderItems.length === 0 || submitting"
-                                class="flex items-center justify-center gap-2 px-4 py-3.5 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 disabled:bg-neutral-600 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm">
-                            <svg x-show="submitting && !saveAsDraft" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                            <span x-text="(submitting && !saveAsDraft) ? 'Saving…' : '{{ $editing ? 'Complete Order' : 'Book Order' }}'"></span>
-                        </button>
                     </div>
+
+                    {{-- Book Order — full row --}}
+                    <button type="submit" :disabled="!selectedCustomer || orderItems.length === 0 || submitting"
+                            class="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 disabled:bg-neutral-600 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm">
+                        <svg x-show="submitting && !saveAsDraft" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        <span x-text="(submitting && !saveAsDraft) ? 'Saving…' : '{{ $editing ? 'Complete Order' : 'Book Order' }}'"></span>
+                    </button>
                 </div>
 
             </div>

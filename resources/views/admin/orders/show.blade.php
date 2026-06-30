@@ -27,23 +27,15 @@
             </button>
         </form>
         @else
-        {{-- Send Email --}}
-        <form action="{{ route('admin.orders.send-email', $order) }}" method="POST" @submit="sending = true">
-            @csrf
-            <button type="submit" :disabled="sending"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed">
-                {{-- Spinner --}}
-                <svg x-show="sending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                {{-- Mail icon --}}
-                <svg x-show="!sending" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                <span x-text="sending ? 'Sending…' : 'Send Confirmation Email'"></span>
-            </button>
-        </form>
+        {{-- Compose & Send Email --}}
+        <a href="{{ route('admin.orders.email', $order) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm">
+            {{-- Mail icon --}}
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <span>Send Confirmation Email</span>
+        </a>
 
         {{-- Download Receipt --}}
         <a href="{{ route('admin.orders.receipt', $order) }}" target="_blank"

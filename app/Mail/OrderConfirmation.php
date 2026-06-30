@@ -19,11 +19,17 @@ class OrderConfirmation extends Mailable
     public Setting $settings;
     public array   $email;
 
-    public function __construct(Order $order)
+    /**
+     * @param array|null $overrides Admin-edited, already-resolved subject/body.
+     *                              When given, it is sent as-is (no further placeholder replacement).
+     */
+    public function __construct(Order $order, ?array $overrides = null)
     {
         $this->order    = $order;
         $this->settings = Setting::first() ?? new Setting();
-        $this->email    = $this->resolveContent();
+        $this->email    = $overrides
+            ? array_merge($this->resolveContent(), array_filter($overrides, fn($v) => $v !== null))
+            : $this->resolveContent();
     }
 
     /**
