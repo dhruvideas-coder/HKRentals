@@ -106,13 +106,17 @@
                 body: JSON.stringify({ ...this.form, total_amount: this.totalAmount, is_pickup: this.isPickup ? 1 : 0 })
             });
             let orderData = await orderResponse.json();
-            if (!orderData.success) throw new Error('Order creation failed');
+            if (!orderData.success) throw new Error(orderData.message || 'Order creation failed');
+
+            // For invoice the order is created immediately; for card it is only created
+            // after payment succeeds (so an abandoned card checkout leaves no order).
+            let orderId = orderData.order_id;
 
             if (this.form.paymentMethod === 'card') {
                 let intentResponse = await fetch('{{ route('payment.create-intent') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ amount: this.totalAmount, order_id: orderData.order_id })
+                    body: JSON.stringify({ amount: this.totalAmount })
                 });
                 let intentData = await intentResponse.json();
                 if (!intentData.id) throw new Error('Failed to initiate payment');
@@ -122,15 +126,16 @@
                 let confirmResponse = await fetch('{{ route('payment.confirm') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ payment_intent_id: intentData.id, order_id: orderData.order_id, amount: this.totalAmount })
+                    body: JSON.stringify({ payment_intent_id: intentData.id, amount: this.totalAmount })
                 });
                 let confirmData = await confirmResponse.json();
                 if (!confirmData.success) throw new Error(confirmData.message || 'Payment failed');
+                orderId = confirmData.order_id;
             }
 
             this.paymentState = 'success';
             Alpine.store('cart').clear();
-            setTimeout(() => { window.location.href = '{{ url('/order-success') }}/' + orderData.order_id; }, 1500);
+            setTimeout(() => { window.location.href = '{{ url('/order-success') }}/' + orderId; }, 1500);
         } catch (error) {
             console.error(error);
             this.paymentState = 'error';
@@ -224,6 +229,7 @@
                 lat: pl.geometry.location.lat(),
                 lng: pl.geometry.location.lng(),
                 formatted_address: pl.formatted_address,
+                address_components: pl.address_components,
             };
             if (pl.address_components) this.fillAddressFromPlace(pl);
         });
@@ -249,7 +255,7 @@
     geocodeLatLng(lat, lng) {
         new google.maps.Geocoder().geocode({ location: { lat, lng } }, (r, s) => {
             this.selectedLocation = (s === 'OK' && r[0])
-                ? { lat, lng, formatted_address: r[0].formatted_address }
+                ? { lat, lng, formatted_address: r[0].formatted_address, address_components: r[0].address_components }
                 : { lat, lng, formatted_address: `${lat.toFixed(5)}, ${lng.toFixed(5)}` };
         });
     },
@@ -260,10 +266,14 @@
             if (x.types.includes('street_number')) n = x.long_name;
             if (x.types.includes('route')) r = x.long_name;
             if (x.types.includes('locality')) c = x.long_name;
+            if (!c && x.types.includes('postal_town')) c = x.long_name;
+            if (!c && x.types.includes('sublocality')) c = x.long_name;
             if (x.types.includes('administrative_area_level_1')) s = x.short_name;
             if (x.types.includes('postal_code')) z = x.long_name;
         }
-        if (n || r) this.form.address = `${n} ${r}`.trim();
+        const street = `${n} ${r}`.trim();
+        if (street) this.form.address = street;
+        else if (pl.formatted_address) this.form.address = pl.formatted_address.split(',')[0];
         if (c) this.form.city = c;
         if (s) this.form.state = s;
         if (z) this.form.zip = z;
@@ -287,8 +297,20 @@
 
     confirmLocation() {
         if (!this.selectedLocation) return;
-        this.form.mapLocation = this.selectedLocation;
+        // Auto-fill address / city / state / zip from the pinned location
+        if (this.selectedLocation.address_components) {
+            this.fillAddressFromPlace({
+                address_components: this.selectedLocation.address_components,
+                formatted_address: this.selectedLocation.formatted_address,
+            });
+        }
+        this.form.mapLocation = {
+            lat: this.selectedLocation.lat,
+            lng: this.selectedLocation.lng,
+            formatted_address: this.selectedLocation.formatted_address,
+        };
         this.locationPinned = true;
+        ['address', 'city', 'state', 'zip'].forEach(k => { if (this.form[k]) delete this.errors[k]; });
         this.closeMapModal();
         this.calculateCost();
     },
@@ -492,16 +514,16 @@
 
                     {{-- City / State / ZIP — hidden when pickup --}}
                     <div x-show="!isPickup" x-transition>
-                        <x-input label="City" x-model="form.city" placeholder="Knoxville" />
+                        <x-input label="City" x-model="form.city" x-on:input="delete errors.city" placeholder="Knoxville" />
                         <p class="text-red-500 text-xs mt-1" x-show="errors.city" x-text="errors.city"></p>
                     </div>
                     <div class="grid grid-cols-2 gap-3" x-show="!isPickup" x-transition>
                         <div>
-                            <x-input label="State" x-model="form.state" placeholder="TN" maxlength="2" />
+                            <x-input label="State" x-model="form.state" x-on:input="delete errors.state" placeholder="TN" maxlength="2" />
                             <p class="text-red-500 text-xs mt-1" x-show="errors.state" x-text="errors.state"></p>
                         </div>
                         <div>
-                            <x-input label="ZIP" inputmode="numeric" x-model="form.zip" placeholder="37901" />
+                            <x-input label="ZIP" inputmode="numeric" x-model="form.zip" x-on:input="delete errors.zip" placeholder="37901" />
                             <p class="text-red-500 text-xs mt-1" x-show="errors.zip" x-text="errors.zip"></p>
                         </div>
                     </div>

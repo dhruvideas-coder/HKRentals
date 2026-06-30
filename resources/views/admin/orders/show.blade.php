@@ -10,6 +10,23 @@
         <span class="text-neutral-600 font-semibold">#{{ $order->formatted_id }}</span>
     </div>
     <div class="flex items-center gap-2 flex-wrap" x-data="{ sending: false, downloading: false }">
+        @if($order->isDraft())
+        {{-- Draft: jump back into the editor to finish & complete it, or discard it --}}
+        <a href="{{ route('admin.orders.edit', $order) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-neutral-800 text-white text-xs font-bold rounded-xl hover:bg-neutral-900 transition-all shadow-sm">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            Edit / Complete Draft
+        </a>
+        <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"
+              onsubmit="return confirm('Delete draft #{{ $order->formatted_id }}? This cannot be undone.');">
+            @csrf @method('DELETE')
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-white text-red-600 border border-red-200 text-xs font-bold rounded-xl hover:bg-red-50 transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete Draft
+            </button>
+        </form>
+        @else
         {{-- Send Email --}}
         <form action="{{ route('admin.orders.send-email', $order) }}" method="POST" @submit="sending = true">
             @csrf
@@ -44,6 +61,7 @@
             </svg>
             <span x-text="downloading ? 'Preparing…' : 'Download Receipt'"></span>
         </a>
+        @endif
     </div>
 </div>
 
@@ -150,7 +168,8 @@
             <div class="mb-3 flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider {{ $order->status_color }}">
                     <span class="w-2 h-2 rounded-full mr-2
-                        @if($order->status === 'pending') bg-amber-500
+                        @if($order->status === 'draft') bg-neutral-500
+                        @elseif($order->status === 'pending') bg-amber-500
                         @elseif($order->status === 'confirmed') bg-brand-500
                         @elseif($order->status === 'active') bg-green-500
                         @elseif($order->status === 'completed') bg-neutral-400
@@ -170,6 +189,8 @@
                     </span>
                 @endif
             </div>
+            @if($order->isDraft())
+            @else
             <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="space-y-3">
                 @csrf @method('PATCH')
                 <div>
@@ -184,6 +205,7 @@
                     Update Status
                 </button>
             </form>
+            @endif
         </div>
 
         {{-- Customer Card --}}

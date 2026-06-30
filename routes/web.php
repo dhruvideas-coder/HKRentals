@@ -91,6 +91,9 @@ Route::prefix('admin')
         Route::get('/orders/create',     [OrderController::class, 'create'])->name('orders.create');
         Route::post('/orders',           [OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/products-by-category', [OrderController::class, 'productsByCategory'])->name('orders.products');
+        Route::get('/orders/{order}/edit',    [OrderController::class, 'edit'])->name('orders.edit');
+        Route::put('/orders/{order}',         [OrderController::class, 'update'])->name('orders.update');
+        Route::delete('/orders/{order}',      [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::get('/orders/{order}',         [OrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::get('/orders/{order}/receipt',   [OrderController::class, 'receipt'])->name('orders.receipt');

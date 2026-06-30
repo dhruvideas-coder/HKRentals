@@ -40,6 +40,7 @@ class Order extends Model
     public function getStatusColorAttribute(): string
     {
         return match($this->status) {
+            'draft'     => 'bg-neutral-200 text-neutral-700',
             'pending'   => 'bg-amber-100 text-amber-700',
             'confirmed' => 'bg-brand-100 text-brand-700',
             'active'    => 'bg-green-100 text-green-700',
@@ -47,5 +48,10 @@ class Order extends Model
             'cancelled' => 'bg-red-100 text-red-600',
             default     => 'bg-neutral-100 text-neutral-500',
         };
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
     }
 }

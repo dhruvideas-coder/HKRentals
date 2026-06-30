@@ -1,17 +1,30 @@
 <x-layout.admin-layout>
-    <x-slot:title>Book Order</x-slot>
-    <x-slot:pageTitle>Book Manual Order</x-slot>
+    @php $editing = isset($order) && $order; @endphp
+    <x-slot:title>{{ $editing ? 'Edit Draft Order' : 'Book Order' }}</x-slot>
+    <x-slot:pageTitle>{{ $editing ? 'Edit Draft Order' : 'Book Manual Order' }}</x-slot>
 
 @php $mapsKey = config('services.google.maps_key'); @endphp
 
 <div class="flex items-center gap-2 text-sm text-neutral-400 mb-6">
     <a href="{{ route('admin.orders.index') }}" class="hover:text-brand-600 transition-colors font-medium">Orders</a>
     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-    <span class="text-neutral-600 font-semibold">Book Order</span>
+    <span class="text-neutral-600 font-semibold">{{ $editing ? 'Edit Draft #' . $order->formatted_id : 'Book Order' }}</span>
 </div>
 
-<form action="{{ route('admin.orders.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" x-data="orderForm()" @load="init()" @submit.prevent="submitForm()">
+@if($editing)
+<div class="flex items-start gap-3 bg-neutral-100 border border-neutral-200 rounded-2xl px-4 py-3 mb-6">
+    <svg class="w-5 h-5 text-neutral-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    <div>
+        <p class="text-sm font-bold text-neutral-700">You're editing a draft order</p>
+        <p class="text-xs text-neutral-500 mt-0.5">Keep saving as draft while details are pending, or click <span class="font-semibold">Complete Order</span> once everything is filled in to finalise it.</p>
+    </div>
+</div>
+@endif
+
+<form action="{{ $editing ? route('admin.orders.update', $order) : route('admin.orders.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" x-data="orderForm()" x-init="init()" @submit.prevent="submitForm()">
     @csrf
+    @if($editing) @method('PUT') @endif
+    <input type="hidden" name="save_as_draft" x-ref="draftFlag" value="0" />
 
     <div class="lg:col-span-2 space-y-6">
 
@@ -74,6 +87,23 @@
                     {{-- Product Picker Section --}}
                     <div x-show="selectedCustomer" class="mt-8 pt-8 border-t border-neutral-100">
                         <h3 class="font-bold text-neutral-900 text-lg mb-4">Add Products</h3>
+
+                        {{-- Product Search --}}
+                        <div class="relative w-full mb-4">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <svg class="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </span>
+                            <input type="text" x-model="productSearch" placeholder="Search products by name…"
+                                   class="block w-full pl-12 pr-11 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-neutral-800 font-medium text-sm placeholder-neutral-400" />
+                            <button type="button" x-show="productSearch" @click="productSearch = ''"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="w-6 h-6 rounded-full bg-neutral-200 hover:bg-neutral-300 flex items-center justify-center text-neutral-500 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </span>
+                            </button>
+                        </div>
 
                         {{-- Category Filter --}}
                         <div class="flex flex-wrap gap-2 mb-6">
@@ -427,15 +457,27 @@
                 </div>
 
                 {{-- Actions --}}
-                <div class="grid grid-cols-2 gap-3">
-                    <a href="{{ route('admin.orders.index') }}"
-                       class="flex items-center justify-center px-4 py-3.5 bg-white/10 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all text-sm">
-                        Cancel
-                    </a>
-                    <button type="submit" :disabled="!selectedCustomer || orderItems.length === 0"
-                            class="px-4 py-3.5 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 disabled:bg-neutral-600 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm">
-                        Book Order
+                <div class="space-y-3">
+                    {{-- Save as Draft — only needs a customer selected --}}
+                    <button type="button" @click="submitForm(true)"
+                            :disabled="!selectedCustomer || submitting"
+                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-white rounded-2xl font-bold hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm border border-white/15">
+                        <svg x-show="!(submitting && saveAsDraft)" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <svg x-show="submitting && saveAsDraft" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        <span x-text="(submitting && saveAsDraft) ? 'Saving…' : '{{ $editing ? 'Save Draft' : 'Save as Draft' }}'"></span>
                     </button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ $editing ? route('admin.orders.show', $order) : route('admin.orders.index') }}"
+                           class="flex items-center justify-center px-4 py-3.5 bg-white/5 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all text-sm">
+                            Cancel
+                        </a>
+                        <button type="submit" :disabled="!selectedCustomer || orderItems.length === 0 || submitting"
+                                class="flex items-center justify-center gap-2 px-4 py-3.5 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 disabled:bg-neutral-600 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm">
+                            <svg x-show="submitting && !saveAsDraft" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span x-text="(submitting && !saveAsDraft) ? 'Saving…' : '{{ $editing ? 'Complete Order' : 'Book Order' }}'"></span>
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -582,12 +624,16 @@
 
 <script>
     function orderForm() {
+        const prefill = @json($prefill ?? null);
         return {
+            saveAsDraft: false,
+            submitting: false,
             selectedCustomerId: '',
             selectedCustomer: null,
             customers: @json($customers),
             settings: @json($settings),
             categoryFilter: 'all',
+            productSearch: '',
             categories: @json($categoriesForJS),
             allProducts: @json($allProducts),
             orderItems: [],
@@ -614,13 +660,47 @@
                 chargeMile: {{ $settings?->charge_per_mile ?: 1 }},
             },
 
-            init() {},
+            init() {
+                if (prefill) { this.hydrateFromPrefill(prefill); }
+            },
+
+            hydrateFromPrefill(p) {
+                // Restore order-level fields
+                if (p.rental_start_date) this.rentalStartDate = p.rental_start_date;
+                if (p.rental_end_date)   this.rentalEndDate   = p.rental_end_date;
+                this.isPickup      = !!p.is_pickup;
+                this.travelingCost = Number(p.traveling_cost) || 0;
+                this.distanceMiles = Number(p.distance_miles) || 0;
+
+                // Restore line items (product objects shipped inline so they render even if delisted)
+                this.orderItems = (p.items || []).map(it => {
+                    const days = this._calcDays(this.rentalStartDate, this.rentalEndDate);
+                    const multiplier = Math.max(1, days / 2);
+                    return {
+                        product:    it.product,
+                        quantity:   it.quantity,
+                        rentalDays: days,
+                        lineTotal:  it.quantity * it.product.price_per_day * multiplier,
+                    };
+                });
+
+                // Select the customer last so onCustomerChange doesn't clobber a pinned cost
+                if (p.customer_id) {
+                    this.selectedCustomerId = String(p.customer_id);
+                    this.selectedCustomer = this.customers.find(c => c.id == p.customer_id) || null;
+                }
+            },
 
             get filteredProducts() {
-                if (this.categoryFilter === 'all') {
-                    return this.allProducts;
+                let list = this.allProducts;
+                if (this.categoryFilter !== 'all') {
+                    list = list.filter(p => p.category_id == this.categoryFilter);
                 }
-                return this.allProducts.filter(p => p.category_id == this.categoryFilter);
+                const q = this.productSearch.trim().toLowerCase();
+                if (q) {
+                    list = list.filter(p => (p.name || '').toLowerCase().includes(q));
+                }
+                return list;
             },
 
             get subtotal() {
@@ -910,72 +990,78 @@
                 this.orderItems.forEach((_, i) => this.updateItemDates(i));
             },
 
-            submitForm() {
+            submitForm(asDraft = false) {
+                if (this.submitting) return; // guard against double submit
+                this.saveAsDraft = asDraft;
+
+                // A customer is the only hard requirement — even for a draft we need
+                // someone to attach the order to.
                 if (!this.selectedCustomerId) {
                     alert('Please select a customer');
-                    return;
-                }
-                if (!this.rentalStartDate || !this.rentalEndDate) {
-                    alert('Please select rental start and end dates');
-                    return;
-                }
-                if (this.rentalEndDate < this.rentalStartDate) {
-                    alert('Rental end date must be on or after the start date');
-                    return;
-                }
-                if (this.orderItems.length === 0) {
-                    alert('Please add at least one product to the order');
-                    return;
-                }
-                for (let i = 0; i < this.orderItems.length; i++) {
-                    const item = this.orderItems[i];
-                    if (item.quantity < 1) {
-                        alert(`Item ${i + 1}: Quantity must be at least 1`);
-                        return;
-                    }
-                    if (item.quantity > item.product.total_quantity) {
-                        alert(`"${item.product.name}": quantity ${item.quantity} exceeds available stock of ${item.product.total_quantity}`);
-                        return;
-                    }
-                }
-                if (this.paymentStatus === 'paid' && !this.paymentMethod) {
-                    alert('Please select a payment method for paid orders');
+                    this.saveAsDraft = false;
                     return;
                 }
 
-                // Get the form element (use this.$el to avoid selecting the logout form in the nav)
-                const form = this.$el;
+                // Drafts may be incomplete, so skip the full checks below.
+                if (!asDraft) {
+                    if (!this.rentalStartDate || !this.rentalEndDate) {
+                        alert('Please select rental start and end dates');
+                        return;
+                    }
+                    if (this.rentalEndDate < this.rentalStartDate) {
+                        alert('Rental end date must be on or after the start date');
+                        return;
+                    }
+                    if (this.orderItems.length === 0) {
+                        alert('Please add at least one product to the order');
+                        return;
+                    }
+                    for (let i = 0; i < this.orderItems.length; i++) {
+                        const item = this.orderItems[i];
+                        if (item.quantity < 1) {
+                            alert(`Item ${i + 1}: Quantity must be at least 1`);
+                            return;
+                        }
+                        if (item.quantity > item.product.total_quantity) {
+                            alert(`"${item.product.name}": quantity ${item.quantity} exceeds available stock of ${item.product.total_quantity}`);
+                            return;
+                        }
+                    }
+                    if (this.paymentStatus === 'paid' && !this.paymentMethod) {
+                        alert('Please select a payment method for paid orders');
+                        return;
+                    }
+                }
+
+                // Resolve the actual <form>. NOTE: this.$el resolves to the element whose
+                // directive is running — for the draft button's @click that's the BUTTON, not
+                // the form. Use the hidden flag's native .form property to get the owning form
+                // reliably from either entry point (draft button or submit event).
+                const flag = this.$refs.draftFlag;
+                const form = (flag && flag.form) ? flag.form : (this.$el.tagName === 'FORM' ? this.$el : this.$el.closest('form'));
                 if (!form) {
-                    console.error('Form element not found');
                     alert('Error: Could not find form. Please refresh the page.');
                     return;
                 }
 
-                // Disable button to prevent double submission
-                const submitButton = form.querySelector('button[type="submit"]');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Booking...';
+                // Set the draft flag imperatively so the value is guaranteed correct at submit
+                // time (no reliance on Alpine binding flush timing).
+                if (flag) {
+                    flag.value = asDraft ? '1' : '0';
                 }
 
-                // Log form action and data
-                console.log('Form action:', form.action);
-                console.log('Form method:', form.method);
-                console.log('Order items to submit:', this.orderItems.length);
-
-                // Add a small delay to ensure all inputs are updated, then submit
-                setTimeout(() => {
+                // Flip the spinner/disabled state, then submit on the next frame so the DOM updates.
+                this.submitting = true;
+                this.$nextTick(() => {
                     try {
-                        form.submit();
+                        // Call the native prototype method to avoid any name/id="submit" shadowing.
+                        HTMLFormElement.prototype.submit.call(form);
                     } catch (error) {
                         console.error('Form submission error:', error);
                         alert('Error submitting form: ' + error.message);
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                            submitButton.textContent = 'Book Order';
-                        }
+                        this.submitting = false;
                     }
-                }, 100);
+                });
             },
 
             haversine(lat1, lon1, lat2, lon2) {

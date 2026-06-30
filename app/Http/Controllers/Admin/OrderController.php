@@ -40,6 +40,7 @@ class OrderController extends Controller
 
             $stats = [
                 'all'       => Order::count(),
+                'draft'     => Order::where('status', 'draft')->count(),
                 'pending'   => Order::where('status', 'pending')->count(),
                 'active'    => Order::where('status', 'active')->count(),
                 'completed' => Order::where('status', 'completed')->count(),
@@ -50,7 +51,7 @@ class OrderController extends Controller
             $this->logError(__FUNCTION__, $e);
             return view('admin.orders.index', [
                 'orders' => collect(),
-                'stats'  => ['all' => 0, 'pending' => 0, 'active' => 0, 'completed' => 0],
+                'stats'  => ['all' => 0, 'draft' => 0, 'pending' => 0, 'active' => 0, 'completed' => 0],
                 'error'  => 'Could not load orders.',
             ]);
         }
@@ -199,35 +200,89 @@ class OrderController extends Controller
     public function create()
     {
         try {
-            $categories = \App\Models\Category::with([
-                'products' => fn($q) => $q->where('status', 'available')->select('id', 'name', 'price_per_day', 'image', 'total_quantity', 'category_id')->orderBy('name')
-            ])->orderBy('name')->get();
-
-            $customers = \App\Models\Customer::orderBy('name')->select('id', 'name', 'email', 'phone', 'address', 'map_location')->get();
-            $settings = \App\Models\Setting::first();
-
-            // Transform products for Alpine.js
-            $allProducts = [];
-            foreach ($categories as $category) {
-                foreach ($category->products as $product) {
-                    $allProducts[] = [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'price_per_day' => (float) $product->price_per_day,
-                        'image' => $product->image,
-                        'total_quantity' => $product->total_quantity,
-                        'category_id' => $product->category_id,
-                    ];
-                }
-            }
-
-            $categoriesForJS = $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->values()->all();
-
-            return view('admin.orders.create', compact('categories', 'customers', 'settings', 'allProducts', 'categoriesForJS'));
+            return view('admin.orders.create', $this->formData());
         } catch (\Throwable $e) {
             $this->logError(__FUNCTION__, $e);
             return redirect()->route('admin.orders.index')->with('error', 'Could not load create order form.');
         }
+    }
+
+    public function edit(Order $order)
+    {
+        if (! $order->isDraft()) {
+            return redirect()->route('admin.orders.show', $order)
+                ->with('error', 'Only draft orders can be edited.');
+        }
+
+        try {
+            $order->load('items.product');
+
+            return view('admin.orders.create', array_merge($this->formData(), [
+                'order'   => $order,
+                'prefill' => $this->buildPrefill($order),
+            ]));
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
+            return redirect()->route('admin.orders.index')->with('error', 'Could not load draft for editing.');
+        }
+    }
+
+    /**
+     * Shared data needed by the order create/edit form.
+     */
+    private function formData(): array
+    {
+        $categories = \App\Models\Category::with([
+            'products' => fn($q) => $q->where('status', 'available')->select('id', 'name', 'price_per_day', 'image', 'total_quantity', 'category_id')->orderBy('name')
+        ])->orderBy('name')->get();
+
+        $customers = \App\Models\Customer::orderBy('name')->select('id', 'name', 'email', 'phone', 'address', 'map_location')->get();
+        $settings = \App\Models\Setting::first();
+
+        // Transform products for Alpine.js
+        $allProducts = [];
+        foreach ($categories as $category) {
+            foreach ($category->products as $product) {
+                $allProducts[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price_per_day' => (float) $product->price_per_day,
+                    'image' => $product->image,
+                    'total_quantity' => $product->total_quantity,
+                    'category_id' => $product->category_id,
+                ];
+            }
+        }
+
+        $categoriesForJS = $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->values()->all();
+
+        return compact('categories', 'customers', 'settings', 'allProducts', 'categoriesForJS');
+    }
+
+    /**
+     * Build the Alpine prefill payload for editing an existing (draft) order.
+     */
+    private function buildPrefill(Order $order): array
+    {
+        return [
+            'customer_id'       => $order->customer_id,
+            'rental_start_date' => optional($order->rental_start_date)->format('Y-m-d\TH:i'),
+            'rental_end_date'   => optional($order->rental_end_date)->format('Y-m-d\TH:i'),
+            'traveling_cost'    => (float) $order->traveling_cost,
+            'distance_miles'    => (float) ($order->distance_miles ?? 0),
+            'is_pickup'         => (bool) $order->is_pickup,
+            'items'             => $order->items->map(fn($it) => [
+                'product' => [
+                    'id'             => $it->product_id,
+                    'name'           => $it->product->name ?? 'Product',
+                    'price_per_day'  => (float) $it->price_per_day,
+                    'image'          => $it->product->image,
+                    'total_quantity' => $it->product->total_quantity ?? $it->quantity,
+                    'category_id'    => $it->product->category_id,
+                ],
+                'quantity' => $it->quantity,
+            ])->values()->all(),
+        ];
     }
 
     public function productsByCategory(Request $request)
@@ -255,146 +310,18 @@ class OrderController extends Controller
         try {
             \Log::info('BookOrder - Received form data:', $request->all());
 
-            $request->validate([
-                'customer_id' => 'required|exists:customers,id',
-                'rental_start_date' => 'required|date',
-                'rental_end_date' => 'required|date|after_or_equal:rental_start_date',
-                'items' => 'required|array|min:1',
-                'items.*.product_id' => 'required|exists:products,id',
-                'items.*.quantity' => 'required|integer|min:1',
-                'items.*.start_date' => 'required|date',
-                'items.*.end_date' => 'required|date|after_or_equal:items.*.start_date',
-                'payment_status' => 'required|in:pending,paid,waived',
-                'payment_method' => 'nullable|in:cash,bank_transfer,card,other',
-                'payment_amount' => 'nullable|numeric|min:0',
-                'payment_reference' => 'nullable|string',
-                'traveling_cost' => 'nullable|numeric|min:0',
-                'distance_miles' => 'nullable|numeric|min:0',
-            ]);
+            $result = $this->persistOrder($request, null);
 
-            \Log::info('BookOrder - Validation passed');
-
-            // Stock validation
-            foreach ($request->items as $item) {
-                $product = \App\Models\Product::findOrFail($item['product_id']);
-                if ($item['quantity'] > $product->total_quantity) {
-                    return back()->withInput()->with('error',
-                        "Cannot order {$item['quantity']} of \"{$product->name}\" — only {$product->total_quantity} in stock."
-                    );
-                }
+            // A non-Order result means an early validation failure (e.g. stock) returned a redirect.
+            if (! $result instanceof Order) {
+                return $result;
             }
 
-            $customer = \App\Models\Customer::findOrFail($request->customer_id);
+            $message = $result->isDraft()
+                ? 'Draft order #' . $result->formatted_id . ' saved. You can complete it anytime.'
+                : 'Order #' . $result->formatted_id . ' has been created successfully.';
 
-            $settings      = \App\Models\Setting::first();
-            $chargePerMile = (float) ($settings?->charge_per_mile ?? 1);
-            $maxDist       = (float) ($settings?->max_delivery_distance ?? 20);
-            $taxRate       = (float) ($settings?->tax_rate ?? 8.5) / 100;
-
-            $isPickup      = (bool) ($request->is_pickup ?? false);
-            $distanceMiles = 0;
-            $travelingCost = 0;
-
-            if (!$isPickup) {
-                $distanceMiles = (float) ($request->distance_miles ?? 0);
-                $travelingCost = (float) ($request->traveling_cost ?? 0);
-
-                // Fall back to server-side calculation when the form didn't supply a distance
-                if ($distanceMiles <= 0) {
-                    $customerLocation = $customer->map_location;
-
-                    if ($settings && $settings->godown_lat && $settings->godown_lng && $customerLocation && isset($customerLocation['lat'], $customerLocation['lng'])) {
-                        $distanceMiles = $this->calculateDistance(
-                            (float) $settings->godown_lat,
-                            (float) $settings->godown_lng,
-                            (float) $customerLocation['lat'],
-                            (float) $customerLocation['lng']
-                        );
-                    }
-                }
-
-                if (!$travelingCost && $distanceMiles > 0) {
-                    if ($distanceMiles <= $maxDist) {
-                        $travelingCost = $chargePerMile * $maxDist;
-                    } else {
-                        $travelingCost = $chargePerMile * $maxDist + $chargePerMile * $distanceMiles;
-                    }
-                }
-            }
-
-            $subtotal = 0;
-            foreach ($request->items as $item) {
-                $product    = \App\Models\Product::findOrFail($item['product_id']);
-                $rentalDays = \App\Helpers\RentalHelper::calculateDays(
-                    \Carbon\Carbon::parse($item['start_date']),
-                    \Carbon\Carbon::parse($item['end_date'])
-                );
-                $multiplier = max(1, $rentalDays / 2);
-                $lineTotal  = $item['quantity'] * $product->price_per_day * $multiplier;
-                $subtotal  += $lineTotal;
-            }
-
-            $totalAmount = $subtotal + ($subtotal * $taxRate) + $travelingCost;
-
-            $order = Order::create([
-                'customer_id'      => $customer->id,
-                'customer_name'    => $customer->name,
-                'customer_email'   => $customer->email,
-                'customer_phone'   => $customer->phone ?? '',
-                'customer_address' => $customer->address ?? '',
-                'rental_start_date' => $request->rental_start_date,
-                'rental_end_date'   => $request->rental_end_date,
-                'total_amount'     => $totalAmount,
-                'traveling_cost'   => $travelingCost,
-                'distance_miles'   => $distanceMiles,
-                'is_pickup'        => $isPickup,
-                'status'           => 'pending',
-            ]);
-
-            foreach ($request->items as $item) {
-                $product = \App\Models\Product::findOrFail($item['product_id']);
-
-                \App\Models\OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'quantity' => $item['quantity'],
-                    'price_per_day' => $product->price_per_day,
-                    'start_date' => $item['start_date'],
-                    'end_date' => $item['end_date'],
-                ]);
-            }
-
-            if ($request->payment_status === 'paid') {
-                $paymentAmount = $request->payment_amount ?? $totalAmount;
-
-                \App\Models\Payment::create([
-                    'order_id' => $order->id,
-                    'payment_intent_id' => 'admin-manual-' . now()->timestamp,
-                    'amount' => $paymentAmount,
-                    'currency' => 'usd',
-                    'status' => 'succeeded',
-                    'payment_method' => $request->payment_method ?? 'manual',
-                ]);
-
-                $order->update(['status' => 'confirmed']);
-
-                // Send confirmation email to customer
-                try {
-                    $order->load(['items.product', 'payment', 'customer']);
-                    Mail::to($order->customer_email)->send(new OrderConfirmation($order));
-                } catch (\Throwable $e) {
-                    \Log::warning('Admin order email failed: ' . $e->getMessage(), ['order_id' => $order->id]);
-                }
-            }
-
-            \Log::info('BookOrder - Order created successfully:', [
-                'order_id' => $order->id,
-                'formatted_id' => $order->formatted_id,
-                'customer_id' => $order->customer_id,
-                'total_amount' => $order->total_amount
-            ]);
-
-            return redirect()->route('admin.orders.show', $order)->with('success', 'Order #' . $order->formatted_id . ' has been created successfully.');
+            return redirect()->route('admin.orders.show', $result)->with('success', $message);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('BookOrder - Validation Error:', ['errors' => $e->errors()]);
             throw $e;
@@ -403,11 +330,255 @@ class OrderController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
             ]);
             $this->logError(__FUNCTION__, $e);
             return back()->withInput()->with('error', 'Could not create order. Please try again.');
         }
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        if (! $order->isDraft()) {
+            return redirect()->route('admin.orders.show', $order)
+                ->with('error', 'Only draft orders can be edited.');
+        }
+
+        try {
+            $result = $this->persistOrder($request, $order);
+
+            if (! $result instanceof Order) {
+                return $result;
+            }
+
+            $message = $result->isDraft()
+                ? 'Draft order #' . $result->formatted_id . ' updated.'
+                : 'Order #' . $result->formatted_id . ' has been completed.';
+
+            return redirect()->route('admin.orders.show', $result)->with('success', $message);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
+            return back()->withInput()->with('error', 'Could not update order. Please try again.');
+        }
+    }
+
+    public function destroy(Order $order)
+    {
+        if (! $order->isDraft()) {
+            return redirect()->route('admin.orders.show', $order)
+                ->with('error', 'Only draft orders can be deleted.');
+        }
+
+        try {
+            $formattedId = $order->formatted_id;
+            $order->items()->delete();
+            $order->delete();
+
+            return redirect()->route('admin.orders.index')
+                ->with('success', 'Draft order #' . $formattedId . ' was deleted.');
+        } catch (\Throwable $e) {
+            $this->logError(__FUNCTION__, $e, ['order_id' => $order->id]);
+            return back()->with('error', 'Could not delete draft. Please try again.');
+        }
+    }
+
+    /**
+     * Create or update an order from the admin form.
+     *
+     * Drafts use relaxed validation (only a customer is required) so an admin can
+     * save an incomplete order and finish it later. Saving without the draft flag
+     * runs full validation and finalises the order (pending/confirmed + payment + email).
+     *
+     * Returns the saved Order, or a redirect response on an early failure (stock).
+     */
+    private function persistOrder(Request $request, ?Order $order)
+    {
+        $isDraft = $request->boolean('save_as_draft');
+
+        $rules = [
+            'customer_id'     => 'required|exists:customers,id',
+            'traveling_cost'  => 'nullable|numeric|min:0',
+            'distance_miles'  => 'nullable|numeric|min:0',
+        ];
+
+        if ($isDraft) {
+            // Drafts may be incomplete — items and dates are optional.
+            $rules += [
+                'rental_start_date'   => 'nullable|date',
+                'rental_end_date'     => 'nullable|date|after_or_equal:rental_start_date',
+                'items'               => 'nullable|array',
+                'items.*.product_id'  => 'required|exists:products,id',
+                'items.*.quantity'    => 'required|integer|min:1',
+                'items.*.start_date'  => 'nullable|date',
+                'items.*.end_date'    => 'nullable|date|after_or_equal:items.*.start_date',
+            ];
+        } else {
+            $rules += [
+                'rental_start_date'   => 'required|date',
+                'rental_end_date'     => 'required|date|after_or_equal:rental_start_date',
+                'items'               => 'required|array|min:1',
+                'items.*.product_id'  => 'required|exists:products,id',
+                'items.*.quantity'    => 'required|integer|min:1',
+                'items.*.start_date'  => 'required|date',
+                'items.*.end_date'    => 'required|date|after_or_equal:items.*.start_date',
+                'payment_status'      => 'required|in:pending,paid,waived',
+                'payment_method'      => 'nullable|in:cash,bank_transfer,card,other',
+                'payment_amount'      => 'nullable|numeric|min:0',
+                'payment_reference'   => 'nullable|string',
+            ];
+        }
+
+        $request->validate($rules);
+
+        $items = $request->input('items', []) ?? [];
+
+        // Stock validation — skipped for drafts since they are incomplete by design.
+        if (! $isDraft) {
+            foreach ($items as $item) {
+                $product = \App\Models\Product::findOrFail($item['product_id']);
+                if ($item['quantity'] > $product->total_quantity) {
+                    return back()->withInput()->with('error',
+                        "Cannot order {$item['quantity']} of \"{$product->name}\" — only {$product->total_quantity} in stock."
+                    );
+                }
+            }
+        }
+
+        $customer = \App\Models\Customer::findOrFail($request->customer_id);
+        $totals   = $this->computeTotals($request, $customer, $items);
+
+        $data = [
+            'customer_id'       => $customer->id,
+            'customer_name'     => $customer->name,
+            'customer_email'    => $customer->email,
+            'customer_phone'    => $customer->phone ?? '',
+            'customer_address'  => $customer->address ?? '',
+            'rental_start_date' => $request->rental_start_date,
+            'rental_end_date'   => $request->rental_end_date,
+            'total_amount'      => $totals['totalAmount'],
+            'traveling_cost'    => $totals['travelingCost'],
+            'distance_miles'    => $totals['distanceMiles'],
+            'is_pickup'         => $totals['isPickup'],
+            'status'            => $isDraft ? 'draft' : 'pending',
+        ];
+
+        if ($order) {
+            $order->update($data);
+        } else {
+            $order = Order::create($data);
+        }
+
+        $this->syncOrderItems($order, $items);
+
+        // Payment + confirmation only when finalising (not for drafts).
+        if (! $isDraft && $request->payment_status === 'paid') {
+            $order->payment()->updateOrCreate(
+                ['order_id' => $order->id],
+                [
+                    'payment_intent_id' => 'admin-manual-' . now()->timestamp,
+                    'amount'            => $request->payment_amount ?? $totals['totalAmount'],
+                    'currency'          => 'usd',
+                    'status'            => 'succeeded',
+                    'payment_method'    => $request->payment_method ?? 'manual',
+                ]
+            );
+
+            $order->update(['status' => 'confirmed']);
+
+            try {
+                $order->load(['items.product', 'payment', 'customer']);
+                Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+            } catch (\Throwable $e) {
+                \Log::warning('Admin order email failed: ' . $e->getMessage(), ['order_id' => $order->id]);
+            }
+        }
+
+        return $order;
+    }
+
+    /**
+     * Replace an order's line items with the submitted set.
+     */
+    private function syncOrderItems(Order $order, array $items): void
+    {
+        $order->items()->delete();
+
+        foreach ($items as $item) {
+            $product = \App\Models\Product::findOrFail($item['product_id']);
+
+            \App\Models\OrderItem::create([
+                'order_id'      => $order->id,
+                'product_id'    => $product->id,
+                'quantity'      => $item['quantity'],
+                'price_per_day' => $product->price_per_day,
+                'start_date'    => $item['start_date'] ?? $order->rental_start_date,
+                'end_date'      => $item['end_date'] ?? $order->rental_end_date,
+            ]);
+        }
+    }
+
+    /**
+     * Compute pickup/delivery cost and the order total from the submitted items.
+     */
+    private function computeTotals(Request $request, ?\App\Models\Customer $customer, array $items): array
+    {
+        $settings      = \App\Models\Setting::first();
+        $chargePerMile = (float) ($settings?->charge_per_mile ?? 1);
+        $maxDist       = (float) ($settings?->max_delivery_distance ?? 20);
+        $taxRate       = (float) ($settings?->tax_rate ?? 8.5) / 100;
+
+        $isPickup      = (bool) ($request->is_pickup ?? false);
+        $distanceMiles = 0;
+        $travelingCost = 0;
+
+        if (! $isPickup) {
+            $distanceMiles = (float) ($request->distance_miles ?? 0);
+            $travelingCost = (float) ($request->traveling_cost ?? 0);
+
+            // Fall back to server-side calculation when the form didn't supply a distance
+            if ($distanceMiles <= 0) {
+                $customerLocation = $customer?->map_location;
+
+                if ($settings && $settings->godown_lat && $settings->godown_lng && $customerLocation && isset($customerLocation['lat'], $customerLocation['lng'])) {
+                    $distanceMiles = $this->calculateDistance(
+                        (float) $settings->godown_lat,
+                        (float) $settings->godown_lng,
+                        (float) $customerLocation['lat'],
+                        (float) $customerLocation['lng']
+                    );
+                }
+            }
+
+            if (! $travelingCost && $distanceMiles > 0) {
+                if ($distanceMiles <= $maxDist) {
+                    $travelingCost = $chargePerMile * $maxDist;
+                } else {
+                    $travelingCost = $chargePerMile * $maxDist + $chargePerMile * $distanceMiles;
+                }
+            }
+        }
+
+        $subtotal = 0;
+        foreach ($items as $item) {
+            $product = \App\Models\Product::findOrFail($item['product_id']);
+
+            if (! empty($item['start_date']) && ! empty($item['end_date'])) {
+                $rentalDays = \App\Helpers\RentalHelper::calculateDays(
+                    \Carbon\Carbon::parse($item['start_date']),
+                    \Carbon\Carbon::parse($item['end_date'])
+                );
+            } else {
+                $rentalDays = 2;
+            }
+
+            $multiplier = max(1, $rentalDays / 2);
+            $subtotal  += $item['quantity'] * $product->price_per_day * $multiplier;
+        }
+
+        $totalAmount = $subtotal + ($subtotal * $taxRate) + $travelingCost;
+
+        return compact('isPickup', 'distanceMiles', 'travelingCost', 'totalAmount');
     }
 
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float

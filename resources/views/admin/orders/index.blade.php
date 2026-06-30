@@ -23,9 +23,10 @@
 </div>
 
 {{-- Stat chips --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
     @foreach([
         ['label' => 'All Orders',  'value' => $stats['all'],       'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',     'color' => 'bg-neutral-100 text-neutral-600',  'active' => !request('status')],
+        ['label' => 'Draft',       'value' => $stats['draft'] ?? 0,'icon' => 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', 'color' => 'bg-neutral-200 text-neutral-700', 'active' => request('status') === 'draft'],
         ['label' => 'Pending',     'value' => $stats['pending'],   'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',   'color' => 'bg-amber-100 text-amber-700',       'active' => request('status') === 'pending'],
         ['label' => 'Active',      'value' => $stats['active'],    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'bg-green-100 text-green-700',       'active' => request('status') === 'active'],
         ['label' => 'Completed',   'value' => $stats['completed'], 'icon' => 'M5 13l4 4L19 7',                                 'color' => 'bg-sky-100 text-sky-700',           'active' => request('status') === 'completed'],
@@ -60,7 +61,7 @@
         <select name="status" onchange="this.form.submit()"
                 class="px-4 py-2.5 bg-neutral-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 transition-all w-full sm:w-44 appearance-none cursor-pointer">
             <option value="">All Status</option>
-            @foreach(['pending','confirmed','active','completed','cancelled'] as $s)
+            @foreach(['draft','pending','confirmed','active','completed','cancelled'] as $s)
                 <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
             @endforeach
         </select>
@@ -133,7 +134,8 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $order->status_color }}">
                             <span class="w-1.5 h-1.5 rounded-full mr-1.5
-                                @if($order->status === 'pending') bg-amber-500
+                                @if($order->status === 'draft') bg-neutral-500
+                                @elseif($order->status === 'pending') bg-amber-500
                                 @elseif($order->status === 'confirmed') bg-brand-500
                                 @elseif($order->status === 'active') bg-green-500
                                 @elseif($order->status === 'completed') bg-neutral-400
@@ -148,6 +150,19 @@
                                class="p-2 rounded-lg bg-neutral-50 text-neutral-400 hover:bg-brand-50 hover:text-brand-600 transition-all duration-200" title="View order">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </a>
+                            @if($order->status === 'draft')
+                            <a href="{{ route('admin.orders.edit', $order) }}"
+                               class="p-2 rounded-lg bg-neutral-50 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-800 transition-all duration-200" title="Edit / complete draft">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </a>
+                            <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"
+                                  onsubmit="return confirm('Delete draft #{{ $order->formatted_id }}? This cannot be undone.');">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="p-2 rounded-lg bg-neutral-50 text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200" title="Delete draft">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                            @endif
                             @if($order->status === 'pending')
                             <form action="{{ route('admin.orders.status', $order) }}" method="POST">
                                 @csrf @method('PATCH')
